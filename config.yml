@@ -1,0 +1,89 @@
+default:
+  data_prep_inputs_path: ""
+  data_prep_outputs_path: ""
+  masterdata_ownership_filename: ""
+  masterdata_debt_filename: ""
+  ar_company_id__factset_entity_id_filename: ""
+  dbname: "delta"
+  host: "data-eval-db.postgres.database.azure.com"
+  username: !expr readLines("/run/secrets/R_DATABASE_USER")
+  password: !expr readLines("/run/secrets/R_DATABASE_PASSWORD")
+  update_factset: TRUE
+  imf_quarter_timestamp: "2021-Q4"
+  factset_data_timestamp: "2021-12-31"
+  pacta_financial_timestamp: "2021Q4"
+  indices_timestamp: "20211231"
+  market_share_target_reference_year: 2021
+  time_horizon: 5
+  additional_year: [2030, 2040]
+  scenario_sources_list: ["ETP2020", "GECO2021", "IPR2021", "ISF2021", "WEO2021"]
+  sector_list: ["Automotive", "Power", "Fossil Fuels", "Oil&Gas", "Coal"]
+  other_sector_list: ["Steel", "Aviation", "Cement"]
+  zero_emission_factor_techs: ["Electric", "HydroCap", "NuclearCap", "RenewablesCap"]
+  green_techs: ["FuelCell", "Electric", "Hybrid", "RenewablesCap", "HydroCap", "NuclearCap", "FuelCell_HDV", "Electric_HDV", "Hybrid_HDV"]
+  scenario_raw_data_to_include: ["etp_2020", "geco_2021", "ipr_2021", "isf_2021", "weo_2021"]
+  tech_exclude: ["OtherCap", "OtherFF", "Coking Plant", "Sintering Plant", "Direct Or Smelting Reduction Plant", "Pelletizing Plant", "Grinding Plant", "Passenger / Freight"]
+  scenario_geographies_list: ["Global", "NonOECD", "OECD"]
+  global_aggregate_scenario_sources_list: ["ETP2020", "GECO2021", "IPR2021", "ISF2021", "WEO2021"]
+  global_aggregate_sector_list: ["Power"]
+
+
+2021Q4:
+  masterdata_ownership_filename: "2022-08-15_rmi_masterdata_ownership_2021q4.csv"
+  masterdata_debt_filename: "2022-10-05_rmi_masterdata_debt_2021q4.csv"
+  ar_company_id__factset_entity_id_filename: "2022-08-17_rmi_ar_fs_id_bridge_2021q4.csv"
+  imf_quarter_timestamp: "2021-Q4"
+  factset_data_timestamp: "2021-12-31"
+  pacta_financial_timestamp: "2021Q4"
+  indices_timestamp: "20211231"
+  market_share_target_reference_year: 2021
+  time_horizon: 5
+  additional_year: [2030, 2040]
+  scenario_sources_list: ["ETP2020", "GECO2021", "IPR2021", "ISF2021", "WEO2021"]
+  sector_list: ["Automotive", "Power", "Fossil Fuels", "Oil&Gas", "Coal"]
+  other_sector_list: ["Steel", "Aviation", "Cement"]
+  zero_emission_factor_techs: ["Electric", "HydroCap", "NuclearCap", "RenewablesCap"]
+  green_techs: ["FuelCell", "Electric", "Hybrid", "RenewablesCap", "HydroCap", "NuclearCap", "FuelCell_HDV", "Electric_HDV", "Hybrid_HDV"]
+  scenario_raw_data_to_include: ["etp_2020", "geco_2021", "ipr_2021", "isf_2021", "weo_2021"]
+  tech_exclude: ["OtherCap", "OtherFF", "Coking Plant", "Sintering Plant", "Direct Or Smelting Reduction Plant", "Pelletizing Plant", "Grinding Plant", "Passenger / Freight"]
+  scenario_geographies_list: ["Global", "NonOECD", "OECD"]
+  global_aggregate_scenario_sources_list: ["ETP2020", "GECO2021", "IPR2021", "ISF2021", "WEO2021"]
+  global_aggregate_sector_list: ["Power"]
+
+2021Q4_dev_vm:
+  inherits: 2021Q4
+  data_prep_inputs_path: "/home/shiny/inputs"
+  data_prep_outputs_path: "/home/shiny/outputs"
+
+2021Q4_dev_local:
+  inherits: 2021Q4
+  data_prep_inputs_path: "../pacta.data.preparation/input"
+  data_prep_outputs_path: "../pacta.data.preparation/output"
+
+2021Q4_prod_vm:
+  inherits: 2021Q4
+  data_prep_inputs_path: "/home/shiny/inputs"
+  data_prep_outputs_path: "/home/shiny/outputs"
+
+
+2022Q2:
+  masterdata_ownership_filename: "2022-08-30_rmi_masterdata_ownership_2022q2.csv"
+  masterdata_debt_filename: "2022-10-03_rmi_masterdata_debt_2022q2.csv"
+  ar_company_id__factset_entity_id_filename: "2022-08-17_rmi_ar_fs_id_bridge_2021q4.csv"
+  imf_quarter_timestamp: "2022-Q2"
+  factset_data_timestamp: "2022-06-30"
+  pacta_financial_timestamp: "2022Q2"
+  indices_timestamp: "20220630"
+  market_share_target_reference_year: 2022
+  time_horizon: 5
+  additional_year: [2030, 2040]
+  scenario_sources_list: ["ETP2020", "GECO2021", "IPR2021", "ISF2021", "WEO2021"]
+  sector_list: ["Automotive", "Power", "Fossil Fuels", "Oil&Gas", "Coal"]
+  other_sector_list: ["Steel", "Aviation", "Cement"]
+  zero_emission_factor_techs: ["Electric", "HydroCap", "NuclearCap", "RenewablesCap"]
+  green_techs: ["FuelCell", "Electric", "Hybrid", "RenewablesCap", "HydroCap", "NuclearCap", "FuelCell_HDV", "Electric_HDV", "Hybrid_HDV"]
+  scenario_raw_data_to_include: ["etp_2020", "geco_2021", "ipr_2021", "isf_2021", "weo_2021"]
+  tech_exclude: ["OtherCap", "OtherFF", "Coking Plant", "Sintering Plant", "Direct Or Smelting Reduction Plant", "Pelletizing Plant", "Grinding Plant", "Passenger / Freight"]
+  scenario_geographies_list: ["Global", "NonOECD", "OECD"]
+  global_aggregate_scenario_sources_list: ["ETP2020", "GECO2021", "IPR2021", "ISF2021", "WEO2021"]
+  global_aggregate_sector_list: ["Power"]
