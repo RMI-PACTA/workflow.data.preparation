@@ -2,20 +2,13 @@ version: "3"
 
 secrets:
   GITHUB_PAT:
-    file: ./.GITHUB_PAT
-  R_DATABASE_USER:
-    file: ./.R_DATABASE_USER
-  R_DATABASE_PASSWORD:
-    file: ./.R_DATABASE_PASSWORD
+    file: .GITHUB_PAT
 
 services:
-  dataprep:
+  data_prep:
     build:
       context: .
-      secrets:
-        - GITHUB_PAT
-        - R_DATABASE_USER
-        - R_DATABASE_PASSWORD
+      secrets: GITHUB_PAT
     volumes:
       - /inputs:/home/shiny/inputs
       - /outputs:/home/shiny/outputs
