@@ -1,5 +1,13 @@
 version: "3"
 
+secrets:
+  GITHUB_PAT:
+    file: ./.GITHUB_PAT
+  R_DATABASE_USER:
+    file: ./.R_DATABASE_USER
+  R_DATABASE_PASSWORD:
+    file: ./.R_DATABASE_PASSWORD
+
 services:
   dataprep:
     build:
@@ -9,15 +17,7 @@ services:
         - R_DATABASE_USER
         - R_DATABASE_PASSWORD
     volumes:
-      - /Users/cjrmi/github/pacta.data.preparation/inputs:/home/shiny/inputs
-      - /Users/cjrmi/github/pacta.data.preparation/outputs:/home/shiny/outputs
+      - /inputs:/home/shiny/inputs
+      - /outputs:/home/shiny/outputs
     environment:
       - R_CONFIG_ACTIVE=2021Q4_dev_vm
-
-secrets:
-  GITHUB_PAT:
-    file: ./.GITHUB_PAT
-  R_DATABASE_USER:
-    file: ./.R_DATABASE_USER
-  R_DATABASE_PASSWORD:
-    file: ./.R_DATABASE_PASSWORD
