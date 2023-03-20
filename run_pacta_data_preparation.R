@@ -161,7 +161,7 @@ pacta.scenario.preparation::scenario_regions %>%
 
 
 log_info("Fetching currency data... ")
-get_currency_exchange_rates(
+pacta.data.preparation:::get_currency_exchange_rates(
   quarter = imf_quarter_timestamp
 ) %>%
   saveRDS(currencies_data_path)
