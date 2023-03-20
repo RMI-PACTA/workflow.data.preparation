@@ -150,7 +150,7 @@ interpolation_groups <- c(
 )
 
 scenario_raw_data %>%
-  interpolate_yearly(!!!syms(interpolation_groups)) %>%
+  interpolate_yearly(!!!rlang::syms(interpolation_groups)) %>%
   filter(.data$year >= .env$market_share_target_reference_year) %>%
   add_market_share_columns(reference_year = market_share_target_reference_year) %>%
   format_p4i(green_techs) %>%
@@ -159,13 +159,14 @@ scenario_raw_data %>%
 pacta.scenario.preparation::scenario_regions %>%
   write_csv(scenario_regions_path, na = "")
 
+
 log_info("Fetching currency data... ")
-pacta.data.preparation:::get_currency_exchange_rates(
+get_currency_exchange_rates(
   quarter = imf_quarter_timestamp
 ) %>%
   saveRDS(currencies_data_path)
 
-if (config$update_factset) {
+if (update_factset) {
   log_info("Fetching financial data... ")
   pacta.data.preparation:::get_factset_financial_data(
     data_timestamp = factset_data_timestamp,
@@ -261,18 +262,27 @@ log_info("Pre-flight data prepared.")
 
 log_info("Preparing scenario data... ")
 
-scenario_regions <- read_csv(scenario_regions_path, show_col_types = FALSE)
+scenario_regions <- readr::read_csv(scenario_regions_path, na = "", show_col_types = FALSE)
 
 index_regions <- pacta.data.preparation::index_regions
 
 factset_issue_code_bridge <- pacta.data.preparation::factset_issue_code_bridge %>%
-  select("issue_type_code", "asset_type")
+  select(issue_type_code, asset_type) %>%
+  mutate(
+    asset_type = case_when(
+      .data$asset_type == "Listed Equity" ~ "Equity",
+      .data$asset_type == "Corporate Bond" ~ "Bonds",
+      .data$asset_type == "Fund" ~ "Funds",
+      .data$asset_type == "Other" ~ "Others",
+      TRUE ~ "Others"
+    )
+  )
 
 factset_industry_map_bridge <- pacta.data.preparation::factset_industry_map_bridge %>%
-  select("factset_industry_code", "pacta_sector")
+  select(factset_industry_code, pacta_sector)
 
 factset_manual_pacta_sector_override <- pacta.data.preparation::factset_manual_pacta_sector_override %>%
-  select("factset_entity_id", "pacta_sector_override")
+  select(factset_entity_id, pacta_sector_override)
 
 # scenarios_analysisinput_inputs
 scenario_raw <- readr::read_csv(scenarios_analysis_input_path, show_col_types = FALSE)
@@ -308,7 +318,7 @@ log_info("Preparing financial data... ")
 log_info("Formatting and saving financial_data.rds... ")
 
 readRDS(factset_financial_data_path) %>%
-  prepare_financial_data() %>%
+  prepare_financial_data(factset_issue_code_bridge) %>%
   saveRDS(file.path(data_prep_outputs_path, "financial_data.rds"))
 
 log_info("Formatting and saving entity_financing.rds... ")
@@ -350,15 +360,27 @@ log_info("Indices data prepared.")
 # ABCD data output -------------------------------------------------------------
 
 log_info("Preparing  ABCD... ")
+
+entity_info <- readRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
+
 ar_company_id__country_of_domicile <-
-  readRDS(file.path(data_prep_outputs_path, "entity_info.rds")) %>%
+  entity_info %>%
   select("ar_company_id", "country_of_domicile") %>%
   filter(!is.na(.data$ar_company_id)) %>%
   distinct()
 
+ar_company_id__credit_parent_ar_company_id <-
+  entity_info %>%
+  select("ar_company_id", "credit_parent_ar_company_id") %>%
+  filter(!is.na(.data$ar_company_id)) %>%
+  distinct()
+
+rm(entity_info)
+
+
 log_info("Formatting and saving masterdata_ownership_datastore.rds... ")
 
-readr::read_csv(masterdata_ownership_path, show_col_types = FALSE) %>%
+readr::read_csv(masterdata_ownership_path, na = "", show_col_types = FALSE) %>%
   prepare_masterdata(
     ar_company_id__country_of_domicile,
     pacta_financial_timestamp,
@@ -366,15 +388,45 @@ readr::read_csv(masterdata_ownership_path, show_col_types = FALSE) %>%
   ) %>%
   saveRDS(file.path(data_prep_outputs_path, "masterdata_ownership_datastore.rds"))
 
+
 log_info("Formatting and saving masterdata_debt_datastore.rds... ")
 
-readr::read_csv(masterdata_debt_path, show_col_types = FALSE) %>%
+masterdata_debt <- readr::read_csv(masterdata_debt_path, na = "", show_col_types = FALSE)
+
+company_id__creditor_company_id <-
+  masterdata_debt %>%
+  select("company_id", "creditor_company_id") %>%
+  distinct() %>%
+  mutate(across(.fns = as.character))
+
+masterdata_debt %>%
   prepare_masterdata(
     ar_company_id__country_of_domicile,
     pacta_financial_timestamp,
     zero_emission_factor_techs
   ) %>%
+  left_join(company_id__creditor_company_id, by = c(id = "company_id")) %>%
+  left_join(ar_company_id__credit_parent_ar_company_id, by = c(id = "ar_company_id")) %>%
+  mutate(id = if_else(!is.na(.data$creditor_company_id), .data$creditor_company_id, .data$id)) %>%
+  mutate(id = if_else(!is.na(.data$credit_parent_ar_company_id), .data$credit_parent_ar_company_id, .data$id)) %>%
+  mutate(id_name = "credit_parent_ar_company_id") %>%
+  group_by(
+    .data$id, .data$id_name, .data$ald_sector, .data$ald_location,
+    .data$technology, .data$year, .data$country_of_domicile,
+    .data$ald_production_unit, .data$ald_emissions_factor_unit,
+  ) %>%
+  summarise(
+    ald_emissions_factor = stats::weighted.mean(.data$ald_emissions_factor, .data$ald_production, na.rm = TRUE),
+    ald_production = sum(.data$ald_production, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
   saveRDS(file.path(data_prep_outputs_path, "masterdata_debt_datastore.rds"))
+
+rm(masterdata_debt)
+rm(company_id__creditor_company_id)
+
+rm(ar_company_id__country_of_domicile)
+rm(ar_company_id__credit_parent_ar_company_id)
 
 log_info("ABCD prepared.")
 
@@ -388,53 +440,55 @@ entity_info <- readRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
 
 factset_entity_id__ar_company_id <-
   entity_info %>%
-  select("factset_entity_id", "ar_company_id") %>%
-  filter(!is.na(.data$ar_company_id))
+  select(factset_entity_id, ar_company_id) %>%
+  filter(!is.na(ar_company_id))
 
 factset_entity_id__security_mapped_sector <-
   entity_info %>%
-  select("factset_entity_id", "security_mapped_sector")
+  select(factset_entity_id, security_mapped_sector)
+
 
 log_info("Formatting and saving abcd_flags_equity.rds... ")
 
 ar_company_id__sectors_with_assets__ownership <-
   readRDS(file.path(data_prep_outputs_path, "masterdata_ownership_datastore.rds")) %>%
-  filter(.data$year %in% .env$relevant_years) %>%
-  select(ar_company_id = "id", "ald_sector") %>%
+  filter(year %in% relevant_years) %>%
+  select(ar_company_id = id, ald_sector) %>%
   distinct() %>%
-  group_by(.data$ar_company_id) %>%
-  summarise(sectors_with_assets = paste(unique(.data$ald_sector), collapse = " + "))
+  group_by(ar_company_id) %>%
+  summarise(sectors_with_assets = paste(unique(ald_sector), collapse = " + "))
 
 financial_data %>%
   left_join(factset_entity_id__ar_company_id, by = "factset_entity_id") %>%
   left_join(factset_entity_id__security_mapped_sector, by = "factset_entity_id") %>%
   left_join(ar_company_id__sectors_with_assets__ownership, by = "ar_company_id") %>%
-  mutate(has_asset_level_data = if_else(is.na(.data$sectors_with_assets) | .data$sectors_with_assets == "", FALSE, TRUE)) %>%
-  mutate(has_ald_in_fin_sector = if_else(stringr::str_detect(.data$sectors_with_assets, .data$security_mapped_sector), TRUE, FALSE)) %>%
+  mutate(has_asset_level_data = if_else(is.na(sectors_with_assets) | sectors_with_assets == "", FALSE, TRUE)) %>%
+  mutate(has_ald_in_fin_sector = if_else(stringr::str_detect(sectors_with_assets, security_mapped_sector), TRUE, FALSE)) %>%
   select(
-    "isin",
-    "has_asset_level_data",
-    "has_ald_in_fin_sector",
-    "sectors_with_assets"
+    isin,
+    has_asset_level_data,
+    has_ald_in_fin_sector,
+    sectors_with_assets
   ) %>%
   saveRDS(file.path(data_prep_outputs_path, "abcd_flags_equity.rds"))
+
 
 log_info("Formatting and saving abcd_flags_bonds.rds...  ")
 
 ar_company_id__sectors_with_assets__debt <-
   readRDS(file.path(data_prep_outputs_path, "masterdata_debt_datastore.rds")) %>%
-  filter(.data$year %in% .env$relevant_years) %>%
-  select(ar_company_id = "id", "ald_sector") %>%
+  filter(year %in% relevant_years) %>%
+  select(ar_company_id = id, ald_sector) %>%
   distinct() %>%
-  group_by(.data$ar_company_id) %>%
-  summarise(sectors_with_assets = paste(unique(.data$ald_sector), collapse = " + "))
+  group_by(ar_company_id) %>%
+  summarise(sectors_with_assets = paste(unique(ald_sector), collapse = " + "))
 
 financial_data %>%
   left_join(factset_entity_id__ar_company_id, by = "factset_entity_id") %>%
   left_join(factset_entity_id__security_mapped_sector, by = "factset_entity_id") %>%
   left_join(ar_company_id__sectors_with_assets__debt, by = "ar_company_id") %>%
-  mutate(has_asset_level_data = if_else(is.na(.data$sectors_with_assets) | .data$sectors_with_assets == "", FALSE, TRUE)) %>%
-  mutate(has_ald_in_fin_sector = if_else(stringr::str_detect(.data$sectors_with_assets, .data$security_mapped_sector), TRUE, FALSE)) %>%
+  mutate(has_asset_level_data = if_else(is.na(sectors_with_assets) | sectors_with_assets == "", FALSE, TRUE)) %>%
+  mutate(has_ald_in_fin_sector = if_else(stringr::str_detect(sectors_with_assets, security_mapped_sector), TRUE, FALSE)) %>%
   left_join(
     select(entity_info, "factset_entity_id", "credit_parent_id"),
     by = "factset_entity_id"
@@ -442,12 +496,12 @@ financial_data %>%
   mutate(
     # If FactSet has no credit_parent, we define the company as it's own parent
     credit_parent_id = if_else(is.na(credit_parent_id), factset_entity_id, credit_parent_id)
-    ) %>%
-  group_by(.data$credit_parent_id) %>%
+  ) %>%
+  group_by(credit_parent_id) %>%
   summarise(
-    has_asset_level_data = sum(.data$has_asset_level_data, na.rm = TRUE) > 0,
-    has_ald_in_fin_sector = sum(.data$has_ald_in_fin_sector, na.rm = TRUE) > 0,
-    sectors_with_assets = paste(sort(unique(na.omit(unlist(str_split(.data$sectors_with_assets, pattern = " [+] "))))), collapse = " + ")
+    has_asset_level_data = sum(has_asset_level_data, na.rm = TRUE) > 0,
+    has_ald_in_fin_sector = sum(has_ald_in_fin_sector, na.rm = TRUE) > 0,
+    sectors_with_assets = paste(sort(unique(na.omit(unlist(str_split(sectors_with_assets, pattern = " [+] "))))), collapse = " + ")
   ) %>%
   ungroup() %>%
   saveRDS(file.path(data_prep_outputs_path, "abcd_flags_bonds.rds"))
@@ -469,31 +523,33 @@ fund_data <- readRDS(factset_fund_data_path)
 # remove funds above the threshold
 fund_data <-
   fund_data %>%
-  group_by(.data$factset_fund_id, .data$fund_reported_mv) %>%
-  filter((.data$fund_reported_mv[[1]] - sum(.data$holding_reported_mv)) / .data$fund_reported_mv[[1]] > -1e-5) %>%
+  group_by(factset_fund_id, fund_reported_mv) %>%
+  filter((fund_reported_mv[[1]] - sum(holding_reported_mv)) / fund_reported_mv[[1]] > -1e-5) %>%
   ungroup()
 
 # build MISSINGWEIGHT for under and over
 fund_missing_mv <-
   fund_data %>%
-  group_by(.data$factset_fund_id, .data$fund_reported_mv) %>%
+  group_by(factset_fund_id, fund_reported_mv) %>%
   summarise(
     holding_isin = "MISSINGWEIGHT",
-    holding_reported_mv = .data$fund_reported_mv[[1]] - sum(.data$holding_reported_mv),
+    holding_reported_mv = fund_reported_mv[[1]] - sum(holding_reported_mv),
     .groups = "drop"
   ) %>%
   ungroup() %>%
-  filter(.data$holding_reported_mv != 0)
+  filter(holding_reported_mv != 0)
 
 fund_data %>%
   bind_rows(fund_missing_mv) %>%
   saveRDS(file.path(data_prep_outputs_path, "fund_data.rds"))
 
+
 log_info("Saving total_fund_list.rds... ")
 fund_data %>%
-  select("factset_fund_id") %>%
+  select(factset_fund_id) %>%
   distinct() %>%
   saveRDS(file.path(data_prep_outputs_path, "total_fund_list.rds"))
+
 
 log_info("Saving isin_to_fund_table.rds... ")
 
@@ -502,25 +558,26 @@ isin_to_fund_table <- readRDS(factset_isin_to_fund_table_path)
 # filter out fsyms that have more than 1 row and no fund data
 isin_to_fund_table <-
   isin_to_fund_table %>%
-  mutate(has_fund_data = .data$factset_fund_id %in% fund_data$factset_fund_id) %>%
-  group_by(.data$fsym_id) %>%
+  mutate(has_fund_data = factset_fund_id %in% fund_data$factset_fund_id) %>%
+  group_by(fsym_id) %>%
   mutate(n = n()) %>%
-  filter(n == 1 | (n > 1 & .data$has_fund_data)) %>%
+  filter(n == 1 | (n > 1 & has_fund_data)) %>%
   ungroup() %>%
-  select(-"n", -"has_fund_data")
+  select(-n, -has_fund_data)
 
 # filter out fsyms that have more than 1 row and have fund data for both rows
 isin_to_fund_table <-
   isin_to_fund_table %>%
-  mutate(has_fund_data = .data$factset_fund_id %in% fund_data$factset_fund_id) %>%
-  group_by(.data$fsym_id) %>%
+  mutate(has_fund_data = factset_fund_id %in% fund_data$factset_fund_id) %>%
+  group_by(fsym_id) %>%
   mutate(n = n()) %>%
-  filter(!(all(.data$has_fund_data) & n > 1)) %>%
+  filter(!(all(has_fund_data) & n > 1)) %>%
   ungroup() %>%
-  select(-"n", -"has_fund_data")
+  select(-n, -has_fund_data)
 
 isin_to_fund_table %>%
   saveRDS(file.path(data_prep_outputs_path, "isin_to_fund_table.rds"))
+
 
 rm(fund_data)
 rm(isin_to_fund_table)
@@ -534,9 +591,9 @@ currencies <- readRDS(file.path(data_prep_outputs_path, "currencies.rds"))
 
 iss_company_emissions <-
   readRDS(factset_iss_emissions_data_path) %>%
-  group_by(.data$factset_entity_id) %>%
+  group_by(factset_entity_id) %>%
   summarise(
-    icc_total_emissions = sum(.data$icc_total_emissions + .data$icc_scope_3_emissions, na.rm = TRUE),
+    icc_total_emissions = sum(icc_total_emissions + icc_scope_3_emissions, na.rm = TRUE),
     .groups = "drop"
   ) %>%
   mutate(icc_total_emissions_units = "tCO2e")  # units are defined in the ISS/FactSet documentation (see #144)
@@ -547,39 +604,40 @@ iss_entity_emission_intensities <-
   readRDS(factset_entity_financing_data_path) %>%
   left_join(currencies, by = "currency") %>%
   mutate(
-    ff_mkt_val = .data$ff_mkt_val * .data$exchange_rate,
-    ff_debt = .data$ff_debt * .data$exchange_rate,
+    ff_mkt_val = ff_mkt_val * exchange_rate,
+    ff_debt = ff_debt * exchange_rate,
     currency = "USD"
   ) %>%
-  select(-"exchange_rate") %>%
-  group_by(.data$factset_entity_id, .data$currency) %>%
+  select(-exchange_rate) %>%
+  group_by(factset_entity_id, currency) %>%
   summarise(
-    ff_mkt_val = sum(.data$ff_mkt_val, na.rm = TRUE),
-    ff_debt = sum(.data$ff_debt, na.rm = TRUE),
+    ff_mkt_val = sum(ff_mkt_val, na.rm = TRUE),
+    ff_debt = sum(ff_debt, na.rm = TRUE),
     .groups = "drop"
   ) %>%
   inner_join(iss_company_emissions, by = "factset_entity_id") %>%
   transmute(
-    factset_entity_id = .data$factset_entity_id,
+    factset_entity_id = factset_entity_id,
     emission_intensity_per_mkt_val = if_else(
-      .data$ff_mkt_val == 0,
+      ff_mkt_val == 0,
       NA_real_,
-      .data$icc_total_emissions / .data$ff_mkt_val
+      icc_total_emissions / ff_mkt_val
     ),
     emission_intensity_per_debt = if_else(
-      .data$ff_debt == 0,
+      ff_debt == 0,
       NA_real_,
-      .data$icc_total_emissions / .data$ff_debt
+      icc_total_emissions / ff_debt
     ),
-    ff_mkt_val = .data$ff_mkt_val,
-    ff_debt = .data$ff_debt,
-    units = paste0(.data$icc_total_emissions_units, " / ", "$ USD")
+    ff_mkt_val,
+    ff_debt,
+    units = paste0(icc_total_emissions_units, " / ", "$ USD")
   )
 
 saveRDS(
   select(iss_entity_emission_intensities, -c("ff_mkt_val", "ff_debt")),
   file.path(data_prep_outputs_path, "iss_entity_emission_intensities.rds")
-  )
+)
+
 
 log_info("Formatting and saving iss_average_sector_emission_intensities.rds...  ")
 
@@ -587,21 +645,22 @@ factset_entity_info <- readRDS(factset_entity_info_path)
 
 iss_entity_emission_intensities %>%
   inner_join(factset_entity_info, by = "factset_entity_id") %>%
-  group_by(.data$sector_code, .data$factset_sector_desc, .data$units) %>%
+  group_by(sector_code, factset_sector_desc, units) %>%
   summarise(
     emission_intensity_per_mkt_val = weighted.mean(
-      .data$emission_intensity_per_mkt_val,
-      .data$ff_mkt_val,
+      emission_intensity_per_mkt_val,
+      ff_mkt_val,
       na.rm = TRUE
     ),
     emission_intensity_per_debt = weighted.mean(
-      .data$emission_intensity_per_debt,
-      .data$ff_debt,
+      emission_intensity_per_debt,
+      ff_debt,
       na.rm = TRUE
     )
   ) %>%
   ungroup() %>%
   saveRDS(file.path(data_prep_outputs_path, "iss_average_sector_emission_intensities.rds"))
+
 
 rm(currencies)
 rm(iss_company_emissions)
@@ -617,7 +676,7 @@ log_info("Preparing combined ABCD scenario output... ")
 
 masterdata_ownership_datastore <-
   readRDS(file.path(data_prep_outputs_path, "masterdata_ownership_datastore.rds")) %>%
-  filter(.data$year %in% .env$relevant_years)
+  filter(year %in% relevant_years)
 
 for (scenario_source in unique(scenarios_long$scenario_source)) {
   filename <- paste0("equity_abcd_scenario_", scenario_source, ".rds")
@@ -650,9 +709,10 @@ list.files(
   bind_rows() %>%
   saveRDS(file.path(data_prep_outputs_path, "equity_abcd_scenario.rds"))
 
+
 masterdata_debt_datastore <-
   readRDS(file.path(data_prep_outputs_path, "masterdata_debt_datastore.rds")) %>%
-  filter(.data$year %in% .env$relevant_years)
+  filter(year %in% relevant_years)
 
 for (scenario_source in unique(scenarios_long$scenario_source)) {
   filename <- paste0("bonds_abcd_scenario_", scenario_source, ".rds")
@@ -690,6 +750,12 @@ log_info("Combined ABCD scenario output prepared.")
 
 # manifests of input and output file -------------------------------------------
 
+ent_entity_affiliates_last_update <-
+  readRDS(factset_entity_info_path) %>%
+  filter(!is.na(ent_entity_affiliates_last_update)) %>%
+  pull(ent_entity_affiliates_last_update) %>%
+  unique()
+
 parameters <-
   list(
     input_filepaths = list(
@@ -711,7 +777,8 @@ parameters <-
     factset_database = list(
       dbname = dbname,
       host = host,
-      username = username
+      username = username,
+      ent_entity_affiliates_last_update = ent_entity_affiliates_last_update
     ),
     timestamps = list(
       imf_quarter_timestamp = imf_quarter_timestamp,
