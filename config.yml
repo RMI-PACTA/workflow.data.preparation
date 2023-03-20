@@ -7,6 +7,8 @@ default:
   dbname: "delta"
   host: "data-eval-db.postgres.database.azure.com"
   update_factset: TRUE
+  update_currencies: TRUE
+  update_indices: TRUE
   imf_quarter_timestamp: "2021-Q4"
   factset_data_timestamp: "2021-12-31"
   pacta_financial_timestamp: "2021Q4"

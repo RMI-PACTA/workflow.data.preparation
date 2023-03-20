@@ -37,6 +37,8 @@ host <- config$host
 username <- Sys.getenv("R_DATABASE_USER")
 password <- Sys.getenv("R_DATABASE_PASSWORD")
 update_factset <- config$update_factset
+update_currencies <- config$update_currencies
+update_indices <- config$update_indices
 imf_quarter_timestamp <- config$imf_quarter_timestamp
 factset_data_timestamp <- config$factset_data_timestamp
 pacta_financial_timestamp <- config$pacta_financial_timestamp
@@ -129,6 +131,24 @@ stopifnot(file.exists(masterdata_ownership_path))
 stopifnot(file.exists(masterdata_debt_path))
 stopifnot(file.exists(ar_company_id__factset_entity_id_path))
 
+if (!update_currencies) {
+  stopifnot(file.exists(currencies_data_path))
+}
+
+if (!update_factset) {
+  stopifnot(file.exists(factset_financial_data_path))
+  stopifnot(file.exists(factset_entity_info_path))
+  stopifnot(file.exists(factset_entity_financing_data_path))
+  stopifnot(file.exists(factset_fund_data_path))
+  stopifnot(file.exists(factset_isin_to_fund_table_path))
+  stopifnot(file.exists(factset_iss_emissions_data_path))
+}
+
+if (!update_indices) {
+  stopifnot(file.exists(ishares_indices_bonds_data_path))
+  stopifnot(file.exists(ishares_indices_equity_data_path))
+}
+
 
 # pre-flight -------------------------------------------------------------------
 
@@ -160,11 +180,14 @@ pacta.scenario.preparation::scenario_regions %>%
   write_csv(scenario_regions_path, na = "")
 
 
-log_info("Fetching currency data... ")
-pacta.data.preparation:::get_currency_exchange_rates(
-  quarter = imf_quarter_timestamp
-) %>%
-  saveRDS(currencies_data_path)
+if (update_currencies) {
+  log_info("Fetching currency data... ")
+  get_currency_exchange_rates(
+    quarter = imf_quarter_timestamp
+  ) %>%
+    saveRDS(currencies_data_path)
+}
+
 
 if (update_factset) {
   log_info("Fetching financial data... ")
@@ -227,33 +250,35 @@ if (update_factset) {
     saveRDS(factset_iss_emissions_data_path)
 }
 
-log_info("Fetching bonds indices... ")
-dplyr::bind_rows(
-  lapply(
-    seq_along(bonds_indices_urls), function(index) {
-      pacta.data.preparation:::get_ishares_index_data(
-        bonds_indices_urls[[index]],
-        names(bonds_indices_urls)[[index]],
-        indices_timestamp
-      )
-    }
-  )
-) %>%
-  saveRDS(ishares_indices_bonds_data_path)
+if (update_indices) {
+  log_info("Fetching bonds indices... ")
+  dplyr::bind_rows(
+    lapply(
+      seq_along(bonds_indices_urls), function(index) {
+        pacta.data.preparation:::get_ishares_index_data(
+          bonds_indices_urls[[index]],
+          names(bonds_indices_urls)[[index]],
+          indices_timestamp
+        )
+      }
+    )
+  ) %>%
+    saveRDS(ishares_indices_bonds_data_path)
 
-log_info("Fetching equity indices... ")
-dplyr::bind_rows(
-  lapply(
-    seq_along(equity_indices_urls), function(index) {
-      pacta.data.preparation:::get_ishares_index_data(
-        equity_indices_urls[[index]],
-        names(equity_indices_urls)[[index]],
-        indices_timestamp
-      )
-    }
-  )
-) %>%
-  saveRDS(ishares_indices_equity_data_path)
+  log_info("Fetching equity indices... ")
+  dplyr::bind_rows(
+    lapply(
+      seq_along(equity_indices_urls), function(index) {
+        pacta.data.preparation:::get_ishares_index_data(
+          equity_indices_urls[[index]],
+          names(equity_indices_urls)[[index]],
+          indices_timestamp
+        )
+      }
+    )
+  ) %>%
+    saveRDS(ishares_indices_equity_data_path)
+}
 
 log_info("Pre-flight data prepared.")
 
