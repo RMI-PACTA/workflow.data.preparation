@@ -18,4 +18,6 @@ R_CONFIG_ACTIVE=2021Q4
 - `R_DATABASE_PASSWORD` password for the FactSet database
 - `R_CONFIG_ACTIVE` the name of the config to be used. The [config.yml](config.yml) file contains multiple named configurations which can be named here to activate them. Current options are: `2021Q4`, `2021Q4_dev_vm`, `2021Q4_dev_local`, `2021Q4_prod_vm`, `2022Q2`
 
-Run `docker-compose up` from the root directory, and docker will build the image (if necessary), and then run the data.prep process given the specified options in the .env file
+Run `docker-compose up` from the root directory, and docker will build the image (if necessary), and then run the data.prep process given the specified options in the .env file.
+
+Use `docker-compose build` to force a rebuild of the Docker image.
