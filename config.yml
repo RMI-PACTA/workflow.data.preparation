@@ -1,13 +1,11 @@
 default:
-  data_prep_inputs_path: ""
-  data_prep_outputs_path: ""
+  data_prep_inputs_path: "/inputs"
+  data_prep_outputs_path: "/outputs"
   masterdata_ownership_filename: ""
   masterdata_debt_filename: ""
   ar_company_id__factset_entity_id_filename: ""
   dbname: "delta"
   host: "data-eval-db.postgres.database.azure.com"
-  username: !expr readLines("/run/secrets/R_DATABASE_USER")
-  password: !expr readLines("/run/secrets/R_DATABASE_PASSWORD")
   update_factset: TRUE
   imf_quarter_timestamp: "2021-Q4"
   factset_data_timestamp: "2021-12-31"
@@ -52,18 +50,12 @@ default:
 
 2021Q4_dev_vm:
   inherits: 2021Q4
-  data_prep_inputs_path: "/home/shiny/inputs"
-  data_prep_outputs_path: "/home/shiny/outputs"
 
 2021Q4_dev_local:
   inherits: 2021Q4
-  data_prep_inputs_path: "../pacta.data.preparation/input"
-  data_prep_outputs_path: "../pacta.data.preparation/output"
 
 2021Q4_prod_vm:
   inherits: 2021Q4
-  data_prep_inputs_path: "/home/shiny/inputs"
-  data_prep_outputs_path: "/home/shiny/outputs"
 
 
 2022Q2:

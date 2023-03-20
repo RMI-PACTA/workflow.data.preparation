@@ -1,16 +1,16 @@
 version: "3"
 
-secrets:
-  GITHUB_PAT:
-    file: .GITHUB_PAT
-
 services:
   data_prep:
     build:
       context: .
-      secrets: GITHUB_PAT
     volumes:
-      - /inputs:/home/shiny/inputs
-      - /outputs:/home/shiny/outputs
-    environment:
-      - R_CONFIG_ACTIVE=2021Q4_dev_vm
+      - type: bind
+        source: ${HOST_INPUTS_PATH}
+        target: /inputs
+      - type: bind
+        source: ${HOST_OUTPUTS_PATH}
+        target: /outputs
+      - type: bind
+        source: .
+        target: /workflow.data.preparation

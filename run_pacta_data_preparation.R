@@ -18,7 +18,14 @@ suppressPackageStartupMessages({
 
 # config -----------------------------------------------------------------------
 
-config <- config::get(file = "config.yml", use_parent = FALSE)
+readRenviron(".env")
+
+config <-
+  config::get(
+    file = "config.yml",
+    config = Sys.getenv("R_CONFIG_ACTIVE"),
+    use_parent = FALSE
+  )
 
 data_prep_inputs_path <- config$data_prep_inputs_path
 data_prep_outputs_path <- config$data_prep_outputs_path
@@ -27,8 +34,8 @@ masterdata_debt_filename <- config$masterdata_debt_filename
 ar_company_id__factset_entity_id_filename <- config$ar_company_id__factset_entity_id_filename
 dbname <- config$dbname
 host <- config$host
-username <- config$username
-password <- config$password
+username <- Sys.getenv("R_DATABASE_USER")
+password <- Sys.getenv("R_DATABASE_PASSWORD")
 update_factset <- config$update_factset
 imf_quarter_timestamp <- config$imf_quarter_timestamp
 factset_data_timestamp <- config$factset_data_timestamp
@@ -91,7 +98,7 @@ log_info(
   )
 )
 
-scenario_raw_data_to_include <- lapply(scenario_raw_data_to_include, get)
+scenario_raw_data_to_include <- lapply(scenario_raw_data_to_include, get, envir = asNamespace("pacta.scenario.preparation"))
 
 # names and and urls of iShares indices
 equity_indices_urls <-
@@ -118,6 +125,9 @@ bonds_indices_urls <-
 
 # check that everything is ready to go -----------------------------------------
 
+stopifnot(file.exists(masterdata_ownership_path))
+stopifnot(file.exists(masterdata_debt_path))
+stopifnot(file.exists(ar_company_id__factset_entity_id_path))
 
 
 # pre-flight -------------------------------------------------------------------
