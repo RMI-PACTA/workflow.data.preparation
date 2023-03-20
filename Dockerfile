@@ -2,9 +2,9 @@ FROM --platform=linux/amd64 rocker/tidyverse
 
 RUN Rscript -e 'install.packages(c("pak", "renv"))'
 
-WORKDIR /workflow.data.preparation
+COPY . /workflow.data.preparation
 
-COPY * .
+WORKDIR /workflow.data.preparation
 
 RUN Rscript -e '\
   readRenviron(".env"); \
