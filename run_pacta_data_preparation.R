@@ -422,7 +422,7 @@ company_id__creditor_company_id <-
   masterdata_debt %>%
   select("company_id", "creditor_company_id") %>%
   distinct() %>%
-  mutate(across(.fns = as.character))
+  mutate(across(.cols = dplyr::everything(), .fns = as.character))
 
 masterdata_debt %>%
   prepare_masterdata(
