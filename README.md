@@ -1,7 +1,7 @@
 requires a file `.env` to exist in the root directory, that looks like...
 ``` sh
-HOST_INPUTS_PATH=~/Desktop/inputs
-HOST_OUTPUTS_PATH=~/Desktop/outputs
+HOST_INPUTS_PATH=/users/pacta/inputs
+HOST_OUTPUTS_PATH=/users/pacta/outputs
 GITHUB_PAT=ghp_XXXXxxXxXXXxXxxX
 R_DATABASE_USER=xxxx@xxxxx
 R_DATABASE_PASSWORD=xxxXxxXxxxxxxXXxxxxXXXXxx
