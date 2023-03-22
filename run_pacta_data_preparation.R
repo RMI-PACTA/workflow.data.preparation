@@ -238,6 +238,7 @@ if (update_factset) {
   ) %>%
     saveRDS(factset_isin_to_fund_table_path)
 
+  log_info("Fetching ISS emissions data... ")
   pacta.data.preparation:::get_factset_iss_emissions_data(
     #IMPORTANT: `year` is 2019 on purpose as per a decision point from analysts.
     # See Issue #117 for more information.
