@@ -682,7 +682,8 @@ iss_entity_emission_intensities %>%
       emission_intensity_per_debt,
       ff_debt,
       na.rm = TRUE
-    )
+    ),
+    .groups = "drop"
   ) %>%
   ungroup() %>%
   saveRDS(file.path(data_prep_outputs_path, "iss_average_sector_emission_intensities.rds"))
