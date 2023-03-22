@@ -849,6 +849,21 @@ pacta.data.preparation:::write_manifest(
 )
 
 
+# copy in NEWs.md files from relevant PACTA packages ---------------------------
+
+pkg_name <- "pacta.data.preparation"
+file.copy(
+  system.file("NEWS.md", package = pkg_name), 
+  to = file.path(data_prep_outputs_path, paste0(pkg_name, "-NEWS.md"))
+)
+
+pkg_name <- "pacta.scenario.preparation"
+file.copy(
+  system.file("NEWS.md", package = pkg_name), 
+  to = file.path(data_prep_outputs_path, paste0(pkg_name, "-NEWS.md"))
+)
+
+
 # ------------------------------------------------------------------------------
 
 log_info("PACTA Data Preparation Complete.")
