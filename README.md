@@ -20,4 +20,4 @@ R_CONFIG_ACTIVE=2021Q4
 
 Run `docker-compose up` from the root directory, and docker will build the image (if necessary), and then run the data.prep process given the specified options in the .env file.
 
-Use `docker-compose build` to force a rebuild of the Docker image.
+Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
