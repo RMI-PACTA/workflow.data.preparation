@@ -307,9 +307,6 @@ factset_issue_code_bridge <- pacta.data.preparation::factset_issue_code_bridge %
 factset_industry_map_bridge <- pacta.data.preparation::factset_industry_map_bridge %>%
   select(factset_industry_code, pacta_sector)
 
-factset_manual_pacta_sector_override <- pacta.data.preparation::factset_manual_pacta_sector_override %>%
-  select(factset_entity_id, pacta_sector_override)
-
 # scenarios_analysisinput_inputs
 scenario_raw <- readr::read_csv(scenarios_analysis_input_path, show_col_types = FALSE)
 
