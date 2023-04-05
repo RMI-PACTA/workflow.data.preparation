@@ -4,9 +4,11 @@ suppressPackageStartupMessages({
   library(pacta.data.preparation)
   library(pacta.scenario.preparation)
 
+  library(DBI)
   library(dplyr)
   library(readr)
   library(rlang)
+  library(RSQLite)
   library(stringr)
   library(tidyr)
 
@@ -767,6 +769,67 @@ list.files(
   saveRDS(file.path(data_prep_outputs_path, "bonds_abcd_scenario.rds"))
 
 log_info("Combined ABCD scenario output prepared.")
+
+
+# export SQLite versions of relevant files -------------------------------------
+
+# entity_info
+entity_info <- readRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
+
+con <-
+  DBI::dbConnect(
+    drv = RSQLite::SQLite(),
+    dbname = file.path(data_prep_outputs_path, "entity_info.sqlite")
+  )
+
+dplyr::copy_to(
+  dest = con, 
+  df = entity_info, 
+  name = "entity_info",
+  overwrite = TRUE,
+  temporary = FALSE,
+  indexes = list("factset_entity_id")
+)
+
+DBI::dbDisconnect(con)
+
+# equity_abcd_scenario
+equity_abcd_scenario <- readRDS(file.path(data_prep_outputs_path, "equity_abcd_scenario.rds"))
+con <- DBI::dbConnect(RSQLite::SQLite(), dbname = file.path(data_prep_outputs_path, "equity_abcd_scenario.sqlite"))
+dplyr::copy_to(
+  dest = con, 
+  df = equity_abcd_scenario, 
+  name = "abcd_scenario",
+  temporary = FALSE,
+  overwrite = TRUE,
+  indexes = list(
+    "id", 
+    "equity_market", 
+    "scenario_source", 
+    "scenario_geography", 
+    "ald_sector"
+  )
+)
+DBI::dbDisconnect(con)
+
+# bonds_abcd_scenario
+bonds_abcd_scenario <- readRDS(file.path(data_prep_outputs_path, "bonds_abcd_scenario.rds"))
+con <- DBI::dbConnect(RSQLite::SQLite(), dbname = file.path(data_prep_outputs_path, "bonds_abcd_scenario.sqlite"))
+dplyr::copy_to(
+  dest = con, 
+  df = bonds_abcd_scenario, 
+  name = "abcd_scenario",
+  temporary = FALSE,
+  overwrite = TRUE,
+  indexes = list(
+    "id", 
+    "equity_market", 
+    "scenario_source", 
+    "scenario_geography", 
+    "ald_sector"
+  )
+)
+DBI::dbDisconnect(con)
 
 
 # manifests of input and output file -------------------------------------------
