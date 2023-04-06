@@ -794,8 +794,15 @@ dplyr::copy_to(
 DBI::dbDisconnect(con)
 
 # equity_abcd_scenario
+
 equity_abcd_scenario <- readRDS(file.path(data_prep_outputs_path, "equity_abcd_scenario.rds"))
-con <- DBI::dbConnect(RSQLite::SQLite(), dbname = file.path(data_prep_outputs_path, "equity_abcd_scenario.sqlite"))
+
+con <- 
+  DBI::dbConnect(
+    drv = RSQLite::SQLite(), 
+    dbname = file.path(data_prep_outputs_path, "equity_abcd_scenario.sqlite")
+  )
+
 dplyr::copy_to(
   dest = con, 
   df = equity_abcd_scenario, 
@@ -810,11 +817,19 @@ dplyr::copy_to(
     "ald_sector"
   )
 )
+
 DBI::dbDisconnect(con)
 
 # bonds_abcd_scenario
+
 bonds_abcd_scenario <- readRDS(file.path(data_prep_outputs_path, "bonds_abcd_scenario.rds"))
-con <- DBI::dbConnect(RSQLite::SQLite(), dbname = file.path(data_prep_outputs_path, "bonds_abcd_scenario.sqlite"))
+
+con <- 
+  DBI::dbConnect(
+    drv = RSQLite::SQLite(), 
+    dbname = file.path(data_prep_outputs_path, "bonds_abcd_scenario.sqlite")
+  )
+
 dplyr::copy_to(
   dest = con, 
   df = bonds_abcd_scenario, 
@@ -829,6 +844,7 @@ dplyr::copy_to(
     "ald_sector"
   )
 )
+
 DBI::dbDisconnect(con)
 
 
