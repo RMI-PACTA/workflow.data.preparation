@@ -107,13 +107,10 @@ equity_indices_urls <-
   c(
     "iShares Core S&P 500 UCITS ETF USD (Dist) <USD (Distributing)>" =
       "https://www.ishares.com/uk/individual/en/products/251900/ishares-sp-500-ucits-etf-inc-fund/",
-
     "iShares MSCI World UCITS ETF <USD (Distributing)>" =
       "https://www.ishares.com/uk/individual/en/products/251881/ishares-msci-world-ucits-etf-inc-fund/",
-
     "iShares MSCI EM UCITS ETF USD (Acc)" =
       "https://www.ishares.com/uk/individual/en/products/251858/ishares-msci-emerging-markets-ucits-etf-acc-fund/",
-
     "iShares MSCI ACWI UCITS ETF <USD (Accumulating)>" =
       "https://www.ishares.com/uk/individual/en/products/251850/ishares-msci-acwi-ucits-etf/"
   )
@@ -240,7 +237,7 @@ if (update_factset) {
 
   log_info("Fetching ISS emissions data... ")
   pacta.data.preparation:::get_factset_iss_emissions_data(
-    #IMPORTANT: `year` is 2019 on purpose as per a decision point from analysts.
+    # IMPORTANT: `year` is 2019 on purpose as per a decision point from analysts.
     # See Issue #117 for more information.
     year = 2019,
     dbname = dbname,
@@ -619,7 +616,7 @@ iss_company_emissions <-
     icc_total_emissions = sum(icc_total_emissions + icc_scope_3_emissions, na.rm = TRUE),
     .groups = "drop"
   ) %>%
-  mutate(icc_total_emissions_units = "tCO2e")  # units are defined in the ISS/FactSet documentation (see #144)
+  mutate(icc_total_emissions_units = "tCO2e") # units are defined in the ISS/FactSet documentation (see #144)
 
 log_info("Formatting and saving iss_entity_emission_intensities.rds...  ")
 
@@ -820,7 +817,7 @@ parameters <-
       other_sector_list = other_sector_list,
       global_aggregate_sector_list = global_aggregate_sector_list
     ),
-    years  = list(
+    years = list(
       market_share_target_reference_year = market_share_target_reference_year,
       time_horizon = time_horizon,
       additional_year = additional_year,
@@ -850,13 +847,13 @@ pacta.data.preparation:::write_manifest(
 
 pkg_name <- "pacta.data.preparation"
 file.copy(
-  system.file("NEWS.md", package = pkg_name), 
+  system.file("NEWS.md", package = pkg_name),
   to = file.path(data_prep_outputs_path, paste0(pkg_name, "-NEWS.md"))
 )
 
 pkg_name <- "pacta.scenario.preparation"
 file.copy(
-  system.file("NEWS.md", package = pkg_name), 
+  system.file("NEWS.md", package = pkg_name),
   to = file.path(data_prep_outputs_path, paste0(pkg_name, "-NEWS.md"))
 )
 
