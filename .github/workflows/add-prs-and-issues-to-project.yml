@@ -1,0 +1,21 @@
+name: Adds all new issues and PRs to the Transition Monitor project
+
+on:
+  issues:
+    types:
+      - opened
+      - transferred
+  pull_request:
+    branches: [main]
+    types:
+      - opened
+
+jobs:
+  add-to-project:
+    name: Add issue to project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/add-to-project@v0.4.0
+        with:
+          project-url: https://github.com/orgs/RMI-PACTA/projects/8
+          github-token: ${{ secrets.PAT_ADD_ISSUES_TO_PROJECT }}
