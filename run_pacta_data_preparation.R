@@ -774,6 +774,8 @@ log_info("Combined ABCD scenario output prepared.")
 # export SQLite versions of relevant files -------------------------------------
 
 # entity_info
+log_info("Formatting and saving entity_info.sqlite... ")
+
 entity_info <- readRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
 
 con <-
@@ -792,8 +794,10 @@ dplyr::copy_to(
 )
 
 DBI::dbDisconnect(con)
+rm(entity_info)
 
 # equity_abcd_scenario
+log_info("Formatting and saving equity_abcd_scenario.sqlite... ")
 
 equity_abcd_scenario <- readRDS(file.path(data_prep_outputs_path, "equity_abcd_scenario.rds"))
 
@@ -819,8 +823,10 @@ dplyr::copy_to(
 )
 
 DBI::dbDisconnect(con)
+rm(equity_abcd_scenario)
 
 # bonds_abcd_scenario
+log_info("Formatting and saving bonds_abcd_scenario.sqlite... ")
 
 bonds_abcd_scenario <- readRDS(file.path(data_prep_outputs_path, "bonds_abcd_scenario.rds"))
 
@@ -846,6 +852,7 @@ dplyr::copy_to(
 )
 
 DBI::dbDisconnect(con)
+rm(bonds_abcd_scenario)
 
 
 # manifests of input and output file -------------------------------------------
