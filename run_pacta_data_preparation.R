@@ -783,6 +783,7 @@ con <-
     drv = RSQLite::SQLite(),
     dbname = file.path(data_prep_outputs_path, "entity_info.sqlite")
   )
+RSQLite::sqliteSetBusyHandler(con, 3000L)
 
 dplyr::copy_to(
   dest = con, 
@@ -806,6 +807,7 @@ con <-
     drv = RSQLite::SQLite(), 
     dbname = file.path(data_prep_outputs_path, "equity_abcd_scenario.sqlite")
   )
+RSQLite::sqliteSetBusyHandler(con, 3000L)
 
 dplyr::copy_to(
   dest = con, 
@@ -835,6 +837,7 @@ con <-
     drv = RSQLite::SQLite(), 
     dbname = file.path(data_prep_outputs_path, "bonds_abcd_scenario.sqlite")
   )
+RSQLite::sqliteSetBusyHandler(con, 3000L)
 
 dplyr::copy_to(
   dest = con, 
