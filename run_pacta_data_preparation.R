@@ -771,6 +771,8 @@ log_info("Combined ABCD scenario output prepared.")
 
 # manifests of input and output file -------------------------------------------
 
+log_info("Formatting and saving manifest.json... ")
+
 ent_entity_affiliates_last_update <-
   readRDS(factset_entity_info_path) %>%
   filter(!is.na(ent_entity_affiliates_last_update)) %>%
@@ -844,6 +846,8 @@ pacta.data.preparation:::write_manifest(
 
 
 # copy in NEWs.md files from relevant PACTA packages ---------------------------
+
+log_info("Copying NEW.md files from relevant PACTA packages... ")
 
 pkg_name <- "pacta.data.preparation"
 file.copy(
