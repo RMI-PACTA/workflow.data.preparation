@@ -2,6 +2,7 @@
 
 suppressPackageStartupMessages({
   library(pacta.data.preparation)
+  library(pacta.data.scraping)
   library(pacta.scenario.preparation)
 
   library(DBI)
@@ -181,7 +182,7 @@ pacta.scenario.preparation::scenario_regions %>%
 
 if (update_currencies) {
   log_info("Fetching currency data... ")
-  pacta.data.preparation:::get_currency_exchange_rates(
+  pacta.data.scraping::get_currency_exchange_rates(
     quarter = imf_quarter_timestamp
   ) %>%
     saveRDS(currencies_data_path)
@@ -255,7 +256,7 @@ if (update_indices) {
   dplyr::bind_rows(
     lapply(
       seq_along(bonds_indices_urls), function(index) {
-        pacta.data.preparation:::get_ishares_index_data(
+        pacta.data.scraping::get_ishares_index_data(
           bonds_indices_urls[[index]],
           names(bonds_indices_urls)[[index]],
           indices_timestamp
@@ -269,7 +270,7 @@ if (update_indices) {
   dplyr::bind_rows(
     lapply(
       seq_along(equity_indices_urls), function(index) {
-        pacta.data.preparation:::get_ishares_index_data(
+        pacta.data.scraping::get_ishares_index_data(
           equity_indices_urls[[index]],
           names(equity_indices_urls)[[index]],
           indices_timestamp
@@ -289,7 +290,7 @@ log_info("Preparing scenario data... ")
 
 scenario_regions <- readr::read_csv(scenario_regions_path, na = "", show_col_types = FALSE)
 
-index_regions <- pacta.data.preparation::index_regions
+index_regions <- pacta.data.scraping::get_index_regions()
 
 factset_issue_code_bridge <- pacta.data.preparation::factset_issue_code_bridge %>%
   select(issue_type_code, asset_type) %>%
@@ -368,12 +369,12 @@ log_info("Financial data prepared.")
 
 log_info("Processing bonds indices data... ")
 readRDS(ishares_indices_bonds_data_path) %>%
-  pacta.data.preparation:::process_ishares_index_data() %>%
+  pacta.data.scraping::process_ishares_index_data() %>%
   saveRDS(file.path(data_prep_outputs_path, "ishares_indices_bonds.rds"))
 
 log_info("Processing equity indices data... ")
 readRDS(ishares_indices_equity_data_path) %>%
-  pacta.data.preparation:::process_ishares_index_data() %>%
+  pacta.data.scraping::process_ishares_index_data() %>%
   saveRDS(file.path(data_prep_outputs_path, "ishares_indices_equity.rds"))
 
 log_info("Indices data prepared.")
