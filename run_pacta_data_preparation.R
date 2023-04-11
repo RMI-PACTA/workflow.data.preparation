@@ -2,6 +2,7 @@
 
 suppressPackageStartupMessages({
   library(pacta.data.preparation)
+  library(pacta.data.scraping)
   library(pacta.scenario.preparation)
 
   library(dplyr)
@@ -151,7 +152,7 @@ pacta.scenario.preparation::scenario_regions %>%
 
 if (update_currencies) {
   log_info("Fetching currency data... ")
-  pacta.data.preparation:::get_currency_exchange_rates(
+  pacta.data.scraping::get_currency_exchange_rates(
     quarter = imf_quarter_timestamp
   ) %>%
     saveRDS(currencies_data_path)
@@ -229,7 +230,7 @@ log_info("Preparing scenario data... ")
 
 scenario_regions <- readr::read_csv(scenario_regions_path, na = "", show_col_types = FALSE)
 
-index_regions <- pacta.data.preparation::index_regions
+index_regions <- pacta.data.scraping::get_index_regions()
 
 factset_issue_code_bridge <- pacta.data.preparation::factset_issue_code_bridge %>%
   select(issue_type_code, asset_type) %>%
