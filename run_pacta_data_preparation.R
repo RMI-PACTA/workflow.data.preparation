@@ -288,7 +288,7 @@ log_info("Preparing scenario data... ")
 
 scenario_regions <- readr::read_csv(scenario_regions_path, na = "", show_col_types = FALSE)
 
-index_regions <- pacta.data.scraping::get_index_regions()
+index_regions <- pacta.data.preparation::index_regions
 
 factset_issue_code_bridge <- pacta.data.preparation::factset_issue_code_bridge %>%
   select(issue_type_code, asset_type) %>%
