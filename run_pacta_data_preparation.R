@@ -41,6 +41,7 @@ username <- Sys.getenv("R_DATABASE_USER")
 password <- Sys.getenv("R_DATABASE_PASSWORD")
 update_factset <- config$update_factset
 update_currencies <- config$update_currencies
+export_sqlite_files <- config$export_sqlite_files
 imf_quarter_timestamp <- config$imf_quarter_timestamp
 factset_data_timestamp <- config$factset_data_timestamp
 pacta_financial_timestamp <- config$pacta_financial_timestamp
@@ -704,89 +705,91 @@ log_info("Combined ABCD scenario output prepared.")
 
 # export SQLite versions of relevant files -------------------------------------
 
-# entity_info
-log_info("Formatting and saving entity_info.sqlite... ")
+if (export_sqlite_files) {
+  # entity_info
+  log_info("Formatting and saving entity_info.sqlite... ")
 
-entity_info <- readRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
+  entity_info <- readRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
 
-con <-
-  DBI::dbConnect(
-    drv = RSQLite::SQLite(),
-    dbname = file.path(data_prep_outputs_path, "entity_info.sqlite")
+  con <-
+    DBI::dbConnect(
+      drv = RSQLite::SQLite(),
+      dbname = file.path(data_prep_outputs_path, "entity_info.sqlite")
+    )
+  RSQLite::sqliteSetBusyHandler(con, 3000L)
+
+  dplyr::copy_to(
+    dest = con,
+    df = entity_info,
+    name = "entity_info",
+    overwrite = TRUE,
+    temporary = FALSE,
+    indexes = list("factset_entity_id")
   )
-RSQLite::sqliteSetBusyHandler(con, 3000L)
 
-dplyr::copy_to(
-  dest = con, 
-  df = entity_info, 
-  name = "entity_info",
-  overwrite = TRUE,
-  temporary = FALSE,
-  indexes = list("factset_entity_id")
-)
+  DBI::dbDisconnect(con)
+  rm(entity_info)
 
-DBI::dbDisconnect(con)
-rm(entity_info)
+  # equity_abcd_scenario
+  log_info("Formatting and saving equity_abcd_scenario.sqlite... ")
 
-# equity_abcd_scenario
-log_info("Formatting and saving equity_abcd_scenario.sqlite... ")
+  equity_abcd_scenario <- readRDS(file.path(data_prep_outputs_path, "equity_abcd_scenario.rds"))
 
-equity_abcd_scenario <- readRDS(file.path(data_prep_outputs_path, "equity_abcd_scenario.rds"))
+  con <-
+    DBI::dbConnect(
+      drv = RSQLite::SQLite(),
+      dbname = file.path(data_prep_outputs_path, "equity_abcd_scenario.sqlite")
+    )
+  RSQLite::sqliteSetBusyHandler(con, 3000L)
 
-con <- 
-  DBI::dbConnect(
-    drv = RSQLite::SQLite(), 
-    dbname = file.path(data_prep_outputs_path, "equity_abcd_scenario.sqlite")
+  dplyr::copy_to(
+    dest = con,
+    df = equity_abcd_scenario,
+    name = "abcd_scenario",
+    temporary = FALSE,
+    overwrite = TRUE,
+    indexes = list(
+      "id",
+      "equity_market",
+      "scenario_source",
+      "scenario_geography",
+      "ald_sector"
+    )
   )
-RSQLite::sqliteSetBusyHandler(con, 3000L)
 
-dplyr::copy_to(
-  dest = con, 
-  df = equity_abcd_scenario, 
-  name = "abcd_scenario",
-  temporary = FALSE,
-  overwrite = TRUE,
-  indexes = list(
-    "id", 
-    "equity_market", 
-    "scenario_source", 
-    "scenario_geography", 
-    "ald_sector"
+  DBI::dbDisconnect(con)
+  rm(equity_abcd_scenario)
+
+  # bonds_abcd_scenario
+  log_info("Formatting and saving bonds_abcd_scenario.sqlite... ")
+
+  bonds_abcd_scenario <- readRDS(file.path(data_prep_outputs_path, "bonds_abcd_scenario.rds"))
+
+  con <-
+    DBI::dbConnect(
+      drv = RSQLite::SQLite(),
+      dbname = file.path(data_prep_outputs_path, "bonds_abcd_scenario.sqlite")
+    )
+  RSQLite::sqliteSetBusyHandler(con, 3000L)
+
+  dplyr::copy_to(
+    dest = con,
+    df = bonds_abcd_scenario,
+    name = "abcd_scenario",
+    temporary = FALSE,
+    overwrite = TRUE,
+    indexes = list(
+      "id",
+      "equity_market",
+      "scenario_source",
+      "scenario_geography",
+      "ald_sector"
+    )
   )
-)
 
-DBI::dbDisconnect(con)
-rm(equity_abcd_scenario)
-
-# bonds_abcd_scenario
-log_info("Formatting and saving bonds_abcd_scenario.sqlite... ")
-
-bonds_abcd_scenario <- readRDS(file.path(data_prep_outputs_path, "bonds_abcd_scenario.rds"))
-
-con <- 
-  DBI::dbConnect(
-    drv = RSQLite::SQLite(), 
-    dbname = file.path(data_prep_outputs_path, "bonds_abcd_scenario.sqlite")
-  )
-RSQLite::sqliteSetBusyHandler(con, 3000L)
-
-dplyr::copy_to(
-  dest = con, 
-  df = bonds_abcd_scenario, 
-  name = "abcd_scenario",
-  temporary = FALSE,
-  overwrite = TRUE,
-  indexes = list(
-    "id", 
-    "equity_market", 
-    "scenario_source", 
-    "scenario_geography", 
-    "ald_sector"
-  )
-)
-
-DBI::dbDisconnect(con)
-rm(bonds_abcd_scenario)
+  DBI::dbDisconnect(con)
+  rm(bonds_abcd_scenario)
+}
 
 
 # manifests of input and output file -------------------------------------------
