@@ -39,11 +39,9 @@ username <- Sys.getenv("R_DATABASE_USER")
 password <- Sys.getenv("R_DATABASE_PASSWORD")
 update_factset <- config$update_factset
 update_currencies <- config$update_currencies
-update_indices <- config$update_indices
 imf_quarter_timestamp <- config$imf_quarter_timestamp
 factset_data_timestamp <- config$factset_data_timestamp
 pacta_financial_timestamp <- config$pacta_financial_timestamp
-indices_timestamp <- config$indices_timestamp
 market_share_target_reference_year <- config$market_share_target_reference_year
 time_horizon <- config$time_horizon
 additional_year <- config$additional_year
@@ -80,8 +78,6 @@ factset_entity_financing_data_path <- file.path(data_prep_inputs_path, "factset_
 factset_fund_data_path <- file.path(data_prep_inputs_path, "factset_fund_data.rds")
 factset_isin_to_fund_table_path <- file.path(data_prep_inputs_path, "factset_isin_to_fund_table.rds")
 factset_iss_emissions_data_path <- file.path(data_prep_inputs_path, "factset_iss_emissions.rds")
-ishares_indices_bonds_data_path <- file.path(data_prep_inputs_path, "ishares_indices_bonds_data.rds")
-ishares_indices_equity_data_path <- file.path(data_prep_inputs_path, "ishares_indices_equity_data.rds")
 
 
 # computed options -------------------------------------------------------------
@@ -104,25 +100,6 @@ log_info(
 
 scenario_raw_data_to_include <- lapply(scenario_raw_data_to_include, get, envir = asNamespace("pacta.scenario.preparation"))
 
-# names and and urls of iShares indices
-equity_indices_urls <-
-  c(
-    "iShares Core S&P 500 UCITS ETF USD (Dist) <USD (Distributing)>" =
-      "https://www.ishares.com/uk/individual/en/products/251900/ishares-sp-500-ucits-etf-inc-fund/",
-    "iShares MSCI World UCITS ETF <USD (Distributing)>" =
-      "https://www.ishares.com/uk/individual/en/products/251881/ishares-msci-world-ucits-etf-inc-fund/",
-    "iShares MSCI EM UCITS ETF USD (Acc)" =
-      "https://www.ishares.com/uk/individual/en/products/251858/ishares-msci-emerging-markets-ucits-etf-acc-fund/",
-    "iShares MSCI ACWI UCITS ETF <USD (Accumulating)>" =
-      "https://www.ishares.com/uk/individual/en/products/251850/ishares-msci-acwi-ucits-etf/"
-  )
-
-bonds_indices_urls <-
-  c(
-    "iShares Global Corp Bond UCITS ETF <USD (Distributing)>" =
-      "https://www.ishares.com/uk/individual/en/products/251813/ishares-global-corporate-bond-ucits-etf/"
-  )
-
 
 # check that everything is ready to go -----------------------------------------
 
@@ -141,11 +118,6 @@ if (!update_factset) {
   stopifnot(file.exists(factset_fund_data_path))
   stopifnot(file.exists(factset_isin_to_fund_table_path))
   stopifnot(file.exists(factset_iss_emissions_data_path))
-}
-
-if (!update_indices) {
-  stopifnot(file.exists(ishares_indices_bonds_data_path))
-  stopifnot(file.exists(ishares_indices_equity_data_path))
 }
 
 
@@ -250,36 +222,6 @@ if (update_factset) {
     saveRDS(factset_iss_emissions_data_path)
 }
 
-if (update_indices) {
-  log_info("Fetching bonds indices... ")
-  dplyr::bind_rows(
-    lapply(
-      seq_along(bonds_indices_urls), function(index) {
-        pacta.data.scraping::get_ishares_index_data(
-          bonds_indices_urls[[index]],
-          names(bonds_indices_urls)[[index]],
-          indices_timestamp
-        )
-      }
-    )
-  ) %>%
-    saveRDS(ishares_indices_bonds_data_path)
-
-  log_info("Fetching equity indices... ")
-  dplyr::bind_rows(
-    lapply(
-      seq_along(equity_indices_urls), function(index) {
-        pacta.data.scraping::get_ishares_index_data(
-          equity_indices_urls[[index]],
-          names(equity_indices_urls)[[index]],
-          indices_timestamp
-        )
-      }
-    )
-  ) %>%
-    saveRDS(ishares_indices_equity_data_path)
-}
-
 log_info("Pre-flight data prepared.")
 
 
@@ -364,21 +306,6 @@ readRDS(factset_entity_info_path) %>%
   saveRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
 
 log_info("Financial data prepared.")
-
-
-# indices output ---------------------------------------------------------------
-
-log_info("Processing bonds indices data... ")
-readRDS(ishares_indices_bonds_data_path) %>%
-  pacta.data.scraping::process_ishares_index_data() %>%
-  saveRDS(file.path(data_prep_outputs_path, "ishares_indices_bonds.rds"))
-
-log_info("Processing equity indices data... ")
-readRDS(ishares_indices_equity_data_path) %>%
-  pacta.data.scraping::process_ishares_index_data() %>%
-  saveRDS(file.path(data_prep_outputs_path, "ishares_indices_equity.rds"))
-
-log_info("Indices data prepared.")
 
 
 # ABCD data output -------------------------------------------------------------
@@ -810,9 +737,7 @@ parameters <-
       factset_financial_data_path = factset_financial_data_path,
       factset_entity_info_path = factset_entity_info_path,
       factset_fund_data_path = factset_fund_data_path,
-      factset_isin_to_fund_table_path = factset_isin_to_fund_table_path,
-      ishares_indices_bonds_data_path = ishares_indices_bonds_data_path,
-      ishares_indices_equity_data_path = ishares_indices_equity_data_path
+      factset_isin_to_fund_table_path = factset_isin_to_fund_table_path
     ),
     factset_database = list(
       dbname = dbname,
@@ -823,8 +748,7 @@ parameters <-
     timestamps = list(
       imf_quarter_timestamp = imf_quarter_timestamp,
       factset_data_timestamp = factset_data_timestamp,
-      pacta_financial_timestamp = pacta_financial_timestamp,
-      indices_timestamp = indices_timestamp
+      pacta_financial_timestamp = pacta_financial_timestamp
     ),
     scenarios = list(
       scenario_sources_list = scenario_sources_list,
@@ -846,10 +770,6 @@ parameters <-
       zero_emission_factor_techs = zero_emission_factor_techs,
       green_techs = green_techs,
       tech_exclude = tech_exclude
-    ),
-    indices = list(
-      bonds_indices_urls = bonds_indices_urls,
-      equity_indices_urls = equity_indices_urls
     ),
     update_factset = update_factset,
     package_news = package_news
