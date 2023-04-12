@@ -709,6 +709,19 @@ ent_entity_affiliates_last_update <-
   pull(ent_entity_affiliates_last_update) %>%
   unique()
 
+# include PACTA packages NEWS.md test in the parameters to export
+pacta_packages <- c("pacta.data.preparation", "pacta.scenario.preparation")
+package_news <-
+  vapply(
+    X = pacta_packages,
+    FUN = function(pkg) {
+      pkg_news_file <- system.file("NEWS.md", package = pkg)
+      list(paste0(readLines(pkg_news_file), collapse = "\n"))
+    },
+    FUN.VALUE = list(1),
+    USE.NAMES = TRUE
+  )
+
 parameters <-
   list(
     input_filepaths = list(
@@ -757,7 +770,8 @@ parameters <-
       green_techs = green_techs,
       tech_exclude = tech_exclude
     ),
-    update_factset = update_factset
+    update_factset = update_factset,
+    package_news = package_news
   )
 
 pacta.data.preparation::write_manifest(
