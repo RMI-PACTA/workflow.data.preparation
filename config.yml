@@ -8,13 +8,12 @@ default:
   host: "data-eval-db.postgres.database.azure.com"
   update_factset: TRUE
   update_currencies: TRUE
-  update_indices: TRUE
   imf_quarter_timestamp: "2021-Q4"
   factset_data_timestamp: "2021-12-31"
   pacta_financial_timestamp: "2021Q4"
-  indices_timestamp: "20211231"
   market_share_target_reference_year: 2021
   time_horizon: 5
+  tdm_delta_years: [5, 10]
   additional_year: [2030, 2040]
   scenario_sources_list: ["ETP2020", "GECO2021", "IPR2021", "ISF2021", "WEO2021"]
   sector_list: ["Automotive", "Power", "Fossil Fuels", "Oil&Gas", "Coal"]
@@ -35,7 +34,6 @@ default:
   imf_quarter_timestamp: "2021-Q4"
   factset_data_timestamp: "2021-12-31"
   pacta_financial_timestamp: "2021Q4"
-  indices_timestamp: "20211231"
   market_share_target_reference_year: 2021
   time_horizon: 5
   additional_year: [2030, 2040]
@@ -67,7 +65,6 @@ default:
   imf_quarter_timestamp: "2022-Q2"
   factset_data_timestamp: "2022-06-30"
   pacta_financial_timestamp: "2022Q2"
-  indices_timestamp: "20220630"
   market_share_target_reference_year: 2022
   time_horizon: 5
   additional_year: [2030, 2040]
