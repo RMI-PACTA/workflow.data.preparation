@@ -290,7 +290,8 @@ scenario_regions <- readr::read_csv(scenario_regions_path, na = "", show_col_typ
 
 index_regions <- pacta.data.scraping::get_index_regions()
 
-factset_issue_code_bridge <- factset_issue_code_bridge %>%
+factset_issue_code_bridge <- 
+  pacta.data.preparation::factset_issue_code_bridge %>%
   select(issue_type_code, asset_type) %>%
   mutate(
     asset_type = case_when(
