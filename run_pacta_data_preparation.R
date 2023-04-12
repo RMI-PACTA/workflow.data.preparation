@@ -140,10 +140,10 @@ interpolation_groups <- c(
 )
 
 scenario_raw_data %>%
-  interpolate_yearly(!!!rlang::syms(interpolation_groups)) %>%
+  pacta.scenario.preparation::interpolate_yearly(!!!rlang::syms(interpolation_groups)) %>%
   filter(.data$year >= .env$market_share_target_reference_year) %>%
-  add_market_share_columns(reference_year = market_share_target_reference_year) %>%
-  format_p4i(green_techs) %>%
+  pacta.scenario.preparation::add_market_share_columns(reference_year = market_share_target_reference_year) %>%
+  pacta.scenario.preparation::format_p4i(green_techs) %>%
   write_csv(scenarios_analysis_input_path, na = "")
 
 pacta.scenario.preparation::scenario_regions %>%
@@ -161,7 +161,7 @@ if (update_currencies) {
 
 if (update_factset) {
   log_info("Fetching financial data... ")
-  pacta.data.preparation:::get_factset_financial_data(
+  pacta.data.preparation::get_factset_financial_data(
     data_timestamp = factset_data_timestamp,
     dbname = dbname,
     host = host,
@@ -171,7 +171,7 @@ if (update_factset) {
     saveRDS(factset_financial_data_path)
 
   log_info("Fetching entity info data... ")
-  pacta.data.preparation:::get_factset_entity_info(
+  pacta.data.preparation::get_factset_entity_info(
     dbname = dbname,
     host = host,
     username = username,
@@ -180,7 +180,7 @@ if (update_factset) {
     saveRDS(factset_entity_info_path)
 
   log_info("Fetching entity financing data... ")
-  pacta.data.preparation:::get_factset_entity_financing_data(
+  pacta.data.preparation::get_factset_entity_financing_data(
     data_timestamp = factset_data_timestamp,
     dbname = dbname,
     host = host,
@@ -190,7 +190,7 @@ if (update_factset) {
     saveRDS(factset_entity_financing_data_path)
 
   log_info("Fetching fund data... ")
-  pacta.data.preparation:::get_factset_fund_data(
+  pacta.data.preparation::get_factset_fund_data(
     data_timestamp = factset_data_timestamp,
     dbname = dbname,
     host = host,
@@ -200,7 +200,7 @@ if (update_factset) {
     saveRDS(factset_fund_data_path)
 
   log_info("Fetching fund ISINs... ")
-  pacta.data.preparation:::get_factset_isin_to_fund_table(
+  pacta.data.preparation::get_factset_isin_to_fund_table(
     dbname = dbname,
     host = host,
     username = username,
@@ -209,7 +209,7 @@ if (update_factset) {
     saveRDS(factset_isin_to_fund_table_path)
 
   log_info("Fetching ISS emissions data... ")
-  pacta.data.preparation:::get_factset_iss_emissions_data(
+  pacta.data.preparation::get_factset_iss_emissions_data(
     # IMPORTANT: `year` is 2019 on purpose as per a decision point from analysts.
     # See Issue #117 for more information.
     year = 2019,
@@ -232,7 +232,8 @@ scenario_regions <- readr::read_csv(scenario_regions_path, na = "", show_col_typ
 
 index_regions <- pacta.data.scraping::get_index_regions()
 
-factset_issue_code_bridge <- pacta.data.preparation::factset_issue_code_bridge %>%
+factset_issue_code_bridge <- 
+  pacta.data.preparation::factset_issue_code_bridge %>%
   select(issue_type_code, asset_type) %>%
   mutate(
     asset_type = case_when(
@@ -244,7 +245,8 @@ factset_issue_code_bridge <- pacta.data.preparation::factset_issue_code_bridge %
     )
   )
 
-factset_industry_map_bridge <- pacta.data.preparation::factset_industry_map_bridge %>%
+factset_industry_map_bridge <- 
+  pacta.data.preparation::factset_industry_map_bridge %>%
   select(factset_industry_code, pacta_sector)
 
 # scenarios_analysisinput_inputs
@@ -281,7 +283,7 @@ log_info("Preparing financial data... ")
 log_info("Formatting and saving financial_data.rds... ")
 
 readRDS(factset_financial_data_path) %>%
-  prepare_financial_data(factset_issue_code_bridge) %>%
+  pacta.data.preparation::prepare_financial_data(factset_issue_code_bridge) %>%
   saveRDS(file.path(data_prep_outputs_path, "financial_data.rds"))
 
 log_info("Formatting and saving entity_financing.rds... ")
@@ -299,7 +301,7 @@ factset_entity_id__ar_company_id <-
   )
 
 readRDS(factset_entity_info_path) %>%
-  prepare_entity_info(factset_entity_id__ar_company_id) %>%
+  pacta.data.preparation::prepare_entity_info(factset_entity_id__ar_company_id) %>%
   saveRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
 
 log_info("Financial data prepared.")
@@ -329,7 +331,7 @@ rm(entity_info)
 log_info("Formatting and saving masterdata_ownership_datastore.rds... ")
 
 readr::read_csv(masterdata_ownership_path, na = "", show_col_types = FALSE) %>%
-  prepare_masterdata(
+  pacta.data.preparation::prepare_masterdata(
     ar_company_id__country_of_domicile,
     pacta_financial_timestamp,
     zero_emission_factor_techs
@@ -348,7 +350,7 @@ company_id__creditor_company_id <-
   mutate(across(.cols = dplyr::everything(), .fns = as.character))
 
 masterdata_debt %>%
-  prepare_masterdata(
+  pacta.data.preparation::prepare_masterdata(
     ar_company_id__country_of_domicile,
     pacta_financial_timestamp,
     zero_emission_factor_techs
@@ -631,7 +633,7 @@ for (scenario_source in unique(scenarios_long$scenario_source)) {
   filename <- paste0("equity_abcd_scenario_", scenario_source, ".rds")
   scenarios_long_source <- filter(scenarios_long, .data$scenario_source == .env$scenario_source)
   log_info(paste0("Formatting and saving ", filename, "... "))
-  pacta.data.preparation:::dataprep_abcd_scen_connection(
+  pacta.data.preparation::dataprep_abcd_scen_connection(
     abcd_data = masterdata_ownership_datastore,
     scenario_data = scenarios_long_source,
     reference_year = market_share_target_reference_year,
@@ -667,7 +669,7 @@ for (scenario_source in unique(scenarios_long$scenario_source)) {
   filename <- paste0("bonds_abcd_scenario_", scenario_source, ".rds")
   scenarios_long_source <- filter(scenarios_long, .data$scenario_source == .env$scenario_source)
   log_info(paste0("Formatting and saving ", filename, "... "))
-  pacta.data.preparation:::dataprep_abcd_scen_connection(
+  pacta.data.preparation::dataprep_abcd_scen_connection(
     abcd_data = masterdata_debt_datastore,
     scenario_data = scenarios_long_source,
     reference_year = market_share_target_reference_year,
@@ -758,7 +760,7 @@ parameters <-
     update_factset = update_factset
   )
 
-pacta.data.preparation:::write_manifest(
+pacta.data.preparation::write_manifest(
   path = file.path(data_prep_outputs_path, "manifest.json"),
   parameters = parameters,
   data_prep_inputs_path = data_prep_inputs_path,
