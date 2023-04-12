@@ -8,6 +8,7 @@ default:
   host: "data-eval-db.postgres.database.azure.com"
   update_factset: TRUE
   update_currencies: TRUE
+  export_sqlite_files: FALSE
   imf_quarter_timestamp: "2021-Q4"
   factset_data_timestamp: "2021-12-31"
   pacta_financial_timestamp: "2021Q4"
@@ -56,6 +57,10 @@ default:
 
 2021Q4_prod_vm:
   inherits: 2021Q4
+
+2021Q4_sqlite:
+  inherits: 2021Q4
+  export_sqlite_files: TRUE
 
 
 2022Q2:
