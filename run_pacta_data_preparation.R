@@ -47,7 +47,6 @@ factset_data_timestamp <- config$factset_data_timestamp
 pacta_financial_timestamp <- config$pacta_financial_timestamp
 market_share_target_reference_year <- config$market_share_target_reference_year
 time_horizon <- config$time_horizon
-additional_year <- config$additional_year
 scenario_sources_list <- config$scenario_sources_list
 sector_list <- config$sector_list
 other_sector_list <- config$other_sector_list
@@ -89,8 +88,7 @@ relevant_years <- sort(
   unique(
     c(
       market_share_target_reference_year:(market_share_target_reference_year + time_horizon),
-      market_share_target_reference_year + tdm_delta_years,
-      additional_year
+      market_share_target_reference_year + tdm_delta_years
     )
   )
 )
@@ -855,7 +853,6 @@ parameters <-
     years = list(
       market_share_target_reference_year = market_share_target_reference_year,
       time_horizon = time_horizon,
-      additional_year = additional_year,
       relevant_years = relevant_years
     ),
     technologies = list(
