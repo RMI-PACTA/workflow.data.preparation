@@ -47,6 +47,7 @@ factset_data_timestamp <- config$factset_data_timestamp
 pacta_financial_timestamp <- config$pacta_financial_timestamp
 market_share_target_reference_year <- config$market_share_target_reference_year
 time_horizon <- config$time_horizon
+tdm_delta_years <- config$tdm_delta_years
 scenario_sources_list <- config$scenario_sources_list
 sector_list <- config$sector_list
 other_sector_list <- config$other_sector_list
