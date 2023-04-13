@@ -8,10 +8,9 @@ WORKDIR /workflow.data.preparation
 
 RUN Rscript -e '\
   readRenviron(".env"); \
-  private_pkgs <- c("RMI-PACTA/pacta.scenario.preparation", "RMI-PACTA/pacta.data.preparation"); \
-  script_dep_pkgs <- setdiff(renv::dependencies()$Package, basename(private_pkgs)); \
-  pak::pkg_install("tidyverse/dbplyr"); \
-  pak::pkg_install(pkg = c(private_pkgs, script_dep_pkgs)); \
+  non_cran_pkg_deps <- c("RMI-PACTA/pacta.scenario.preparation", "RMI-PACTA/pacta.data.preparation", "RMI-PACTA/pacta.data.scraping", "tidyverse/dbplyr"); \
+  cran_pkg_deps <- setdiff(renv::dependencies()$Package, basename(non_cran_pkg_deps)); \
+  pak::pkg_install(pkg = c(non_cran_pkg_deps, cran_pkg_deps)); \
   '
 
 CMD Rscript run_pacta_data_preparation.R
