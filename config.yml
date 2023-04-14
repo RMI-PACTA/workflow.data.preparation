@@ -80,3 +80,12 @@ default:
   scenario_geographies_list: ["Global", "NonOECD", "OECD"]
   global_aggregate_scenario_sources_list: ["ETP2020", "GECO2021", "IPR2021", "ISF2021", "WEO2021"]
   global_aggregate_sector_list: ["Power"]
+
+2022Q4:
+  masterdata_ownership_filename: "2023-02-15_AI_RMI Bespoke_Company Data Products_masterdata_ownership_2022Q4.csv"
+  masterdata_debt_filename: "2023-02-15_AI_RMI Bespoke_Company Data Products_masterdata_debt_2022Q4.csv"
+  ar_company_id__factset_entity_id_filename: "2023-02-15_AI_RMI_Bespoke_Company_Data_Products_Company_ID_List_2022Q4.csv"
+  imf_quarter_timestamp: "2022-Q4"
+  factset_data_timestamp: "2022-12-31"
+  pacta_financial_timestamp: "2022Q4"
+  market_share_target_reference_year: 2022
