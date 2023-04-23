@@ -35,7 +35,6 @@ default:
   factset_data_timestamp: "2021-12-31"
   pacta_financial_timestamp: "2021Q4"
   market_share_target_reference_year: 2021
-  time_horizon: 5
   scenario_sources_list: ["ETP2020", "GECO2021", "IPR2021", "ISF2021", "WEO2021"]
   sector_list: ["Automotive", "Power", "Fossil Fuels", "Oil&Gas", "Coal"]
   other_sector_list: ["Steel", "Aviation", "Cement"]
@@ -69,7 +68,6 @@ default:
   factset_data_timestamp: "2022-06-30"
   pacta_financial_timestamp: "2022Q2"
   market_share_target_reference_year: 2022
-  time_horizon: 5
   scenario_sources_list: ["ETP2020", "GECO2021", "IPR2021", "ISF2021", "WEO2021"]
   sector_list: ["Automotive", "Power", "Fossil Fuels", "Oil&Gas", "Coal"]
   other_sector_list: ["Steel", "Aviation", "Cement"]
