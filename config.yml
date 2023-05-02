@@ -14,7 +14,7 @@ default:
   pacta_financial_timestamp: "2021Q4"
   market_share_target_reference_year: 2021
   time_horizon: 5
-  tdm_delta_years: [5, 10]
+  tdm_delta_years: [5, 9]
   scenario_sources_list: ["ETP2020", "GECO2021", "IPR2021", "ISF2021", "WEO2021"]
   sector_list: ["Automotive", "Power", "Fossil Fuels", "Oil&Gas", "Coal"]
   other_sector_list: ["Steel", "Aviation", "Cement"]
