@@ -259,6 +259,15 @@ scenario_raw <- readr::read_csv(scenarios_analysis_input_path, show_col_types = 
 
 # filter for relevant scenario data
 scenarios_long <- scenario_raw %>%
+  inner_join(
+    pacta.scenario.preparation::scenario_source_pacta_geography_bridge,
+    by = c(
+      .data$scenario_source = "source",
+      .data$scenario_geography = "scenario_geography_source"
+      )
+    ) %>%
+  select(-.data$scenario_geography) %>%
+  rename(scenario_geography = "scenario_geography_pacta") %>%
   filter(
     .data$scenario_source %in% .env$scenario_sources_list,
     .data$ald_sector %in% c(.env$sector_list, .env$other_sector_list),
