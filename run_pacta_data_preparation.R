@@ -262,11 +262,11 @@ scenarios_long <- scenario_raw %>%
   inner_join(
     pacta.scenario.preparation::scenario_source_pacta_geography_bridge,
     by = c(
-      scenario_source = "source",
-      scenario_geography = "scenario_geography_source"
+      .data$scenario_source = "source",
+      .data$scenario_geography = "scenario_geography_source"
       )
     ) %>%
-  select(-scenario_geography) %>%
+  select(-.data$scenario_geography) %>%
   rename(scenario_geography = "scenario_geography_pacta") %>%
   filter(
     .data$scenario_source %in% .env$scenario_sources_list,
