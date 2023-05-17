@@ -266,7 +266,7 @@ scenarios_long <- scenario_raw %>%
       scenario_geography = "scenario_geography_source"
       )
     ) %>%
-  select("scenario_geography") %>%
+  select(-"scenario_geography") %>%
   rename(scenario_geography = "scenario_geography_pacta") %>%
   filter(
     .data$scenario_source %in% .env$scenario_sources_list,
