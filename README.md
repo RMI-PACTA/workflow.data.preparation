@@ -1,4 +1,6 @@
-requires a file `.env` to exist in the root directory, that looks like...
+# workflow.data.preparation
+
+Running the workflow requires a file `.env` to exist in the root directory, that looks like...
 ``` sh
 HOST_INPUTS_PATH=/users/pacta/inputs
 HOST_OUTPUTS_PATH=/users/pacta/outputs
