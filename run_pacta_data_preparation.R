@@ -259,6 +259,15 @@ scenario_raw <- readr::read_csv(scenarios_analysis_input_path, show_col_types = 
 
 # filter for relevant scenario data
 scenarios_long <- scenario_raw %>%
+  inner_join(
+    pacta.scenario.preparation::scenario_source_pacta_geography_bridge,
+    by = c(
+      scenario_source = "source",
+      scenario_geography = "scenario_geography_source"
+      )
+    ) %>%
+  select(-"scenario_geography") %>%
+  rename(scenario_geography = "scenario_geography_pacta") %>%
   filter(
     .data$scenario_source %in% .env$scenario_sources_list,
     .data$ald_sector %in% c(.env$sector_list, .env$other_sector_list),
@@ -879,17 +888,13 @@ pacta.data.preparation::write_manifest(
 
 log_info("Copying NEW.md files from relevant PACTA packages... ")
 
-pkg_name <- "pacta.data.preparation"
-file.copy(
-  system.file("NEWS.md", package = pkg_name),
-  to = file.path(data_prep_outputs_path, paste0(pkg_name, "-NEWS.md"))
-)
-
-pkg_name <- "pacta.scenario.preparation"
-file.copy(
-  system.file("NEWS.md", package = pkg_name),
-  to = file.path(data_prep_outputs_path, paste0(pkg_name, "-NEWS.md"))
-)
+# `pacta_packages` defined above to add NEWS text to manifest
+for (pkg_name in pacta_packages) {
+  file.copy(
+    system.file("NEWS.md", package = pkg_name),
+    to = file.path(data_prep_outputs_path, paste0(pkg_name, "-NEWS.md"))
+  )
+}
 
 
 # ------------------------------------------------------------------------------
