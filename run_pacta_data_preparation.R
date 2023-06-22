@@ -152,6 +152,7 @@ scenario_raw_data %>%
 pacta.scenario.preparation::scenario_regions %>%
   write_csv(scenario_regions_path, na = "")
 
+# web scraping -----------------------------------------------------------------
 
 if (update_currencies) {
   log_info("Fetching currency data... ")
@@ -161,6 +162,12 @@ if (update_currencies) {
     saveRDS(currencies_data_path)
 }
 
+log_info("Scraping index regions... ")
+
+index_regions <- pacta.data.scraping::get_index_regions()
+
+
+# pull factset data ------------------------------------------------------------
 
 if (update_factset) {
   log_info("Fetching financial data... ")
@@ -232,10 +239,6 @@ log_info("Pre-flight data prepared.")
 log_info("Preparing scenario data... ")
 
 scenario_regions <- readr::read_csv(scenario_regions_path, na = "", show_col_types = FALSE)
-
-log_info("Scraping index regions... ")
-
-index_regions <- pacta.data.scraping::get_index_regions()
 
 factset_issue_code_bridge <-
   pacta.data.preparation::factset_issue_code_bridge %>%
