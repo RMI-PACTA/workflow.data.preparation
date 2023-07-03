@@ -28,8 +28,8 @@ default:
 
 
 2021Q4:
-  masterdata_ownership_filename: "2023-06-05_AI_RMI Bespoke_Company Data Products_masterdata_ownership_2021Q4.csv"
-  masterdata_debt_filename: "2023-06-05_AI_RMI Bespoke_Company Data Products_masterdata_debt_2021Q4.csv"
+  masterdata_ownership_filename: "2023-06-05_AI_RMI Bespoke_Company Data Products_masterdata_ownership_2021q4.csv"
+  masterdata_debt_filename: "2023-06-05_AI_RMI Bespoke_Company Data Products_masterdata_debt_2021q4.csv"
   ar_company_id__factset_entity_id_filename: "2022-08-17_rmi_ar_fs_id_bridge_2021q4.csv"
   imf_quarter_timestamp: "2021-Q4"
   factset_data_timestamp: "2021-12-31"
