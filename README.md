@@ -2,12 +2,12 @@
 
 Running the workflow requires a file `.env` to exist in the root directory, that looks like...
 ``` sh
-HOST_INPUTS_PATH=/users/pacta/inputs
-HOST_OUTPUTS_PATH=/users/pacta/outputs
+HOST_INPUTS_PATH=/PATH/TO/AR_YYYYQQ
+HOST_OUTPUTS_PATH=/PATH/TO/YYYYQQ_pacta_analysis_inputs_YYYY-MM-DD/YYYYQQ
 GITHUB_PAT=ghp_XXXXxxXxXXXxXxxX
 R_DATABASE_USER=xxxx@xxxxx
 R_DATABASE_PASSWORD=xxxXxxXxxxxxxXXxxxxXXXXxx
-R_CONFIG_ACTIVE=2021Q4
+R_CONFIG_ACTIVE=YYYYQQ
 ```
 
 - `HOST_INPUTS_PATH` the local path to where the input files live. This directory will be mounted into the Docker image and it will read and write some files to this directory, so appropriate permissions in this directory will be required. The pacta.data.preparation process requires 3 input files that must exist in this directory and they must have filenames that match those specified in the [config.yml](config.yml) for the specified config:
