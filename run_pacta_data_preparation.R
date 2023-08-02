@@ -374,8 +374,8 @@ masterdata_debt %>%
   ) %>%
   left_join(company_id__creditor_company_id, by = c(id = "company_id")) %>%
   left_join(ar_company_id__credit_parent_ar_company_id, by = c(id = "ar_company_id")) %>%
-  mutate(id = if_else(!is.na(.data$creditor_company_id), .data$creditor_company_id, .data$id)) %>%
   mutate(id = if_else(!is.na(.data$credit_parent_ar_company_id), .data$credit_parent_ar_company_id, .data$id)) %>%
+  mutate(id = if_else(!is.na(.data$creditor_company_id), .data$creditor_company_id, .data$id)) %>%
   mutate(id_name = "credit_parent_ar_company_id") %>%
   group_by(
     .data$id, .data$id_name, .data$ald_sector, .data$ald_location,
