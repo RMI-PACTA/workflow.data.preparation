@@ -19,7 +19,6 @@ github_dependencies <- c(
 
 # get github_pat from docker build secrets
 github_pat <- readLines("/run/secrets/github_pat")
-message("github_pat: ", github_pat)
 if (!nzchar(github_pat)) {
   stop("github_pat secret is empty. Is it being passed in build secrets?")
 }
