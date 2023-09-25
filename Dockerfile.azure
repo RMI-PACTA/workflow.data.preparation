@@ -28,11 +28,12 @@ RUN curl -fsSL -o /tmp/google-chrome.deb https://dl.google.com/linux/direct/goog
       && rm /tmp/google-chrome.deb \
       && rm -rf /var/lib/apt/lists/*
 
+WORKDIR /workflow.data.preparation
+
 RUN Rscript -e 'install.packages(c("pak", "renv"))'
 
-COPY . /workflow.data.preparation
+COPY ./run_pacta_data_preparation.R run_pacta_data_preparation.R
 
-WORKDIR /workflow.data.preparation
 
 RUN Rscript -e '\
   readRenviron(".env"); \
