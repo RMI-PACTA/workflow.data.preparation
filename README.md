@@ -32,12 +32,16 @@ Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
 Please note that this Dockerfile is intended to be built using [buildkit](https://docs.docker.com/build/buildkit/), since it relies on passing secrets.
 
 To build this image, create a file containing the _value_ of the GitHub PAT (with access to necessary repos), and build using buildkit.
-(note `docker buildx build` is equivilent to `DOCKER_BUILDKIT=1 docker build`)
+
+Up-to-date installations of docker on MacOS and Windows likely already have buildkit enabled.
+It is possible to check your docker configuration, and check for `buildkit: true`.
+If it is not enabled on your system, then you can either `export DOCKER_BUILDKIT=1 docker build`, or replace the `docker build` commands below with `docker buildx build` (either works).
 
 If your installed docker engine (found by running `docker version`) is > 20.10.0, then the secret can read from your local `GITHUB_PAT` envvar (must be `export`ed).
 
 ```sh
-docker buildx build \
+# must be built with buildkit
+docker build \
   --secret id=github_pat,env=GITHUB_PAT \
   --progress=plain \
   --tag workflow.data.preparation_aci \
@@ -50,7 +54,8 @@ For older docker versions that support buildkit, you can write the _value_ of th
 # Note that path to secretfile must be an absolute path 
 # or use $(pwd) if in working dir
 
-docker buildx build \
+# must be built with buildkit
+docker build \
   --secret id=github_pat,src=/path/to/secretfile \
   --tag workflow.data.preparation_aci \
   -f Dockerfile.azure . 
