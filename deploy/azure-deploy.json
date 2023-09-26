@@ -1,0 +1,184 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "0.0.4",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources."
+      }
+    },
+    "identity": {
+      "type": "string",
+      "metadata": {
+        "description": "The ID of the user assigned identity to use for the container group."
+      }
+    },
+    "serviceprincipal": {
+      "type": "string",
+      "metadata": {
+        "description": "The ID of the service principal to use for the container group."
+      }
+    },
+    "containerGroupName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the container group."
+      }
+    },
+    "restartPolicy": {
+      "type": "string",
+      "defaultValue": "OnFailure",
+      "allowedValues": [
+        "Always",
+        "Never",
+        "OnFailure"
+      ],
+      "metadata": {
+        "description": "The behavior of Azure runtime if container has stopped."
+      }
+    },
+    "rawdata-storageaccountkey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The storage account key for the rawdata storage account."
+      }
+    },
+    "dataprepinputs-storageaccountkey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The storage account key for the rawdata storage account."
+      }
+    },
+    "dataprepoutputs-storageaccountkey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The storage account key for the rawdata storage account."
+      }
+    },
+    "factset-database-user": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The storage account key for the rawdata storage account."
+      }
+    },
+    "factset-database-password": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The storage account key for the rawdata storage account."
+      }
+    },
+    "starttime": {
+      "type": "string",
+      "defaultValue": "[utcNow()]",
+      "metadata": {
+        "description": "The time to start the container group."
+      }
+    }
+  },
+  "variables": {
+    "azurecontainerregistry": "transitionmonitordockerregistry.azurecr.io"
+  },
+  "functions": [],
+  "resources": [
+    {
+      "type": "Microsoft.ContainerInstance/containerGroups",
+      "apiVersion": "2021-09-01",
+      "name": "[parameters('containerGroupName')]",
+      "location": "[parameters('location')]",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[parameters('identity')]": {}
+        }
+      },
+      "properties": {
+        "containers": [
+          {
+            "name": "data-prep",
+            "properties": {
+              "image": "[concat(variables('azurecontainerregistry'),'/workflow.data.preparation_aci:latest')]",
+              "ports": [],
+              "resources": {
+                "requests": {
+                  "cpu": 1,
+                  "memoryInGB": 1
+                }
+              },
+              "environmentVariables": [
+                {
+                  "name": "R_DATABASE_USER",
+                  "secureValue": "factset-database-user"
+                },
+                {
+                  "name": "R_DATABASE_PASSWORD",
+                  "secureValue": "factset-database-password"
+                },
+                {
+                  "name": "DEPLOY_START_TIME",
+                  "value": "[parameters('starttime')]"
+                }
+              ],
+              "volumeMounts": [
+                {
+                  "name": "rawdatavolume",
+                  "mountPath": "/mnt/rawdata/"
+                },
+                {
+                  "name": "inputsvolume",
+                  "mountPath": "/mnt/inputs/"
+                },
+                {
+                  "name": "outputsvolume",
+                  "mountPath": "/mnt/outputs/"
+                }
+              ],
+              "command": [
+                "tail", "-f", "/dev/null"
+              ]
+            }
+          }
+        ],
+        "imageRegistryCredentials": [
+          {
+            "server": "[variables('azurecontainerregistry')]",
+            "identity": "[parameters('identity')]"
+          }
+        ],
+        "restartPolicy": "[parameters('restartPolicy')]",
+        "osType": "Linux",
+        "volumes": [
+          {
+            "name": "rawdatavolume",
+            "azureFile": {
+              "shareName": "rawdata",
+              "readOnly": true,
+              "storageAccountName": "pactarawdata",
+              "storageAccountKey": "[parameters('rawdata-storageaccountkey')]"
+            }
+          },
+          {
+            "name": "inputsvolume",
+            "azureFile": {
+              "shareName": "data-prep-inputs",
+              "readOnly": false,
+              "storageAccountName": "pactadata",
+              "storageAccountKey": "[parameters('dataprepinputs-storageaccountkey')]"
+            }
+          },
+          {
+            "name": "outputsvolume",
+            "azureFile": {
+              "shareName": "data-prep-outputs",
+              "readOnly": false,
+              "storageAccountName": "pactadata",
+              "storageAccountKey": "[parameters('dataprepoutputs-storageaccountkey')]"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {}
+}

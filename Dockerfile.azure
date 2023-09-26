@@ -37,4 +37,4 @@ RUN --mount=type=secret,id=github_pat \
 
 COPY ./run_pacta_data_preparation.R run_pacta_data_preparation.R
 
-CMD Rscript run_pacta_data_preparation.R
+CMD ["Rscript", "run_pacta_data_preparation.R"]

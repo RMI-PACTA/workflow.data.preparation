@@ -1,0 +1,52 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "identity": {
+      "value": "/subscriptions/<SUBSCRIPTION ID>/resourcegroups/<RESOURCE GROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/<IDENTITY NAME>"
+    },
+    "serviceprincipal": {
+      "value": "<SERVICE PRINCIPAL ID>"
+    },
+    "rawdata-storageaccountkey": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/<SUBSCRIPTION ID>/resourceGroups/<RESOURCE GROUP>/providers/Microsoft.KeyVault/vaults/<VAULT NAME>"
+        },
+        "secretName": "rawdata-storageaccountkey"
+      }
+    },
+    "dataprepinputs-storageaccountkey": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/<SUBSCRIPTION ID>/resourceGroups/<RESOURCE GROUP>/providers/Microsoft.KeyVault/vaults/<VAULT NAME>"
+        },
+        "secretName": "dataprepinputs-storageaccountkey"
+      }
+    },
+    "dataprepoutputs-storageaccountkey": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/<SUBSCRIPTION ID>/resourceGroups/<RESOURCE GROUP>/providers/Microsoft.KeyVault/vaults/<VAULT NAME>"
+        },
+        "secretName": "dataprepoutputs-storageaccountkey"
+      }
+    },
+    "factset-database-user": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/<SUBSCRIPTION ID>/resourceGroups/<RESOURCE GROUP>/providers/Microsoft.KeyVault/vaults/<VAULT NAME>"
+        },
+        "secretName": "factset-database-user"
+      }
+    },
+    "factset-database-password": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/<SUBSCRIPTION ID>/resourceGroups/<RESOURCE GROUP>/providers/Microsoft.KeyVault/vaults/<VAULT NAME>"
+        },
+        "secretName": "factset-database-password"
+      }
+    }
+  }
+}

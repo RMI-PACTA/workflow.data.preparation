@@ -60,3 +60,42 @@ docker build \
   --tag workflow.data.preparation_aci \
   -f Dockerfile.azure . 
 ```
+
+The image then needs to be pushed to a registry, for use with `azure-deploy.json`
+
+### Deploy process
+
+#### Prerequisites
+
+[Containers ARM Schema](https://learn.microsoft.com/en-us/azure/templates/microsoft.containerinstance/containergroups?pivots=deployment-language-arm-template#resource-format)
+
+[secrets](https://learn.microsoft.com/en-us/azure/container-apps/manage-secrets?tabs=azure-portal)
+
+- Azure Key Vault: the deploy process reads secrets from an Azure Key vault. The essential values refenced in the ARM template are:
+  - Storage Account Key for raw data storage (`rawdata-storageAccountKey`)
+  - Storage Account Key for "input" data storage (`dataprepinputs-storageAccountKey`)
+  - Storage Account Key for "output" data storage (`dataprepoutputs-storageAccountKey`)
+  - Username for FactSet database (`factset-database-user`)
+  - Password for FactSet database (`factset-database-password`)
+Note that the Storage account keys are passed as parameters via `azure-deploy.parameters.json`, while the database credentials are used by the application itself, are are __freely readable__ if accessing the container (via `exec`, for example).
+
+To get the storage keys:
+
+```sh
+# replace these values with storage account name and resource group appropriate to your deployment
+ACI_PERS_STORAGE_ACCOUNT_NAME="pactadata"
+ACI_PERS_RESOURCE_GROUP="pacta-data"
+
+STORAGE_KEY=$(az storage account keys list --resource-group "$ACI_PERS_RESOURCE_GROUP" --account-name "$ACI_PERS_STORAGE_ACCOUNT_NAME" --query "[0].value" --output tsv)
+echo "$STORAGE_KEY"
+```
+
+#### Deploy
+
+```sh
+# change this value as needed.
+RESOURCEGROUP="myResourceGroup"
+
+az deployment group create --resource-group "$RESOURCEGROUP" --template-file azure-deploy.json --parameters @azure-deploy.parameters.json
+
+```
