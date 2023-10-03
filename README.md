@@ -40,12 +40,14 @@ If it is not enabled on your system, then you can either `export DOCKER_BUILDKIT
 If your installed docker engine (found by running `docker version`) is > 20.10.0, then the secret can read from your local `GITHUB_PAT` envvar (must be `export`ed).
 
 ```sh
+
 # must be built with buildkit
 docker build \
   --secret id=github_pat,env=GITHUB_PAT \
   --progress=plain \
   --tag workflow.data.preparation_aci \
   -f Dockerfile.azure . 
+
 ```
 
 For older docker versions that support buildkit, you can write the _value_ of the token to a file, and specifiy the absolute path to that file instead.
@@ -56,9 +58,10 @@ For older docker versions that support buildkit, you can write the _value_ of th
 
 # must be built with buildkit
 docker build \
-  --secret id=github_pat,src=/path/to/secretfile \
+  --secret id=github_pat,src=$(pwd)/secretfile \
   --tag workflow.data.preparation_aci \
   -f Dockerfile.azure . 
+
 ```
 
 The image then needs to be pushed to a registry, for use with `azure-deploy.json`
@@ -98,4 +101,22 @@ RESOURCEGROUP="myResourceGroup"
 
 az deployment group create --resource-group "$RESOURCEGROUP" --template-file azure-deploy.json --parameters @azure-deploy.parameters.json
 
+```
+
+### Helpful tips
+
+To attach to the container and execute commands interactively (for debugging)
+
+```sh
+
+az container exec --resource-group "$RESOURCEGROUP" --name "<Deployment Group Name>" --container-name "data-prep" --exec-command "/bin/bash"
+
+```
+
+To start a long-running process (to allow for attaching and debugging), add this to `properties` for the container:
+
+```json
+  "command": [
+    "tail", "-f", "/dev/null"
+  ]
 ```

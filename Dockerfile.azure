@@ -36,5 +36,7 @@ RUN --mount=type=secret,id=github_pat \
   Rscript install_dependencies.R
 
 COPY ./run_pacta_data_preparation.R run_pacta_data_preparation.R
+COPY ./config.yml config.yml
+COPY ./copy_raw_data.R copy_raw_data.R
 
 CMD ["Rscript", "run_pacta_data_preparation.R"]

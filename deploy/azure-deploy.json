@@ -109,16 +109,30 @@
               "environmentVariables": [
                 {
                   "name": "R_DATABASE_USER",
-                  "secureValue": "factset-database-user"
+                  "secureValue": "[parameters('factset-database-user')]"
                 },
                 {
                   "name": "R_DATABASE_PASSWORD",
-                  "secureValue": "factset-database-password"
+                  "secureValue": "[parameters('factset-database-password')]"
                 },
                 {
                   "name": "DEPLOY_START_TIME",
                   "value": "[parameters('starttime')]"
-                }
+                },
+                {
+                  "name": "R_CONFIG_ACTIVE",
+                  "value": "2022Q4_CICD"
+                },
+                {
+                  "name": "R_CONFIG_FILE",
+                  "value": "/workflow.data.preparation/config.yml"
+                },
+                {
+                  "name": "LOG_LEVEL",
+                  "value": "INFO"
+                  "metadata": {
+                    "description": "The log level for the container. See {rlog} docs."
+                  }
               ],
               "volumeMounts": [
                 {
