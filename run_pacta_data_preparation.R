@@ -21,11 +21,21 @@ suppressPackageStartupMessages({
 
 # config -----------------------------------------------------------------------
 
-readRenviron(".env")
+# if any essential envvars are missing, read the .env file.
+# These should be set already as part of an ACI deployment.
+if (any(
+  !nzchar(c(
+    Sys.getenv("R_DATABASE_USER"),
+    Sys.getenv("R_DATABASE_PASSWORD"),
+    Sys.getenv("R_CONFIG_ACTIVE")
+  ))
+)) {
+  readRenviron(".env")
+}
 
 config <-
   config::get(
-    file = "config.yml",
+    file = Sys.getenv("R_CONFIG_FILE", "config.yml"),
     config = Sys.getenv("R_CONFIG_ACTIVE"),
     use_parent = FALSE
   )
@@ -167,7 +177,7 @@ log_info("Scraping index regions... ")
 index_regions <- pacta.data.scraping::get_index_regions()
 
 
-# pull factset data ------------------------------------------------------------
+ pull factset data ------------------------------------------------------------
 
 if (update_factset) {
   log_info("Fetching financial data... ")

@@ -30,13 +30,15 @@ RUN curl -fsSL -o /tmp/google-chrome.deb https://dl.google.com/linux/direct/goog
 
 WORKDIR /workflow.data.preparation
 
-COPY ./install_dependencies.R install_dependencies.R
+COPY ./ACI/install_dependencies.R install_dependencies.R
 
 RUN --mount=type=secret,id=github_pat \
   Rscript install_dependencies.R
 
 COPY ./run_pacta_data_preparation.R run_pacta_data_preparation.R
 COPY ./config.yml config.yml
-COPY ./copy_raw_data.R copy_raw_data.R
+COPY ./ACI/copy_raw_data.R copy_raw_data.R
 
-CMD ["Rscript", "run_pacta_data_preparation.R"]
+COPY ./ACI/copy_files_and_run_data_prep.sh /usr/local/bin/copy_files_and_run_data_prep
+
+CMD ["copy_files_and_run_data_prep"]

@@ -66,7 +66,7 @@ for (x in files_to_copy) {
   )
   if (!copy_success) {
     log_error(sprintf("Failed to copy %s to %s", x, destination))
-    stop("Please ensure the config points to extant files.")
+    stop("File copy error")
   }
 
   source_md5 <- digest::digest(

@@ -97,5 +97,5 @@ default:
 2022Q4_CICD:
   inherits: 2022Q4
   raw_data_path: !expr file.path("/mnt", "rawdata")
-  data_prep_inputs_path: !expr file.path("/mnt", "inputs", Sys.etenv( "DEPLOY_START_TIME"))
+  data_prep_inputs_path: !expr file.path("/mnt", "inputs", Sys.getenv( "DEPLOY_START_TIME"))
   data_prep_outputs_path: !expr file.path( "/mnt", "outputs", Sys.getenv( "DEPLOY_START_TIME"))

@@ -27,7 +27,7 @@ Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
 
 ## Docker image for Azure Container Instance
 
-`Dockerfile.azure` is intended to be built and run as an Azure Container Instance.
+`Dockerfile.ACI` is intended to be built and run as an Azure Container Instance.
 
 Please note that this Dockerfile is intended to be built using [buildkit](https://docs.docker.com/build/buildkit/), since it relies on passing secrets.
 
@@ -42,11 +42,12 @@ If your installed docker engine (found by running `docker version`) is > 20.10.0
 ```sh
 
 # must be built with buildkit
+# run from repo root
 docker build \
   --secret id=github_pat,env=GITHUB_PAT \
   --progress=plain \
   --tag workflow.data.preparation_aci \
-  -f Dockerfile.azure . 
+  -f ACI/Dockerfile.ACI . 
 
 ```
 
@@ -57,10 +58,12 @@ For older docker versions that support buildkit, you can write the _value_ of th
 # or use $(pwd) if in working dir
 
 # must be built with buildkit
+# run from repo root
 docker build \
   --secret id=github_pat,src=$(pwd)/secretfile \
+  --progress=plain \
   --tag workflow.data.preparation_aci \
-  -f Dockerfile.azure . 
+  -f ACI/Dockerfile.ACI . 
 
 ```
 
@@ -99,7 +102,8 @@ echo "$STORAGE_KEY"
 # change this value as needed.
 RESOURCEGROUP="myResourceGroup"
 
-az deployment group create --resource-group "$RESOURCEGROUP" --template-file azure-deploy.json --parameters @azure-deploy.parameters.json
+# run from repo root
+az deployment group create --resource-group "$RESOURCEGROUP" --template-file ACI/azure-deploy.json --parameters @ACI/azure-deploy.parameters.json
 
 ```
 
