@@ -46,6 +46,7 @@ imf_quarter_timestamp <- config$imf_quarter_timestamp
 factset_data_timestamp <- config$factset_data_timestamp
 pacta_financial_timestamp <- config$pacta_financial_timestamp
 market_share_target_reference_year <- config$market_share_target_reference_year
+iss_emissions_year <- config$iss_emissions_year
 time_horizon <- config$time_horizon
 tdm_delta_years <- config$tdm_delta_years
 scenario_sources_list <- config$scenario_sources_list
@@ -220,9 +221,7 @@ if (update_factset) {
 
   log_info("Fetching ISS emissions data... ")
   pacta.data.preparation::get_factset_iss_emissions_data(
-    # IMPORTANT: `year` is 2019 on purpose as per a decision point from analysts.
-    # See Issue #117 for more information.
-    year = 2019,
+    year = iss_emissions_year,
     dbname = dbname,
     host = host,
     username = username,
