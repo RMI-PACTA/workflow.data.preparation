@@ -88,10 +88,7 @@ factset_iss_emissions_data_path <- file.path(data_prep_inputs_path, "factset_iss
 
 relevant_years <- sort(
   unique(
-    c(
-      market_share_target_reference_year:(market_share_target_reference_year + time_horizon),
-      market_share_target_reference_year + tdm_delta_years
-    )
+    market_share_target_reference_year:(market_share_target_reference_year + time_horizon)
   )
 )
 log_info(
