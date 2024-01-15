@@ -35,11 +35,6 @@ data_prep_outputs_path <- config$data_prep_outputs_path
 masterdata_ownership_filename <- config$masterdata_ownership_filename
 masterdata_debt_filename <- config$masterdata_debt_filename
 ar_company_id__factset_entity_id_filename <- config$ar_company_id__factset_entity_id_filename
-dbname <- config$dbname
-host <- config$host
-username <- Sys.getenv("R_DATABASE_USER")
-password <- Sys.getenv("R_DATABASE_PASSWORD")
-update_factset <- config$update_factset
 update_currencies <- config$update_currencies
 export_sqlite_files <- config$export_sqlite_files
 imf_quarter_timestamp <- config$imf_quarter_timestamp
