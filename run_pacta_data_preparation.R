@@ -106,25 +106,21 @@ scenario_raw_data_to_include <- lapply(scenario_raw_data_to_include, get, envir 
 stopifnot(file.exists(masterdata_ownership_path))
 stopifnot(file.exists(masterdata_debt_path))
 stopifnot(file.exists(ar_company_id__factset_entity_id_path))
+stopifnot(file.exists(factset_financial_data_path))
+stopifnot(file.exists(factset_entity_info_path))
+stopifnot(file.exists(factset_entity_financing_data_path))
+stopifnot(file.exists(factset_fund_data_path))
+stopifnot(file.exists(factset_isin_to_fund_table_path))
+stopifnot(file.exists(factset_iss_emissions_data_path))
 
 if (!update_currencies) {
   stopifnot(file.exists(currencies_data_path))
-}
-
-if (!update_factset) {
-  stopifnot(file.exists(factset_financial_data_path))
-  stopifnot(file.exists(factset_entity_info_path))
-  stopifnot(file.exists(factset_entity_financing_data_path))
-  stopifnot(file.exists(factset_fund_data_path))
-  stopifnot(file.exists(factset_isin_to_fund_table_path))
-  stopifnot(file.exists(factset_iss_emissions_data_path))
 }
 
 
 # pre-flight -------------------------------------------------------------------
 
 log_info("Fetching pre-flight data... ")
-
 
 log_info("Preparing scenario data... ")
 scenario_raw_data <- bind_rows(scenario_raw_data_to_include)
@@ -150,6 +146,7 @@ scenario_raw_data %>%
 pacta.scenario.preparation::scenario_regions %>%
   write_csv(scenario_regions_path, na = "")
 
+
 # web scraping -----------------------------------------------------------------
 
 if (update_currencies) {
@@ -163,71 +160,6 @@ if (update_currencies) {
 log_info("Scraping index regions... ")
 
 index_regions <- pacta.data.scraping::get_index_regions()
-
-
-# pull factset data ------------------------------------------------------------
-
-if (update_factset) {
-  log_info("Fetching financial data... ")
-  pacta.data.preparation::get_factset_financial_data(
-    data_timestamp = factset_data_timestamp,
-    dbname = dbname,
-    host = host,
-    username = username,
-    password = password
-  ) %>%
-    saveRDS(factset_financial_data_path)
-
-  log_info("Fetching entity info data... ")
-  pacta.data.preparation::get_factset_entity_info(
-    dbname = dbname,
-    host = host,
-    username = username,
-    password = password
-  ) %>%
-    saveRDS(factset_entity_info_path)
-
-  log_info("Fetching entity financing data... ")
-  pacta.data.preparation::get_factset_entity_financing_data(
-    data_timestamp = factset_data_timestamp,
-    dbname = dbname,
-    host = host,
-    username = username,
-    password = password
-  ) %>%
-    saveRDS(factset_entity_financing_data_path)
-
-  log_info("Fetching fund data... ")
-  pacta.data.preparation::get_factset_fund_data(
-    data_timestamp = factset_data_timestamp,
-    dbname = dbname,
-    host = host,
-    username = username,
-    password = password
-  ) %>%
-    saveRDS(factset_fund_data_path)
-
-  log_info("Fetching fund ISINs... ")
-  pacta.data.preparation::get_factset_isin_to_fund_table(
-    dbname = dbname,
-    host = host,
-    username = username,
-    password = password
-  ) %>%
-    saveRDS(factset_isin_to_fund_table_path)
-
-  log_info("Fetching ISS emissions data... ")
-  pacta.data.preparation::get_factset_iss_emissions_data(
-    year = iss_emissions_year,
-    dbname = dbname,
-    host = host,
-    username = username,
-    password = password
-  ) %>%
-    saveRDS(factset_iss_emissions_data_path)
-}
-
-log_info("Pre-flight data prepared.")
 
 
 # intermediary files -----------------------------------------------------------
