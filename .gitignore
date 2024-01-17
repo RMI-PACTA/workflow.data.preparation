@@ -5,3 +5,4 @@
 .env
 .DS_Store
 *parameters.json
+github_pat.txt

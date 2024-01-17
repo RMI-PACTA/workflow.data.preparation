@@ -30,10 +30,19 @@ RUN curl -fsSL -o /tmp/google-chrome.deb https://dl.google.com/linux/direct/goog
 
 WORKDIR /workflow.data.preparation
 
-COPY ./ACI/install_dependencies.R install_dependencies.R
+# Install R dependencies
+COPY DESCRIPTION /workflow.portfolio.parser/DESCRIPTION
 
+# install pak, find dependencises from DESCRIPTION, and install them.
 RUN --mount=type=secret,id=github_pat \
-  Rscript install_dependencies.R
+    Rscript -e "\
+      Sys.setenv(GITHUB_PAT = readLines('/run/secrets/github_pat')); \
+      install.packages('pak'); \
+      deps <- pak::local_deps(root = '/workflow.portfolio.parser'); \
+      pkg_deps <- deps[!deps[['direct']], 'ref']; \
+      pak::pak(pkg_deps); \
+      Sys.unsetenv('GITHUB_PAT') \
+    "
 
 COPY ./run_pacta_data_preparation.R run_pacta_data_preparation.R
 COPY ./config.yml config.yml
