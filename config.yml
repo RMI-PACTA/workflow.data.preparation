@@ -103,3 +103,4 @@ default:
   data_prep_outputs_path: !expr file.path("/mnt", "outputs", Sys.getenv("DEPLOY_START_TIME"))
   factset-extracted_path: "/mnt/factset-extracted"
   factset_dataset: "factset-pacta_timestamp-20221231T000000Z_pulled-20231221T195325Z"
+  update_factset: false
