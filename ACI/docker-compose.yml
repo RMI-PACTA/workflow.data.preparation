@@ -2,12 +2,21 @@ version: "3.2"
 
 services:
   workflow.data.preparation_aci:
+    # stdin_open: true
+    # tty: true
+    # command: ["R"]
     build:
       context: ..
       dockerfile: ACI/Dockerfile.ACI
       secrets:
         - github_pat
+    environment:
+      LOG_LEVEL: TRACE
+      R_CONFIG_ACTIVE: 2022Q4_CICD
     volumes:
+      - type: bind
+        source: ./dataprep_inputs
+        target: /mnt/dataprep_inputs
       - type: bind
         source: ./inputs/factset-extracted
         target: /mnt/factset-extracted

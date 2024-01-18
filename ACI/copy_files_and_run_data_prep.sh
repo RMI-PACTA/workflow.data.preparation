@@ -3,6 +3,7 @@ set -e
 
 inputs_dir="/mnt/inputs"
 
+# copy raw data, then run normal data prep script
 Rscript /workflow.data.preparation/copy_raw_data.R 2>&1 | \
   tee "$inputs_dir/$DEPLOY_START_TIME-copy.log"
 
