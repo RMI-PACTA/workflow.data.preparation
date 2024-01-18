@@ -66,8 +66,8 @@ logger::log_trace("factset_file: {factset_files}")
 files_to_copy <- c(
   masterdata_debt,
   masterdata_ownership,
-  ar_fs_bridge#,
-  # factset_files
+  ar_fs_bridge,
+  factset_files
 )
 
 missing_files <- !file.exists(files_to_copy)
