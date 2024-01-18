@@ -68,6 +68,11 @@ scenario_geographies_list <- config$scenario_geographies_list
 global_aggregate_scenario_sources_list <- config$global_aggregate_scenario_sources_list
 global_aggregate_sector_list <- config$global_aggregate_sector_list
 
+#ensure data_prep_outputs_path exists
+if (!dir.exists(data_prep_outputs_path)) {
+  dir.create(data_prep_outputs_path)
+}
+logger::log_info("Data prep outputs path: {data_prep_outputs_path}")
 
 # input filepaths --------------------------------------------------------------
 
@@ -169,7 +174,7 @@ logger::log_info("Scraping index regions.")
 index_regions <- pacta.data.scraping::get_index_regions()
 
 
- pull factset data ------------------------------------------------------------
+# pull factset data ------------------------------------------------------------
 
 if (update_factset) {
 
