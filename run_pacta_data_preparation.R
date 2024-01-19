@@ -3,6 +3,7 @@ logger::log_formatter(logger::formatter_glue)
 
 # necessary packages -----------------------------------------------------------
 
+logger::log_debug("Loading necessary packages.")
 suppressPackageStartupMessages({
   library(pacta.data.preparation)
   library(pacta.data.scraping)
@@ -15,12 +16,13 @@ suppressPackageStartupMessages({
   library(stringr)
   library(tidyr)
 })
-
+logger::log_trace("Necessary packages loaded.")
 
 # config -----------------------------------------------------------------------
 
 # if any essential envvars are missing, read the .env file.
 # These should be set already as part of an ACI deployment.
+logger::log_debug("Checking for missing envvars.")
 if (any(
   !nzchar(c(
     Sys.getenv("R_DATABASE_USER"),
@@ -31,13 +33,16 @@ if (any(
   readRenviron(".env")
 }
 
+logger::log_debug("Loading config.")
 config <-
   config::get(
     file = Sys.getenv("R_CONFIG_FILE", "config.yml"),
     config = Sys.getenv("R_CONFIG_ACTIVE"),
     use_parent = FALSE
   )
+logger::log_trace("Config loaded.")
 
+logger::log_debug("Setting config values as R objects.")
 data_prep_inputs_path <- config$data_prep_inputs_path
 data_prep_outputs_path <- config$data_prep_outputs_path
 masterdata_ownership_filename <- config$masterdata_ownership_filename
@@ -67,8 +72,10 @@ tech_exclude <- config$tech_exclude
 scenario_geographies_list <- config$scenario_geographies_list
 global_aggregate_scenario_sources_list <- config$global_aggregate_scenario_sources_list
 global_aggregate_sector_list <- config$global_aggregate_sector_list
+logger::log_trace("Config values set as R objects.")
 
 #ensure data_prep_outputs_path exists
+logger::log_debug("Checking data prep outputs path.")
 if (dir.exists(data_prep_outputs_path)) {
   logger::log_warn("Data prep outputs path already exists.")
 } else {
@@ -79,13 +86,16 @@ logger::log_info("Data prep outputs path: {data_prep_outputs_path}")
 
 # input filepaths --------------------------------------------------------------
 
+logger::log_debug("Setting input filepaths.")
 masterdata_ownership_path <-
   file.path(data_prep_inputs_path, masterdata_ownership_filename)
+logger::log_trace("Masterdata ownership path: {masterdata_ownership_path}")
 masterdata_debt_path <-
   file.path(data_prep_inputs_path, masterdata_debt_filename)
+logger::log_trace("Masterdata debt path: {masterdata_debt_path}")
 ar_company_id__factset_entity_id_path <-
   file.path(data_prep_inputs_path, ar_company_id__factset_entity_id_filename)
-
+logger::log_trace("AR company ID to FactSet entity ID path: {ar_company_id__factset_entity_id_path}")
 
 # pre-flight filepaths ---------------------------------------------------------
 
@@ -98,7 +108,6 @@ factset_entity_financing_data_path <- file.path(data_prep_inputs_path, "factset_
 factset_fund_data_path <- file.path(data_prep_inputs_path, "factset_fund_data.rds")
 factset_isin_to_fund_table_path <- file.path(data_prep_inputs_path, "factset_isin_to_fund_table.rds")
 factset_iss_emissions_data_path <- file.path(data_prep_inputs_path, "factset_iss_emissions.rds")
-
 
 # computed options -------------------------------------------------------------
 
@@ -115,38 +124,55 @@ logger::log_info(
   "Full time horizon set to: {paste0(relevant_years, collapse = ', ')}."
 )
 
+logger::log_debug("Getting scenario data.")
+logger::log_trace("Scenario data to include: {scenario_raw_data_to_include}")
 scenario_raw_data_to_include <- lapply(scenario_raw_data_to_include, get, envir = asNamespace("pacta.scenario.preparation"))
-
+logger::log_trace("Scenario data retrieved.")
 
 # check that everything is ready to go -----------------------------------------
 
+logger::log_debug("Checking that AI files exist.")
 stopifnot(file.exists(masterdata_ownership_path))
 stopifnot(file.exists(masterdata_debt_path))
 stopifnot(file.exists(ar_company_id__factset_entity_id_path))
+logger::log_trace("AI files exist.")
 
-if (!update_currencies) {
+if (update_currencies) {
+  logger::log_debug(
+    "update_currencies is TRUE. Skipping preflight check for currency file."
+  )
+} else {
+  logger::log_debug("Checking that currencies file exist.")
   stopifnot(file.exists(currencies_data_path))
+  logger::log_trace("Currencies file exist.")
 }
 
-if (!update_factset) {
+if (update_factset) {
+  logger::log_debug(
+    "update_factset is TRUE. Skipping preflight check for FactSet files."
+  )
+} else {
+  logger::log_debug("Checking that FactSet files exist.")
   stopifnot(file.exists(factset_financial_data_path))
   stopifnot(file.exists(factset_entity_info_path))
   stopifnot(file.exists(factset_entity_financing_data_path))
   stopifnot(file.exists(factset_fund_data_path))
   stopifnot(file.exists(factset_isin_to_fund_table_path))
   stopifnot(file.exists(factset_iss_emissions_data_path))
+  logger::log_trace("FactSet files exist.")
 }
-
 
 # pre-flight -------------------------------------------------------------------
 
 logger::log_info("Fetching pre-flight data.")
 
-
 logger::log_info("Preparing scenario data.")
+logger::log_debug("Binding raw scenario data.")
 scenario_raw_data <- bind_rows(scenario_raw_data_to_include)
+logger::log_trace("Raw scenario data bound.")
 
 # scenario values will be linearly interpolated for each group below
+logger::log_debug("Setting interpolation groups.")
 interpolation_groups <- c(
   "source",
   "scenario",
@@ -156,30 +182,52 @@ interpolation_groups <- c(
   "indicator",
   "units"
 )
+logger::log_trace("Interpolation groups set: {interpolation_groups}")
 
+logger::log_debug("
+  Preparing and writing scenario raw data to intermediary file: \\
+   \"{scenario_regions_path}\".
+")
 scenario_raw_data %>%
   pacta.scenario.preparation::interpolate_yearly(!!!rlang::syms(interpolation_groups)) %>%
   filter(.data$year >= .env$market_share_target_reference_year) %>%
   pacta.scenario.preparation::add_market_share_columns(reference_year = market_share_target_reference_year) %>%
   pacta.scenario.preparation::format_p4i(green_techs) %>%
   write_csv(scenarios_analysis_input_path, na = "")
+logger::log_trace(
+  "Scenario raw data written: \"{scenarios_analysis_input_path}\"."
+)
 
+logger::log_debug("
+  Preparing and writing scenario regions to intermediary file: \\
+  \"{scenario_regions_path}\".
+")
 pacta.scenario.preparation::scenario_regions %>%
   write_csv(scenario_regions_path, na = "")
+logger::log_trace(
+  "Scenario regions written: \"{scenarios_analysis_input_path}\"."
+)
 
 # web scraping -----------------------------------------------------------------
 
 if (update_currencies) {
-  logger::log_info("Fetching currency data.")
+  logger::log_info("Fetching and writing currency data to intermediate file: \\
+    \"{currencies_data_path}\".
+  ")
   pacta.data.scraping::get_currency_exchange_rates(
     quarter = imf_quarter_timestamp
   ) %>%
     saveRDS(currencies_data_path)
+  logger::log_trace(
+    "Currency data written: \"{currencies_data_path}\"."
+  )
+} else {
+  logger::log_info("Skipping currency data update.")
 }
 
 logger::log_info("Scraping index regions.")
 index_regions <- pacta.data.scraping::get_index_regions()
-
+logger::log_trace("Index regions scraped.")
 
 # pull factset data ------------------------------------------------------------
 
@@ -246,13 +294,18 @@ if (update_factset) {
 
 logger::log_info("Pre-flight data prepared.")
 
-
 # intermediary files -----------------------------------------------------------
 
 logger::log_info("Preparing scenario data.")
 
+logger::log_debug("
+  Reading scenario regions from intermediary file: \\
+  \"{scenario_regions_path}\".
+")
 scenario_regions <- readr::read_csv(scenario_regions_path, na = "", show_col_types = FALSE)
+logger::log_trace("Scenario regions read.")
 
+logger::log_debug("preparing factset_issue_code_bridge.")
 factset_issue_code_bridge <-
   pacta.data.preparation::factset_issue_code_bridge %>%
   select(issue_type_code, asset_type) %>%
@@ -265,15 +318,23 @@ factset_issue_code_bridge <-
       TRUE ~ "Others"
     )
   )
+logger::log_trace("factset_issue_code_bridge prepared.")
 
+logger::log_debug("preparing factset_industry_map_bridge.")
 factset_industry_map_bridge <-
   pacta.data.preparation::factset_industry_map_bridge %>%
   select(factset_industry_code, pacta_sector)
+logger::log_trace("factset_industry_map_bridge prepared.")
 
 # scenarios_analysisinput_inputs
+logger::log_debug("Reading raw scenario data from intermediary file: \\
+  \"{scenarios_analysis_input_path}\".
+")
 scenario_raw <- readr::read_csv(scenarios_analysis_input_path, show_col_types = FALSE)
+logger::log_trace("Raw scenario data read.")
 
 # filter for relevant scenario data
+logger::log_debug("Filtering raw scenario data and joining geography bridge.")
 scenarios_long <- scenario_raw %>%
   inner_join(
     pacta.scenario.preparation::scenario_source_pacta_geography_bridge,
@@ -292,16 +353,16 @@ scenarios_long <- scenario_raw %>%
       c(.env$relevant_years, .env$market_share_target_reference_year + 10)
     )
   )
+logger::log_trace("Raw scenario data filtered and geography bridge joined.")
 
 logger::log_info("Scenario data prepared.")
 
-
 # currency data output ---------------------------------------------------------
 
-logger::log_info("Saving file: \"currencies.rds\".")
+logger::log_info("Exporting file: \"currencies.rds\".")
 readRDS(currencies_data_path) %>%
   saveRDS(file.path(data_prep_outputs_path, "currencies.rds"))
-
+logger::log_debug("Currency data exported.")
 
 # financial data output --------------------------------------------------------
 
@@ -309,52 +370,62 @@ logger::log_info("Preparing financial data.")
 
 # read raw FactSet financial data, filter to unique rows, merge AR company_id,
 # merge PACTA sectors from AR data
-logger::log_info("Formatting and saving file: \"financial_data.rds\".")
+logger::log_info("Formatting and exporting file: \"financial_data.rds\".")
 readRDS(factset_financial_data_path) %>%
   pacta.data.preparation::prepare_financial_data(factset_issue_code_bridge) %>%
   saveRDS(file.path(data_prep_outputs_path, "financial_data.rds"))
+logger::log_debug("Financial data exported.")
 
-logger::log_info("Formatting and saving file: \"entity_financing.rds\".")
+logger::log_info("Formatting and exporting file: \"entity_financing.rds\".")
 readRDS(factset_entity_financing_data_path) %>%
   saveRDS(file.path(data_prep_outputs_path, "entity_financing.rds"))
+logger::log_debug("Entity financing data exported.")
 
-logger::log_info("Formatting and saving file: \"entity_info.rds\".")
+logger::log_debug("Reading AR company ID to FactSet entity ID mapping.")
 factset_entity_id__ar_company_id <-
   readr::read_csv(ar_company_id__factset_entity_id_path, col_types = "c") %>%
   select(
     factset_entity_id = "factset_id",
     ar_company_id = "company_id"
   )
+logger::log_trace("AR company ID to FactSet entity ID mapping read.")
+logger::log_info("Formatting and exporting file: \"entity_info.rds\".")
 readRDS(factset_entity_info_path) %>%
   pacta.data.preparation::prepare_entity_info(factset_entity_id__ar_company_id) %>%
   saveRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
+logger::log_debug("Entity info data exported.")
 
 logger::log_info("Financial data prepared.")
 
-
 # ABCD data output -------------------------------------------------------------
 
-logger::log_info("Preparing ABCD.")
+logger::log_info("Preparing Asset Based Company Data (ABCD).")
 
+logger::log_debug("Reading entity info.")
 entity_info <- readRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
+logger::log_trace("Entity info read.")
 
+logger::log_debug("Preparing AR company ID to country of domicile mapping.")
 ar_company_id__country_of_domicile <-
   entity_info %>%
   select("ar_company_id", "country_of_domicile") %>%
   filter(!is.na(.data$ar_company_id)) %>%
   distinct()
+logger::log_trace("AR company ID to country of domicile mapping prepared.")
 
+logger::log_debug("Preparing AR company ID to credit parent mapping.")
 ar_company_id__credit_parent_ar_company_id <-
   entity_info %>%
   select("ar_company_id", "credit_parent_ar_company_id") %>%
   filter(!is.na(.data$ar_company_id)) %>%
   distinct()
+logger::log_trace("AR company ID to credit parent mapping prepared.")
 
+log_trace("removing entity_info to clear memory.")
 rm(entity_info)
 
-
 logger::log_info(
-  "Formatting and saving file: \"masterdata_ownership_datastore.rds\"."
+  "Formatting and exporting file: \"masterdata_ownership_datastore.rds\"."
 )
 readr::read_csv(masterdata_ownership_path, na = "", show_col_types = FALSE) %>%
   pacta.data.preparation::prepare_masterdata(
@@ -363,20 +434,23 @@ readr::read_csv(masterdata_ownership_path, na = "", show_col_types = FALSE) %>%
     zero_emission_factor_techs
   ) %>%
   saveRDS(file.path(data_prep_outputs_path, "masterdata_ownership_datastore.rds"))
+logger::log_debug("Masterdata ownership exported.")
 
-
-logger::log_info(
-  "Formatting and saving file: \"masterdata_debt_datastore.rds\"."
-)
-
+logger::log_debug("Reading masterdata debt.")
 masterdata_debt <- readr::read_csv(masterdata_debt_path, na = "", show_col_types = FALSE)
+logger::log_trace("Masterdata debt read.")
 
+logger::log_debug("Preparing AR company ID to creditor company ID mapping.")
 company_id__creditor_company_id <-
   masterdata_debt %>%
   select("company_id", "creditor_company_id") %>%
   distinct() %>%
   mutate(across(.cols = dplyr::everything(), .fns = as.character))
+logger::log_trace("AR company ID to creditor company ID mapping prepared.")
 
+logger::log_info(
+  "Formatting and saving file: \"masterdata_debt_datastore.rds\"."
+)
 masterdata_debt %>%
   pacta.data.preparation::prepare_masterdata(
     ar_company_id__country_of_domicile,
@@ -399,35 +473,42 @@ masterdata_debt %>%
     .groups = "drop"
   ) %>%
   saveRDS(file.path(data_prep_outputs_path, "masterdata_debt_datastore.rds"))
+logger::log_debug("Masterdata debt exported.")
 
+logger::log_trace("removing objects to clear memory.")
 rm(masterdata_debt)
 rm(company_id__creditor_company_id)
-
 rm(ar_company_id__country_of_domicile)
 rm(ar_company_id__credit_parent_ar_company_id)
 
 logger::log_info("ABCD prepared.")
 
-
 # abcd_flags -------------------------------------------------------------------
 
 logger::log_info("Preparing ABCD flags.")
+
+logger::log_debug("Reading financial data.")
 financial_data <- readRDS(file.path(data_prep_outputs_path, "financial_data.rds"))
+logger::log_trace("Financial data read.")
 
+logger::log_debug("Reading entity info.")
 entity_info <- readRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
+logger::log_trace("Entity info read.")
 
+logger::log_debug("Preparing AR company ID to FactSet entity ID mapping.")
 factset_entity_id__ar_company_id <-
   entity_info %>%
   select(factset_entity_id, ar_company_id) %>%
   filter(!is.na(ar_company_id))
+logger::log_trace("AR company ID to FactSet entity ID mapping prepared.")
 
+logger::log_debug("Preparing FactSet entity ID to security sector mapping.")
 factset_entity_id__security_mapped_sector <-
   entity_info %>%
   select(factset_entity_id, security_mapped_sector)
+logger::log_trace("FactSet entity ID to security sector mapping prepared.")
 
-
-logger::log_info("Formatting and saving file: \"abcd_flags_equity.rds\".")
-
+logger::log_debug("Preparing AR Ownership company ID to sector mapping.")
 ar_company_id__sectors_with_assets__ownership <-
   readRDS(file.path(data_prep_outputs_path, "masterdata_ownership_datastore.rds")) %>%
   filter(year %in% relevant_years) %>%
@@ -435,7 +516,9 @@ ar_company_id__sectors_with_assets__ownership <-
   distinct() %>%
   group_by(ar_company_id) %>%
   summarise(sectors_with_assets = paste(unique(ald_sector), collapse = " + "))
+logger::log_trace("AR ownership company ID to sector mapping prepared.")
 
+logger::log_info("Formatting and exporting file: \"abcd_flags_equity.rds\".")
 financial_data %>%
   left_join(factset_entity_id__ar_company_id, by = "factset_entity_id") %>%
   left_join(factset_entity_id__security_mapped_sector, by = "factset_entity_id") %>%
@@ -449,10 +532,9 @@ financial_data %>%
     sectors_with_assets
   ) %>%
   saveRDS(file.path(data_prep_outputs_path, "abcd_flags_equity.rds"))
+logger::log_debug("Equity ABCD flags exported.")
 
-
-logger::log_info("Formatting and saving file: \"abcd_flags_bonds.rds\".")
-
+logger::log_debug("Preparing AR Debt company ID to sector mapping.")
 ar_company_id__sectors_with_assets__debt <-
   readRDS(file.path(data_prep_outputs_path, "masterdata_debt_datastore.rds")) %>%
   filter(year %in% relevant_years) %>%
@@ -460,7 +542,9 @@ ar_company_id__sectors_with_assets__debt <-
   distinct() %>%
   group_by(ar_company_id) %>%
   summarise(sectors_with_assets = paste(unique(ald_sector), collapse = " + "))
+logger::log_trace("AR debt company ID to sector mapping prepared.")
 
+logger::log_info("Formatting and exporting file: \"abcd_flags_bonds.rds\".")
 financial_data %>%
   left_join(factset_entity_id__ar_company_id, by = "factset_entity_id") %>%
   left_join(factset_entity_id__security_mapped_sector, by = "factset_entity_id") %>%
@@ -483,29 +567,37 @@ financial_data %>%
   ) %>%
   ungroup() %>%
   saveRDS(file.path(data_prep_outputs_path, "abcd_flags_bonds.rds"))
+logger::log_debug("Bonds ABCD flags exported.")
 
-
+logger::log_trace("removing objects to clear memory.")
 rm(financial_data)
 rm(entity_info)
 rm(factset_entity_id__ar_company_id)
 rm(factset_entity_id__security_mapped_sector)
 logger::log_info("ABCD flags prepared.")
 
-
 # fund data output -------------------------------------------------------------
 
 logger::log_info("Preparing fund data.")
 
+logger::log_debug("Reading fund data.")
 fund_data <- readRDS(factset_fund_data_path)
+logger::log_trace("Fund data read.")
 
+logger::log_debug("
+  Filtering fund data to include funds with reported holdings appoximately \\
+  equal to reported market value
+  ")
 # remove funds above the threshold
 fund_data <-
   fund_data %>%
   group_by(factset_fund_id, fund_reported_mv) %>%
   filter((fund_reported_mv[[1]] - sum(holding_reported_mv)) / fund_reported_mv[[1]] > -1e-5) %>%
   ungroup()
+logger::log_trace("Fund data filtered.")
 
 # build MISSINGWEIGHT for under and over
+logger::log_debug("Building MISSINGWEIGHT for under and over.")
 fund_missing_mv <-
   fund_data %>%
   group_by(factset_fund_id, fund_reported_mv) %>%
@@ -516,20 +608,20 @@ fund_missing_mv <-
   ) %>%
   ungroup() %>%
   filter(holding_reported_mv != 0)
+logger::log_trace("MISSINGWEIGHT built.")
 
+logger::log_info("Preparing and exporting file: \"fund_data.rds\".")
 fund_data %>%
   bind_rows(fund_missing_mv) %>%
   saveRDS(file.path(data_prep_outputs_path, "fund_data.rds"))
+logger::log_debug("Fund data exported.")
 
-
-logger::log_info("Saving file: \"total_fund_list.rds\".")
+logger::log_info("Preparing and exporting file: \"total_fund_list.rds\".")
 fund_data %>%
   select(factset_fund_id) %>%
   distinct() %>%
   saveRDS(file.path(data_prep_outputs_path, "total_fund_list.rds"))
-
-
-logger::log_info("Saving file: \"isin_to_fund_table.rds\".")
+logger::log_debug("Total fund list exported.")
 
 isin_to_fund_table <- readRDS(factset_isin_to_fund_table_path)
 
@@ -553,20 +645,24 @@ isin_to_fund_table <-
   ungroup() %>%
   select(-n, -has_fund_data)
 
+logger::log_info("Exporting file: \"isin_to_fund_table.rds\".")
 isin_to_fund_table %>%
   saveRDS(file.path(data_prep_outputs_path, "isin_to_fund_table.rds"))
-
-
-rm(fund_data)
-rm(isin_to_fund_table)
+logger::log_debug("ISIN to fund table exported.")
 
 logger::log_info("Fund data prepared.")
 
+logger::log_trace("removing objects to clear memory.")
+rm(fund_data)
+rm(isin_to_fund_table)
 
 # emission data output ---------------------------------------------------------
 
+logger::log_debug("Reading currencies data.")
 currencies <- readRDS(file.path(data_prep_outputs_path, "currencies.rds"))
+logger::log_trace("Currencies data read.")
 
+logger::log_debug("Preparing ISS company emissions data.")
 iss_company_emissions <-
   readRDS(factset_iss_emissions_data_path) %>%
   group_by(factset_entity_id) %>%
@@ -575,11 +671,9 @@ iss_company_emissions <-
     .groups = "drop"
   ) %>%
   mutate(icc_total_emissions_units = "tCO2e") # units are defined in the ISS/FactSet documentation (see #144)
+logger::log_trace("ISS company emissions data prepared.")
 
-logger::log_info(
-  "Formatting and saving file: \"iss_entity_emission_intensities.rds\"."
-)
-
+logger::log_debug("Preparing ISS entity emission intensities.")
 iss_entity_emission_intensities <-
   readRDS(factset_entity_financing_data_path) %>%
   left_join(currencies, by = "currency") %>%
@@ -612,19 +706,24 @@ iss_entity_emission_intensities <-
     ff_debt,
     units = paste0(icc_total_emissions_units, " / ", "$ USD")
   )
+logger::log_trace("ISS entity emission intensities prepared.")
 
+logger::log_info(
+  "Formatting and exporting file: \"iss_entity_emission_intensities.rds\"."
+)
 saveRDS(
   select(iss_entity_emission_intensities, -c("ff_mkt_val", "ff_debt")),
   file.path(data_prep_outputs_path, "iss_entity_emission_intensities.rds")
 )
+logger::log_debug("ISS entity emission intensities exported.")
 
+logger::log_debug("Reading entity info.")
+factset_entity_info <- readRDS(factset_entity_info_path)
+logger::log_trace("Entity info read.")
 
 logger::log_info(
-  "Formatting and saving file: \"iss_average_sector_emission_intensities.rds\"."
+  "Formatting and exporting file: \"iss_average_sector_emission_intensities.rds\"."
 )
-
-factset_entity_info <- readRDS(factset_entity_info_path)
-
 iss_entity_emission_intensities %>%
   inner_join(factset_entity_info, by = "factset_entity_id") %>%
   group_by(sector_code, factset_sector_desc, units) %>%
@@ -643,8 +742,9 @@ iss_entity_emission_intensities %>%
   ) %>%
   ungroup() %>%
   saveRDS(file.path(data_prep_outputs_path, "iss_average_sector_emission_intensities.rds"))
+logger::log_debug("ISS average sector emission intensities exported.")
 
-
+logger::log_trace("removing objects to clear memory.")
 rm(currencies)
 rm(iss_company_emissions)
 rm(iss_entity_emission_intensities)
@@ -652,19 +752,27 @@ rm(factset_entity_info)
 
 logger::log_info("Emissions data prepared.")
 
-
 # combined ABCD and scenarios output -------------------------------------------
 
 logger::log_info("Preparing combined ABCD scenario output.")
 
+logger::log_debug("Reading masterdata ownership, filtering to relevant years.")
 masterdata_ownership_datastore <-
   readRDS(file.path(data_prep_outputs_path, "masterdata_ownership_datastore.rds")) %>%
   filter(year %in% relevant_years)
+logger::log_trace("Masterdata ownership read and filtered.")
 
+logger::log_debug("Preparing individual equity scenario ABCD files.")
 for (scenario_source in unique(scenarios_long$scenario_source)) {
+  logger::log_debug(
+    "Preparing equity ABCD scenario output for source: \"{scenario_source}\"."
+  )
   filename <- paste0("equity_abcd_scenario_", scenario_source, ".rds")
+  logger::log_trace("Filtering scenario data: \"{scenario_source}\".")
   scenarios_long_source <- filter(scenarios_long, .data$scenario_source == .env$scenario_source)
-  logger::log_info("Formatting and saving file: \"{filename}\".")
+  logger::log_info(
+    "Formatting and exporting scenario ABCD file: \"{filename}\"."
+  )
   pacta.data.preparation::dataprep_abcd_scen_connection(
     abcd_data = masterdata_ownership_datastore,
     scenario_data = scenarios_long_source,
@@ -680,7 +788,11 @@ for (scenario_source in unique(scenarios_long$scenario_source)) {
     index_regions = index_regions
   ) %>%
     saveRDS(file.path(data_prep_outputs_path, filename))
+  logger::log_debug(
+    "equity ABCD scenario output for source: \"{scenario_source}\" exported"
+  )
 }
+logger::log_debug("Individual equity scenario ABCD files prepared.")
 
 logger::log_info("Formatting and saving file: \"equity_abcd_scenario.rds\".")
 list.files(
@@ -691,16 +803,24 @@ list.files(
   lapply(readRDS) %>%
   bind_rows() %>%
   saveRDS(file.path(data_prep_outputs_path, "equity_abcd_scenario.rds"))
+logger::log_debug("Equity ABCD scenario output prepared.")
 
-
+logger::log_debug("Reading masterdata debt, filtering to relevant years.")
 masterdata_debt_datastore <-
   readRDS(file.path(data_prep_outputs_path, "masterdata_debt_datastore.rds")) %>%
   filter(year %in% relevant_years)
+logger::log_trace("Masterdata debt read and filtered.")
 
+logger::log_debug("Preparing individual bonds scenario ABCD files.")
 for (scenario_source in unique(scenarios_long$scenario_source)) {
+  logger::log_debug(
+    "Preparing bonds ABCD scenario output for source: \"{scenario_source}\"."
+  )
   filename <- paste0("bonds_abcd_scenario_", scenario_source, ".rds")
   scenarios_long_source <- filter(scenarios_long, .data$scenario_source == .env$scenario_source)
-  logger::log_info("Formatting and saving file: \"{filename}\".")
+  logger::log_info(
+    "Formatting and exporting scenario ABCD file: \"{filename}\"."
+  )
   pacta.data.preparation::dataprep_abcd_scen_connection(
     abcd_data = masterdata_debt_datastore,
     scenario_data = scenarios_long_source,
@@ -716,6 +836,9 @@ for (scenario_source in unique(scenarios_long$scenario_source)) {
     index_regions = index_regions
   ) %>%
     saveRDS(file.path(data_prep_outputs_path, filename))
+  logger::log_debug(
+    "Bonds ABCD scenario output for source: \"{scenario_source}\" exported"
+  )
 }
 
 logger::log_info("Formatting and saving file: \"bonds_abcd_scenario.rds\".")
@@ -727,25 +850,32 @@ list.files(
   lapply(readRDS) %>%
   bind_rows() %>%
   saveRDS(file.path(data_prep_outputs_path, "bonds_abcd_scenario.rds"))
+logger::log_debug("Bonds ABCD scenario output prepared.")
 
 logger::log_info("Combined ABCD scenario output prepared.")
-
 
 # export SQLite versions of relevant files -------------------------------------
 
 if (export_sqlite_files) {
+  logger::log_info("Exporting SQLite versions of relevant files.")
+
   # entity_info
   logger::log_info("Formatting and saving file: \"entity_info.sqlite\".")
 
+  logger::log_debug("Reading entity info.")
   entity_info <- readRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
+  logger::log_trace("Entity info read.")
 
+  logger::log_debug("Establishing SQLite connection.")
   con <-
     DBI::dbConnect(
       drv = RSQLite::SQLite(),
       dbname = file.path(data_prep_outputs_path, "entity_info.sqlite")
     )
   RSQLite::sqliteSetBusyHandler(con, 3000L)
+  logger::log_trace("SQLite connection established.")
 
+  logger::log_debug("Writing entity info to SQLite file.")
   dplyr::copy_to(
     dest = con,
     df = entity_info,
@@ -754,7 +884,9 @@ if (export_sqlite_files) {
     temporary = FALSE,
     indexes = list("factset_entity_id")
   )
+  logger::log_trace("Entity info written to SQLite file.")
 
+  logger::log_debug("Closing SQLite connection and freeing memory")
   DBI::dbDisconnect(con)
   rm(entity_info)
 
@@ -762,16 +894,20 @@ if (export_sqlite_files) {
   logger::log_info(
     "Formatting and saving file: \"equity_abcd_scenario.sqlite\"."
   )
-
+  logger::log_debug("Reading equity ABCD scenario data.")
   equity_abcd_scenario <- readRDS(file.path(data_prep_outputs_path, "equity_abcd_scenario.rds"))
+  logger::log_trace("Equity ABCD scenario data read.")
 
+  logger::log_debug("Establishing SQLite connection.")
   con <-
     DBI::dbConnect(
       drv = RSQLite::SQLite(),
       dbname = file.path(data_prep_outputs_path, "equity_abcd_scenario.sqlite")
     )
   RSQLite::sqliteSetBusyHandler(con, 3000L)
+  logger::log_trace("SQLite connection established.")
 
+  logger::log_debug("Writing equity ABCD scenario data to SQLite file.")
   dplyr::copy_to(
     dest = con,
     df = equity_abcd_scenario,
@@ -786,7 +922,9 @@ if (export_sqlite_files) {
       "ald_sector"
     )
   )
+  logger::log_trace("Equity ABCD scenario data written to SQLite file.")
 
+  logger::log_debug("Closing SQLite connection and freeing memory")
   DBI::dbDisconnect(con)
   rm(equity_abcd_scenario)
 
@@ -795,15 +933,20 @@ if (export_sqlite_files) {
     "Formatting and saving file: \"bonds_abcd_scenario.sqlite\"."
   )
 
+  logger::log_debug("Reading bonds ABCD scenario data.")
   bonds_abcd_scenario <- readRDS(file.path(data_prep_outputs_path, "bonds_abcd_scenario.rds"))
+  logger::log_trace("Bonds ABCD scenario data read.")
 
+  logger::log_debug("Establishing SQLite connection.")
   con <-
     DBI::dbConnect(
       drv = RSQLite::SQLite(),
       dbname = file.path(data_prep_outputs_path, "bonds_abcd_scenario.sqlite")
     )
   RSQLite::sqliteSetBusyHandler(con, 3000L)
+  logger::log_trace("SQLite connection established.")
 
+  logger::log_debug("Writing bonds ABCD scenario data to SQLite file.")
   dplyr::copy_to(
     dest = con,
     df = bonds_abcd_scenario,
@@ -818,23 +961,30 @@ if (export_sqlite_files) {
       "ald_sector"
     )
   )
+  logger::log_trace("Bonds ABCD scenario data written to SQLite file.")
 
+  logger::log_debug("Closing SQLite connection and freeing memory")
   DBI::dbDisconnect(con)
   rm(bonds_abcd_scenario)
+} else {
+  logger::log_info("Skipping SQLite file export.")
 }
-
 
 # manifests of input and output file -------------------------------------------
 
 logger::log_info("Formatting and saving file: \"manifest.json\".")
 
+# get the last update date of the ent_entity_affiliates table
+logger::log_debug("Reading ent_entity_affiliates last update.")
 ent_entity_affiliates_last_update <-
   readRDS(factset_entity_info_path) %>%
   filter(!is.na(ent_entity_affiliates_last_update)) %>%
   pull(ent_entity_affiliates_last_update) %>%
   unique()
+logger::log_trace("ent_entity_affiliates last update read.")
 
 # include PACTA packages NEWS.md test in the parameters to export
+logger::log_debug("Reading NEWS.md files from relevant PACTA packages.")
 pacta_packages <- c("pacta.data.preparation", "pacta.scenario.preparation")
 package_news <-
   vapply(
@@ -846,7 +996,9 @@ package_news <-
     FUN.VALUE = list(1),
     USE.NAMES = TRUE
   )
+logger::log_trace("NEWS.md files read.")
 
+logger::log_debug("Preparing metadata parameters.")
 parameters <-
   list(
     input_filepaths = list(
@@ -897,27 +1049,29 @@ parameters <-
     update_factset = update_factset,
     package_news = package_news
   )
+logger::log_trace("Metadata parameters prepared.")
 
+logger::log_debug("Writing manifest file.")
 pacta.data.preparation::write_manifest(
   path = file.path(data_prep_outputs_path, "manifest.json"),
   parameters = parameters,
   data_prep_inputs_path = data_prep_inputs_path,
   data_prep_outputs_path = data_prep_outputs_path
 )
+logger::log_trace("Manifest file written.")
 
-
-# copy in NEWs.md files from relevant PACTA packages ---------------------------
+# copy in NEWS.md files from relevant PACTA packages ---------------------------
 
 logger::log_info("Copying NEWS.md files from relevant PACTA packages.")
-
 # `pacta_packages` defined above to add NEWS text to manifest
 for (pkg_name in pacta_packages) {
+  logger::log_debug("Copying NEWS.md file from package: \"{pkg_name}\".")
   file.copy(
     system.file("NEWS.md", package = pkg_name),
     to = file.path(data_prep_outputs_path, paste0(pkg_name, "-NEWS.md"))
   )
+  logger::log_trace("NEWS.md file copied.")
 }
-
 
 # ------------------------------------------------------------------------------
 
