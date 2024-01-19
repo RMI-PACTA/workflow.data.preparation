@@ -1,7 +1,8 @@
 # workflow.data.preparation
 
 Running the workflow requires a file `.env` to exist in the root directory, that looks like...
-``` sh
+
+```sh
 HOST_INPUTS_PATH=/PATH/TO/AR_YYYYQQ
 HOST_OUTPUTS_PATH=/PATH/TO/YYYYQQ_pacta_analysis_inputs_YYYY-MM-DD/YYYYQQ
 GITHUB_PAT=ghp_XXXXxxXxXXXxXxxX
@@ -19,3 +20,19 @@ R_CONFIG_ACTIVE=YYYYQQ
 Run `docker-compose up` from the root directory, and docker will build the image (if necessary), and then run the data.prep process given the specified options in the .env file.
 
 Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
+
+## Required Input Files
+
+### FactSet Data
+
+Files exported by [`{workflow.factset}`](https://github.com/RMI-PACTA/workflow.factset) provide financial data to tie to production data.
+See the [`workflow.factset` README](https://github.com/RMI-PACTA/workflow.factset#exported-files) for more information on expected file format.
+
+The required files are:
+
+- factset_entity_financing_data.rds
+- factset_entity_info.rds
+- factset_financial_data.rds
+- factset_fund_data.rds
+- factset_isin_to_fund_table.rds
+- factset_iss_emissions.rds
