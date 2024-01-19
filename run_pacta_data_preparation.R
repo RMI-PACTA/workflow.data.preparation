@@ -1,10 +1,12 @@
+logger::log_threshold(Sys.getenv("LOG_LEVEL", "INFO"))
+logger::log_formatter(logger::formatter_glue)
+
 # necessary packages -----------------------------------------------------------
 
 suppressPackageStartupMessages({
   library(pacta.data.preparation)
   library(pacta.data.scraping)
   library(pacta.scenario.preparation)
-
   library(DBI)
   library(dplyr)
   library(readr)
@@ -12,10 +14,6 @@ suppressPackageStartupMessages({
   library(RSQLite)
   library(stringr)
   library(tidyr)
-
-  # used for logging
-  library(rlog)
-  if (interactive()) Sys.setenv("LOG_LEVEL" = "ERROR")
 })
 
 
@@ -91,11 +89,8 @@ relevant_years <- sort(
     market_share_target_reference_year:(market_share_target_reference_year + time_horizon)
   )
 )
-log_info(
-  paste(
-    "Full time horizon set to:",
-    paste0(relevant_years, collapse = ", ")
-  )
+logger::log_info(
+  "Full time horizon set to: {paste0(relevant_years, collapse = ', ')}."
 )
 
 scenario_raw_data_to_include <- lapply(scenario_raw_data_to_include, get, envir = asNamespace("pacta.scenario.preparation"))
@@ -123,10 +118,10 @@ if (!update_factset) {
 
 # pre-flight -------------------------------------------------------------------
 
-log_info("Fetching pre-flight data... ")
+logger::log_info("Fetching pre-flight data.")
 
 
-log_info("Preparing scenario data... ")
+logger::log_info("Preparing scenario data.")
 scenario_raw_data <- bind_rows(scenario_raw_data_to_include)
 
 # scenario values will be linearly interpolated for each group below
@@ -153,22 +148,22 @@ pacta.scenario.preparation::scenario_regions %>%
 # web scraping -----------------------------------------------------------------
 
 if (update_currencies) {
-  log_info("Fetching currency data... ")
+  logger::log_info("Fetching currency data.")
   pacta.data.scraping::get_currency_exchange_rates(
     quarter = imf_quarter_timestamp
   ) %>%
     saveRDS(currencies_data_path)
 }
 
-log_info("Scraping index regions... ")
-
+logger::log_info("Scraping index regions.")
 index_regions <- pacta.data.scraping::get_index_regions()
 
 
 # pull factset data ------------------------------------------------------------
 
 if (update_factset) {
-  log_info("Fetching financial data... ")
+
+  logger::log_info("Fetching financial data.")
   pacta.data.preparation::get_factset_financial_data(
     data_timestamp = factset_data_timestamp,
     dbname = dbname,
@@ -178,7 +173,7 @@ if (update_factset) {
   ) %>%
     saveRDS(factset_financial_data_path)
 
-  log_info("Fetching entity info data... ")
+  logger::log_info("Fetching entity info data.")
   pacta.data.preparation::get_factset_entity_info(
     dbname = dbname,
     host = host,
@@ -187,7 +182,7 @@ if (update_factset) {
   ) %>%
     saveRDS(factset_entity_info_path)
 
-  log_info("Fetching entity financing data... ")
+  logger::log_info("Fetching entity financing data.")
   pacta.data.preparation::get_factset_entity_financing_data(
     data_timestamp = factset_data_timestamp,
     dbname = dbname,
@@ -197,7 +192,7 @@ if (update_factset) {
   ) %>%
     saveRDS(factset_entity_financing_data_path)
 
-  log_info("Fetching fund data... ")
+  logger::log_info("Fetching fund data.")
   pacta.data.preparation::get_factset_fund_data(
     data_timestamp = factset_data_timestamp,
     dbname = dbname,
@@ -207,7 +202,7 @@ if (update_factset) {
   ) %>%
     saveRDS(factset_fund_data_path)
 
-  log_info("Fetching fund ISINs... ")
+  logger::log_info("Fetching fund ISINs.")
   pacta.data.preparation::get_factset_isin_to_fund_table(
     dbname = dbname,
     host = host,
@@ -216,7 +211,7 @@ if (update_factset) {
   ) %>%
     saveRDS(factset_isin_to_fund_table_path)
 
-  log_info("Fetching ISS emissions data... ")
+  logger::log_info("Fetching ISS emissions data.")
   pacta.data.preparation::get_factset_iss_emissions_data(
     year = iss_emissions_year,
     dbname = dbname,
@@ -227,12 +222,12 @@ if (update_factset) {
     saveRDS(factset_iss_emissions_data_path)
 }
 
-log_info("Pre-flight data prepared.")
+logger::log_info("Pre-flight data prepared.")
 
 
 # intermediary files -----------------------------------------------------------
 
-log_info("Preparing scenario data... ")
+logger::log_info("Preparing scenario data.")
 
 scenario_regions <- readr::read_csv(scenario_regions_path, na = "", show_col_types = FALSE)
 
@@ -276,53 +271,48 @@ scenarios_long <- scenario_raw %>%
     )
   )
 
-log_info("Scenario data prepared.")
+logger::log_info("Scenario data prepared.")
 
 
 # currency data output ---------------------------------------------------------
 
-log_info("Saving currencies.rds... ")
-
+logger::log_info("Saving file: \"currencies.rds\".")
 readRDS(currencies_data_path) %>%
   saveRDS(file.path(data_prep_outputs_path, "currencies.rds"))
 
 
 # financial data output --------------------------------------------------------
 
-log_info("Preparing financial data... ")
+logger::log_info("Preparing financial data.")
 
 # read raw FactSet financial data, filter to unique rows, merge AR company_id,
 # merge PACTA sectors from AR data
-log_info("Formatting and saving financial_data.rds... ")
-
+logger::log_info("Formatting and saving file: \"financial_data.rds\".")
 readRDS(factset_financial_data_path) %>%
   pacta.data.preparation::prepare_financial_data(factset_issue_code_bridge) %>%
   saveRDS(file.path(data_prep_outputs_path, "financial_data.rds"))
 
-log_info("Formatting and saving entity_financing.rds... ")
-
+logger::log_info("Formatting and saving file: \"entity_financing.rds\".")
 readRDS(factset_entity_financing_data_path) %>%
   saveRDS(file.path(data_prep_outputs_path, "entity_financing.rds"))
 
-log_info("Formatting and saving entity_info.rds... ")
-
+logger::log_info("Formatting and saving file: \"entity_info.rds\".")
 factset_entity_id__ar_company_id <-
   readr::read_csv(ar_company_id__factset_entity_id_path, col_types = "c") %>%
   select(
     factset_entity_id = "factset_id",
     ar_company_id = "company_id"
   )
-
 readRDS(factset_entity_info_path) %>%
   pacta.data.preparation::prepare_entity_info(factset_entity_id__ar_company_id) %>%
   saveRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
 
-log_info("Financial data prepared.")
+logger::log_info("Financial data prepared.")
 
 
 # ABCD data output -------------------------------------------------------------
 
-log_info("Preparing  ABCD... ")
+logger::log_info("Preparing ABCD.")
 
 entity_info <- readRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
 
@@ -341,8 +331,9 @@ ar_company_id__credit_parent_ar_company_id <-
 rm(entity_info)
 
 
-log_info("Formatting and saving masterdata_ownership_datastore.rds... ")
-
+logger::log_info(
+  "Formatting and saving file: \"masterdata_ownership_datastore.rds\"."
+)
 readr::read_csv(masterdata_ownership_path, na = "", show_col_types = FALSE) %>%
   pacta.data.preparation::prepare_masterdata(
     ar_company_id__country_of_domicile,
@@ -352,7 +343,9 @@ readr::read_csv(masterdata_ownership_path, na = "", show_col_types = FALSE) %>%
   saveRDS(file.path(data_prep_outputs_path, "masterdata_ownership_datastore.rds"))
 
 
-log_info("Formatting and saving masterdata_debt_datastore.rds... ")
+logger::log_info(
+  "Formatting and saving file: \"masterdata_debt_datastore.rds\"."
+)
 
 masterdata_debt <- readr::read_csv(masterdata_debt_path, na = "", show_col_types = FALSE)
 
@@ -391,12 +384,12 @@ rm(company_id__creditor_company_id)
 rm(ar_company_id__country_of_domicile)
 rm(ar_company_id__credit_parent_ar_company_id)
 
-log_info("ABCD prepared.")
+logger::log_info("ABCD prepared.")
 
 
 # abcd_flags -------------------------------------------------------------------
 
-log_info("Preparing  ABCD flags... ")
+logger::log_info("Preparing ABCD flags.")
 financial_data <- readRDS(file.path(data_prep_outputs_path, "financial_data.rds"))
 
 entity_info <- readRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
@@ -411,7 +404,7 @@ factset_entity_id__security_mapped_sector <-
   select(factset_entity_id, security_mapped_sector)
 
 
-log_info("Formatting and saving abcd_flags_equity.rds... ")
+logger::log_info("Formatting and saving file: \"abcd_flags_equity.rds\".")
 
 ar_company_id__sectors_with_assets__ownership <-
   readRDS(file.path(data_prep_outputs_path, "masterdata_ownership_datastore.rds")) %>%
@@ -436,7 +429,7 @@ financial_data %>%
   saveRDS(file.path(data_prep_outputs_path, "abcd_flags_equity.rds"))
 
 
-log_info("Formatting and saving abcd_flags_bonds.rds...  ")
+logger::log_info("Formatting and saving file: \"abcd_flags_bonds.rds\".")
 
 ar_company_id__sectors_with_assets__debt <-
   readRDS(file.path(data_prep_outputs_path, "masterdata_debt_datastore.rds")) %>%
@@ -474,12 +467,12 @@ rm(financial_data)
 rm(entity_info)
 rm(factset_entity_id__ar_company_id)
 rm(factset_entity_id__security_mapped_sector)
-log_info("ABCD flags prepared.")
+logger::log_info("ABCD flags prepared.")
 
 
 # fund data output -------------------------------------------------------------
 
-log_info("Preparing fund data... ")
+logger::log_info("Preparing fund data.")
 
 fund_data <- readRDS(factset_fund_data_path)
 
@@ -507,14 +500,14 @@ fund_data %>%
   saveRDS(file.path(data_prep_outputs_path, "fund_data.rds"))
 
 
-log_info("Saving total_fund_list.rds... ")
+logger::log_info("Saving file: \"total_fund_list.rds\".")
 fund_data %>%
   select(factset_fund_id) %>%
   distinct() %>%
   saveRDS(file.path(data_prep_outputs_path, "total_fund_list.rds"))
 
 
-log_info("Saving isin_to_fund_table.rds... ")
+logger::log_info("Saving file: \"isin_to_fund_table.rds\".")
 
 isin_to_fund_table <- readRDS(factset_isin_to_fund_table_path)
 
@@ -545,7 +538,7 @@ isin_to_fund_table %>%
 rm(fund_data)
 rm(isin_to_fund_table)
 
-log_info("Fund data prepared.")
+logger::log_info("Fund data prepared.")
 
 
 # emission data output ---------------------------------------------------------
@@ -561,7 +554,9 @@ iss_company_emissions <-
   ) %>%
   mutate(icc_total_emissions_units = "tCO2e") # units are defined in the ISS/FactSet documentation (see #144)
 
-log_info("Formatting and saving iss_entity_emission_intensities.rds...  ")
+logger::log_info(
+  "Formatting and saving file: \"iss_entity_emission_intensities.rds\"."
+)
 
 iss_entity_emission_intensities <-
   readRDS(factset_entity_financing_data_path) %>%
@@ -602,7 +597,9 @@ saveRDS(
 )
 
 
-log_info("Formatting and saving iss_average_sector_emission_intensities.rds...  ")
+logger::log_info(
+  "Formatting and saving file: \"iss_average_sector_emission_intensities.rds\"."
+)
 
 factset_entity_info <- readRDS(factset_entity_info_path)
 
@@ -631,12 +628,12 @@ rm(iss_company_emissions)
 rm(iss_entity_emission_intensities)
 rm(factset_entity_info)
 
-log_info("Emissions data prepared.")
+logger::log_info("Emissions data prepared.")
 
 
 # combined ABCD and scenarios output -------------------------------------------
 
-log_info("Preparing combined ABCD scenario output... ")
+logger::log_info("Preparing combined ABCD scenario output.")
 
 masterdata_ownership_datastore <-
   readRDS(file.path(data_prep_outputs_path, "masterdata_ownership_datastore.rds")) %>%
@@ -645,7 +642,7 @@ masterdata_ownership_datastore <-
 for (scenario_source in unique(scenarios_long$scenario_source)) {
   filename <- paste0("equity_abcd_scenario_", scenario_source, ".rds")
   scenarios_long_source <- filter(scenarios_long, .data$scenario_source == .env$scenario_source)
-  log_info(paste0("Formatting and saving ", filename, "... "))
+  logger::log_info("Formatting and saving file: \"{filename}\".")
   pacta.data.preparation::dataprep_abcd_scen_connection(
     abcd_data = masterdata_ownership_datastore,
     scenario_data = scenarios_long_source,
@@ -663,7 +660,7 @@ for (scenario_source in unique(scenarios_long$scenario_source)) {
     saveRDS(file.path(data_prep_outputs_path, filename))
 }
 
-log_info("Formatting and saving equity_abcd_scenario.rds... ")
+logger::log_info("Formatting and saving file: \"equity_abcd_scenario.rds\".")
 list.files(
   data_prep_outputs_path,
   pattern = "^equity_abcd_scenario_",
@@ -681,7 +678,7 @@ masterdata_debt_datastore <-
 for (scenario_source in unique(scenarios_long$scenario_source)) {
   filename <- paste0("bonds_abcd_scenario_", scenario_source, ".rds")
   scenarios_long_source <- filter(scenarios_long, .data$scenario_source == .env$scenario_source)
-  log_info(paste0("Formatting and saving ", filename, "... "))
+  logger::log_info("Formatting and saving file: \"{filename}\".")
   pacta.data.preparation::dataprep_abcd_scen_connection(
     abcd_data = masterdata_debt_datastore,
     scenario_data = scenarios_long_source,
@@ -699,7 +696,7 @@ for (scenario_source in unique(scenarios_long$scenario_source)) {
     saveRDS(file.path(data_prep_outputs_path, filename))
 }
 
-log_info("Formatting and saving bonds_abcd_scenario.rds... ")
+logger::log_info("Formatting and saving file: \"bonds_abcd_scenario.rds\".")
 list.files(
   data_prep_outputs_path,
   pattern = "^bonds_abcd_scenario_",
@@ -709,14 +706,14 @@ list.files(
   bind_rows() %>%
   saveRDS(file.path(data_prep_outputs_path, "bonds_abcd_scenario.rds"))
 
-log_info("Combined ABCD scenario output prepared.")
+logger::log_info("Combined ABCD scenario output prepared.")
 
 
 # export SQLite versions of relevant files -------------------------------------
 
 if (export_sqlite_files) {
   # entity_info
-  log_info("Formatting and saving entity_info.sqlite... ")
+  logger::log_info("Formatting and saving file: \"entity_info.sqlite\".")
 
   entity_info <- readRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
 
@@ -740,7 +737,9 @@ if (export_sqlite_files) {
   rm(entity_info)
 
   # equity_abcd_scenario
-  log_info("Formatting and saving equity_abcd_scenario.sqlite... ")
+  logger::log_info(
+    "Formatting and saving file: \"equity_abcd_scenario.sqlite\"."
+  )
 
   equity_abcd_scenario <- readRDS(file.path(data_prep_outputs_path, "equity_abcd_scenario.rds"))
 
@@ -770,7 +769,9 @@ if (export_sqlite_files) {
   rm(equity_abcd_scenario)
 
   # bonds_abcd_scenario
-  log_info("Formatting and saving bonds_abcd_scenario.sqlite... ")
+  logger::log_info(
+    "Formatting and saving file: \"bonds_abcd_scenario.sqlite\"."
+  )
 
   bonds_abcd_scenario <- readRDS(file.path(data_prep_outputs_path, "bonds_abcd_scenario.rds"))
 
@@ -803,7 +804,7 @@ if (export_sqlite_files) {
 
 # manifests of input and output file -------------------------------------------
 
-log_info("Formatting and saving manifest.json... ")
+logger::log_info("Formatting and saving file: \"manifest.json\".")
 
 ent_entity_affiliates_last_update <-
   readRDS(factset_entity_info_path) %>%
@@ -885,7 +886,7 @@ pacta.data.preparation::write_manifest(
 
 # copy in NEWs.md files from relevant PACTA packages ---------------------------
 
-log_info("Copying NEW.md files from relevant PACTA packages... ")
+logger::log_info("Copying NEWS.md files from relevant PACTA packages.")
 
 # `pacta_packages` defined above to add NEWS text to manifest
 for (pkg_name in pacta_packages) {
@@ -898,4 +899,4 @@ for (pkg_name in pacta_packages) {
 
 # ------------------------------------------------------------------------------
 
-log_info("PACTA Data Preparation Complete.")
+logger::log_info("PACTA Data Preparation Complete.")
