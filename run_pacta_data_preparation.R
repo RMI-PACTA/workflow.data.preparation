@@ -22,16 +22,8 @@ logger::log_trace("Necessary packages loaded.")
 
 # if any essential envvars are missing, read the .env file.
 # These should be set already as part of an ACI deployment.
-logger::log_debug("Checking for missing envvars.")
-if (any(
-  !nzchar(c(
-    Sys.getenv("R_DATABASE_USER"),
-    Sys.getenv("R_DATABASE_PASSWORD"),
-    Sys.getenv("R_CONFIG_ACTIVE")
-  ))
-)) {
-  readRenviron(".env")
-}
+logger::log_debug("Reading .env file.")
+readRenviron(".env")
 
 logger::log_debug("Loading config.")
 config <-
