@@ -69,7 +69,10 @@ global_aggregate_scenario_sources_list <- config$global_aggregate_scenario_sourc
 global_aggregate_sector_list <- config$global_aggregate_sector_list
 
 #ensure data_prep_outputs_path exists
-if (!dir.exists(data_prep_outputs_path)) {
+if (dir.exists(data_prep_outputs_path)) {
+  logger::log_warn("Data prep outputs path already exists.")
+} else {
+  logger::log_debug("Creating data prep outputs path.")
   dir.create(data_prep_outputs_path)
 }
 logger::log_info("Data prep outputs path: {data_prep_outputs_path}")
@@ -105,7 +108,7 @@ relevant_years <- sort(
   )
 )
 logger::log_info(
-    "Full time horizon set to: {paste0(relevant_years, collapse = ', ')}."
+  "Full time horizon set to: {paste0(relevant_years, collapse = ', ')}."
 )
 
 scenario_raw_data_to_include <- lapply(scenario_raw_data_to_include, get, envir = asNamespace("pacta.scenario.preparation"))
@@ -273,8 +276,8 @@ scenarios_long <- scenario_raw %>%
     by = c(
       scenario_source = "source",
       scenario_geography = "scenario_geography_source"
-      )
-    ) %>%
+    )
+  ) %>%
   select(-"scenario_geography") %>%
   rename(scenario_geography = "scenario_geography_pacta") %>%
   filter(
