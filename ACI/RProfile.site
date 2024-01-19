@@ -1,5 +1,7 @@
 options(
   pkg.sysreqs = FALSE,
+  pkg.sysreqs_db_update = FALSE,
+  pkg.sysreqs_update = FALSE,
   readr.show_progress = FALSE,
   repos = c(CRAN = '$CRAN_REPO')
 )
