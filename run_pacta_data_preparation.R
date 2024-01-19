@@ -104,7 +104,11 @@ factset_iss_emissions_data_path <- file.path(data_prep_inputs_path, "factset_iss
 
 relevant_years <- sort(
   unique(
-    market_share_target_reference_year:(market_share_target_reference_year + time_horizon)
+    seq(
+      from = market_share_target_reference_year,
+      to = (market_share_target_reference_year + time_horizon),
+      by = 1L
+    )
   )
 )
 logger::log_info(
