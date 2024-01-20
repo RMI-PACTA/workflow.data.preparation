@@ -26,6 +26,7 @@ default:
   scenario_geographies_list: ["Global", "NonOECD", "OECD"]
   global_aggregate_scenario_sources_list: ["ETP2020", "GECO2021", "IPR2021", "ISF2021", "WEO2021"]
   global_aggregate_sector_list: ["Power"]
+  create_tar: true
 
 
 2021Q4:
@@ -47,6 +48,7 @@ default:
   scenario_geographies_list: ["Global", "NonOECD", "OECD"]
   global_aggregate_scenario_sources_list: ["ETP2020", "GECO2021", "IPR2021", "ISF2021", "WEO2021"]
   global_aggregate_sector_list: ["Power"]
+  create_tar: true
 
 2021Q4_dev_vm:
   inherits: 2021Q4
@@ -81,6 +83,7 @@ default:
   scenario_geographies_list: ["Global", "NonOECD", "OECD"]
   global_aggregate_scenario_sources_list: ["ETP2020", "GECO2021", "IPR2021", "ISF2021", "WEO2021"]
   global_aggregate_sector_list: ["Power"]
+  create_tar: true
 
 2022Q4:
   dbname: "fds_20230705"

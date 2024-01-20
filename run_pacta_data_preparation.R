@@ -64,6 +64,7 @@ tech_exclude <- config$tech_exclude
 scenario_geographies_list <- config$scenario_geographies_list
 global_aggregate_scenario_sources_list <- config$global_aggregate_scenario_sources_list
 global_aggregate_sector_list <- config$global_aggregate_sector_list
+create_tar <- config$create_tar
 logger::log_trace("Config values set as R objects.")
 
 #ensure data_prep_outputs_path exists
