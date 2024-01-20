@@ -2,9 +2,6 @@ version: "3.2"
 
 services:
   workflow.data.preparation_aci:
-    stdin_open: true
-    tty: true
-    command: ["sh"]
     build:
       context: ..
       dockerfile: ACI/Dockerfile.ACI

@@ -1,7 +1,7 @@
 #! /bin/sh
 set -e
 
-inputs_dir="/mnt/inputs"
+inputs_dir="/mnt/dataprep_inputs"
 
 # copy raw data, then run normal data prep script
 Rscript /workflow.data.preparation/copy_raw_data.R 2>&1 | \

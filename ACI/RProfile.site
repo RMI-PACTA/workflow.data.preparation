@@ -3,5 +3,7 @@ options(
   pkg.sysreqs_db_update = FALSE,
   pkg.sysreqs_update = FALSE,
   readr.show_progress = FALSE,
-  repos = c(CRAN = '$CRAN_REPO')
+  repos = c(
+    CRAN = "https://packagemanager.posit.co/cran/__linux__/jammy/2023-10-30"
+  )
 )

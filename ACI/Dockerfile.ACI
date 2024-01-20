@@ -30,10 +30,8 @@ RUN curl -fsSL -o /tmp/google-chrome.deb https://dl.google.com/linux/direct/goog
 
 WORKDIR /workflow.data.preparation
 
-# set frozen CRAN repo
-ARG CRAN_REPO="https://packagemanager.posit.co/cran/__linux__/jammy/2023-10-30"
-ARG R_HOME="/usr/local/lib/R"
-COPY ./ACI/Rprofile.site "${R_HOME}/etc/Rprofile.site"
+# set frozen CRAN repo and other R options()
+COPY ./ACI/Rprofile.site "/usr/local/lib/R/etc/Rprofile.site"
 
 # Install R dependencies
 COPY DESCRIPTION DESCRIPTION
