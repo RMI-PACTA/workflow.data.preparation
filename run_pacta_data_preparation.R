@@ -413,7 +413,7 @@ ar_company_id__credit_parent_ar_company_id <-
   distinct()
 logger::log_trace("AR company ID to credit parent mapping prepared.")
 
-log_trace("removing entity_info to clear memory.")
+logger::log_trace("removing entity_info to clear memory.")
 rm(entity_info)
 
 logger::log_info(
@@ -1066,5 +1066,30 @@ for (pkg_name in pacta_packages) {
 }
 
 # ------------------------------------------------------------------------------
+
+# Create tar file if requested
+if (create_tar) {
+  logger::log_info("Creating tar file.")
+  tar_file_path <- file.path(
+    data_prep_outputs_path,
+    paste0(basename(data_prep_outputs_path), ".tar.gz")
+  )
+  logger::log_trace("Tar file path: \"{tar_file_path}\".")
+  system2(
+    command = "tar",
+    args = c(
+      "--create",
+      "--exclude-backups",
+      "--exclude-vcs",
+      "--gzip",
+      "--verbose",
+      "-C", dirname(data_prep_outputs_path),
+      paste0("--file=", tar_file_path),
+      basename(data_prep_outputs_path)
+    )
+  )
+  logger::log_info("Tar file created at ", tar_file_path)
+}
+
 
 logger::log_info("PACTA Data Preparation Complete.")
