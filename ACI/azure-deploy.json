@@ -88,9 +88,9 @@
                 "requests": {
                   "cpu": 1,
                   "memoryInGB": 32
-                  gpu: {
+                  "gpu": {
                     "count": 1,
-                    "sku": "K80"
+                    "sku": "V100"
                   }
                 }
               },

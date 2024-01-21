@@ -60,9 +60,9 @@ For older docker versions that support buildkit, you can write the _value_ of th
 # must be built with buildkit
 # run from repo root
 docker build \
-  --secret id=github_pat,src=$(pwd)/secretfile \
+  --secret id=github_pat,src=$(pwd)/ACI/github_pat.txt \
   --progress=plain \
-  --tag workflow.data.preparation_aci \
+  --tag transitionmonitordockerregistry.azurecr.io/workflow.data.preparation_aci \
   -f ACI/Dockerfile.ACI . 
 
 ```
