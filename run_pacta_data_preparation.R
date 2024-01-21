@@ -63,18 +63,25 @@ masterdata_debt_path <-
 ar_company_id__factset_entity_id_path <-
   file.path(data_prep_inputs_path, ar_company_id__factset_entity_id_filename)
 
+factset_financial_data_path <-
+  file.path(data_prep_inputs_path, "factset_financial_data.rds")
+factset_entity_info_path <-
+  file.path(data_prep_inputs_path, "factset_entity_info.rds")
+factset_entity_financing_data_path <-
+  file.path(data_prep_inputs_path, "factset_entity_financing_data.rds")
+factset_fund_data_path <-
+  file.path(data_prep_inputs_path, "factset_fund_data.rds")
+factset_isin_to_fund_table_path <-
+  file.path(data_prep_inputs_path, "factset_isin_to_fund_table.rds")
+factset_iss_emissions_data_path <-
+  file.path(data_prep_inputs_path, "factset_iss_emissions.rds")
+
 
 # pre-flight filepaths ---------------------------------------------------------
 
 scenarios_analysis_input_path <- file.path(data_prep_inputs_path, "Scenarios_AnalysisInput.csv")
 scenario_regions_path <- file.path(data_prep_inputs_path, "scenario_regions.csv")
 currencies_data_path <- file.path(data_prep_inputs_path, "currencies.rds")
-factset_financial_data_path <- file.path(data_prep_inputs_path, "factset_financial_data.rds")
-factset_entity_info_path <- file.path(data_prep_inputs_path, "factset_entity_info.rds")
-factset_entity_financing_data_path <- file.path(data_prep_inputs_path, "factset_entity_financing_data.rds")
-factset_fund_data_path <- file.path(data_prep_inputs_path, "factset_fund_data.rds")
-factset_isin_to_fund_table_path <- file.path(data_prep_inputs_path, "factset_isin_to_fund_table.rds")
-factset_iss_emissions_data_path <- file.path(data_prep_inputs_path, "factset_iss_emissions.rds")
 
 
 # computed options -------------------------------------------------------------
@@ -136,6 +143,8 @@ scenario_raw_data %>%
 pacta.scenario.preparation::scenario_regions %>%
   write_csv(scenario_regions_path, na = "")
 
+logger::log_info("Pre-flight data prepared.")
+
 
 # web scraping -----------------------------------------------------------------
 
@@ -149,6 +158,7 @@ if (update_currencies) {
 
 logger::log_info("Scraping index regions.")
 index_regions <- pacta.data.scraping::get_index_regions()
+
 
 # intermediary files -----------------------------------------------------------
 
