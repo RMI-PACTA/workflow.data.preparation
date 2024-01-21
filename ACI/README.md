@@ -25,8 +25,13 @@ Due to data prep requiring >16 GB of memory (which is the current limit for stan
 
 ```sh
 
-RESOURCEGROUP="pacta-experiments" \
-    ./deploy-vm.sh
+# must set envvar RESOURCEGROUP and refer to an exisitng Azure RG.
+# set inline
+# RESOURCEGROUP="<myRG>" ./deploy-vm.sh
+# or with export:
+# export RESOURCEGROUP="<myRG>"
+
+./deploy-vm.sh
 
 ```
 
@@ -38,11 +43,20 @@ You can connect to the VM if you first connect to the VPN (the deploy script doe
 
 ```sh
 
-RESOURCEGROUP="pacta-experiments" \
 az ssh vm \
     --local-user azureuser \
     --name "data-prep-runner" \
     --prefer-private-ip \
     --resource-group "$RESOURCEGROUP"
+
+```
+
+### Watching progress
+
+from an SSH session (above):
+
+```sh
+
+tmux new-session tail -n 10000 -f /var/log/cloud-init-output.log
 
 ```

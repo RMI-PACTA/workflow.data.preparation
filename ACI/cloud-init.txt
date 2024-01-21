@@ -139,7 +139,6 @@ write_files:
         DOCKERIMAGE="transitionmonitordockerregistry.azurecr.io/workflow.data.preparation_aci"
         docker pull $DOCKERIMAGE
         docker run \
-          -i -t --rm \
           --env DEPLOY_START_TIME=$(date -u +%Y%m%dT%H%M%SZ) \
           --env LOG_LEVEL=TRACE \
           --env R_CONFIG_ACTIVE=2022Q4_CICD \
@@ -153,4 +152,4 @@ write_files:
 
 runcmd:
   - [chown, -R, azureuser, /home/azureuser]
-  - [su, -c, "run_dataprep_docker", azureuser]
+  - [su, -c, "/usr/local/bin/run_dataprep_docker", azureuser]

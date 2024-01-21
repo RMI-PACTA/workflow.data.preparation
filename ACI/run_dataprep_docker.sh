@@ -13,7 +13,6 @@ DOCKERIMAGE="transitionmonitordockerregistry.azurecr.io/workflow.data.preparatio
 docker pull $DOCKERIMAGE
 
 docker run \
-  -i -t --rm \
   --env DEPLOY_START_TIME=$(date -u +%Y%m%dT%H%M%SZ) \
   --env LOG_LEVEL=TRACE \
   --env R_CONFIG_ACTIVE=2022Q4_CICD \
