@@ -1,6 +1,9 @@
 #! /bin/sh
 set -e
 
+# check memory available
+free -m | cat
+
 inputs_dir="/mnt/dataprep_inputs"
 
 # copy raw data, then run normal data prep script

@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "contentVersion": "0.0.4",
+  "contentVersion": "0.0.0.5",
   "parameters": {
     "location": {
       "type": "string",
@@ -13,12 +13,6 @@
       "type": "string",
       "metadata": {
         "description": "The ID of the user assigned identity to use for the container group."
-      }
-    },
-    "serviceprincipal": {
-      "type": "string",
-      "metadata": {
-        "description": "The ID of the service principal to use for the container group."
       }
     },
     "containerGroupName": {
@@ -40,12 +34,6 @@
       }
     },
     "rawdata-storageaccountkey": {
-      "type": "securestring",
-      "metadata": {
-        "description": "The storage account key for the rawdata storage account."
-      }
-    },
-    "dataprepinputs-storageaccountkey": {
       "type": "securestring",
       "metadata": {
         "description": "The storage account key for the rawdata storage account."
@@ -99,7 +87,11 @@
               "resources": {
                 "requests": {
                   "cpu": 1,
-                  "memoryInGB": 1
+                  "memoryInGB": 32
+                  gpu: {
+                    "count": 1,
+                    "sku": "K80"
+                  }
                 }
               },
               "environmentVariables": [
@@ -117,7 +109,7 @@
                 },
                 {
                   "name": "LOG_LEVEL",
-                  "value": "DEBUG"
+                  "value": "TRACE"
                 }
               ],
               "volumeMounts": [
@@ -130,8 +122,8 @@
                   "mountPath": "/mnt/rawdata/"
                 },
                 {
-                  "name": "inputsvolume",
-                  "mountPath": "/mnt/inputs/"
+                  "name": "dataprepinputsvolume",
+                  "mountPath": "/mnt/dataprep_inputs"
                 },
                 {
                   "name": "outputsvolume",
@@ -169,12 +161,12 @@
             }
           },
           {
-            "name": "inputsvolume",
+            "name": "dataprepinputsvolume",
             "azureFile": {
-              "shareName": "data-prep-inputs",
+              "shareName": "dataprep-inputs",
               "readOnly": false,
-              "storageAccountName": "pactadata",
-              "storageAccountKey": "[parameters('dataprepinputs-storageaccountkey')]"
+              "storageAccountName": "pactarawdata",
+              "storageAccountKey": "[parameters('rawdata-storageaccountkey')]"
             }
           },
           {
