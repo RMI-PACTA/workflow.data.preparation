@@ -764,22 +764,16 @@ parameters <-
     input_filepaths = list(
       masterdata_ownership_path = masterdata_ownership_path,
       masterdata_debt_path = masterdata_debt_path,
-      ar_company_id__factset_entity_id_path = ar_company_id__factset_entity_id_path
-    ),
-    preflight_filepaths = list(
-      scenarios_analysis_input_path = scenarios_analysis_input_path,
-      scenario_regions_path = scenario_regions_path,
-      currencies_data_path = currencies_data_path,
+      ar_company_id__factset_entity_id_path = ar_company_id__factset_entity_id_path,
       factset_financial_data_path = factset_financial_data_path,
       factset_entity_info_path = factset_entity_info_path,
       factset_fund_data_path = factset_fund_data_path,
       factset_isin_to_fund_table_path = factset_isin_to_fund_table_path
     ),
-    factset_database = list(
-      dbname = dbname,
-      host = host,
-      username = username,
-      ent_entity_affiliates_last_update = ent_entity_affiliates_last_update
+    preflight_filepaths = list(
+      scenarios_analysis_input_path = scenarios_analysis_input_path,
+      scenario_regions_path = scenario_regions_path,
+      currencies_data_path = currencies_data_path
     ),
     timestamps = list(
       imf_quarter_timestamp = imf_quarter_timestamp,
@@ -805,7 +799,6 @@ parameters <-
       green_techs = green_techs,
       tech_exclude = tech_exclude
     ),
-    update_factset = update_factset,
     package_news = package_news
   )
 
