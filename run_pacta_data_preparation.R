@@ -36,7 +36,6 @@ ar_company_id__factset_entity_id_filename <- config$ar_company_id__factset_entit
 update_currencies <- config$update_currencies
 export_sqlite_files <- config$export_sqlite_files
 imf_quarter_timestamp <- config$imf_quarter_timestamp
-factset_data_timestamp <- config$factset_data_timestamp
 pacta_financial_timestamp <- config$pacta_financial_timestamp
 market_share_target_reference_year <- config$market_share_target_reference_year
 iss_emissions_year <- config$iss_emissions_year
@@ -784,7 +783,6 @@ parameters <-
     ),
     timestamps = list(
       imf_quarter_timestamp = imf_quarter_timestamp,
-      factset_data_timestamp = factset_data_timestamp,
       pacta_financial_timestamp = pacta_financial_timestamp
     ),
     scenarios = list(
