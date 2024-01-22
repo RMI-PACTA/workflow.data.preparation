@@ -33,6 +33,12 @@ data_prep_outputs_path <- config$data_prep_outputs_path
 masterdata_ownership_filename <- config$masterdata_ownership_filename
 masterdata_debt_filename <- config$masterdata_debt_filename
 ar_company_id__factset_entity_id_filename <- config$ar_company_id__factset_entity_id_filename
+factset_financial_data_filename <- config$factset_financial_data_filename
+factset_entity_info_filename <- config$factset_entity_info_filename
+factset_entity_financing_data_filename <- config$factset_entity_financing_data_filename
+factset_fund_data_filename <- config$factset_fund_data_filename
+factset_isin_to_fund_table_filename <- config$factset_isin_to_fund_table_filename
+factset_iss_emissions_data_filename <- config$factset_iss_emissions_data_filename
 update_currencies <- config$update_currencies
 export_sqlite_files <- config$export_sqlite_files
 imf_quarter_timestamp <- config$imf_quarter_timestamp
@@ -63,17 +69,17 @@ ar_company_id__factset_entity_id_path <-
   file.path(data_prep_inputs_path, ar_company_id__factset_entity_id_filename)
 
 factset_financial_data_path <-
-  file.path(data_prep_inputs_path, "factset_financial_data.rds")
+  file.path(data_prep_inputs_path, factset_financial_data_filename)
 factset_entity_info_path <-
-  file.path(data_prep_inputs_path, "factset_entity_info.rds")
+  file.path(data_prep_inputs_path, factset_entity_info_filename)
 factset_entity_financing_data_path <-
-  file.path(data_prep_inputs_path, "factset_entity_financing_data.rds")
+  file.path(data_prep_inputs_path, factset_entity_financing_data_filename)
 factset_fund_data_path <-
-  file.path(data_prep_inputs_path, "factset_fund_data.rds")
+  file.path(data_prep_inputs_path, factset_fund_data_filename)
 factset_isin_to_fund_table_path <-
-  file.path(data_prep_inputs_path, "factset_isin_to_fund_table.rds")
+  file.path(data_prep_inputs_path, factset_isin_to_fund_table_filename)
 factset_iss_emissions_data_path <-
-  file.path(data_prep_inputs_path, "factset_iss_emissions.rds")
+  file.path(data_prep_inputs_path, factset_iss_emissions_data_filename)
 
 
 # pre-flight filepaths ---------------------------------------------------------
