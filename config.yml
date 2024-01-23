@@ -11,7 +11,7 @@ default:
   factset_isin_to_fund_table_filename: ""
   factset_iss_emissions_data_filename: ""
   update_currencies: TRUE
-  export_sqlite_files: FALSE
+  export_sqlite_files: TRUE
   imf_quarter_timestamp: "2021-Q4"
   pacta_financial_timestamp: "2021Q4"
   market_share_target_reference_year: 2021
