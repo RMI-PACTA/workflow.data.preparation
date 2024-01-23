@@ -28,7 +28,8 @@ config <-
     use_parent = FALSE
   )
 
-data_prep_inputs_path <- config$data_prep_inputs_path
+asset_impact_data_path <- config$asset_impact_data_path
+factset_data_path <- config$factset_data_path
 data_prep_outputs_path <- config$data_prep_outputs_path
 masterdata_ownership_filename <- config$masterdata_ownership_filename
 masterdata_debt_filename <- config$masterdata_debt_filename
@@ -62,31 +63,31 @@ global_aggregate_sector_list <- config$global_aggregate_sector_list
 # input filepaths --------------------------------------------------------------
 
 masterdata_ownership_path <-
-  file.path(data_prep_inputs_path, masterdata_ownership_filename)
+  file.path(asset_impact_data_path, masterdata_ownership_filename)
 masterdata_debt_path <-
-  file.path(data_prep_inputs_path, masterdata_debt_filename)
+  file.path(asset_impact_data_path, masterdata_debt_filename)
 ar_company_id__factset_entity_id_path <-
-  file.path(data_prep_inputs_path, ar_company_id__factset_entity_id_filename)
+  file.path(asset_impact_data_path, ar_company_id__factset_entity_id_filename)
 
 factset_financial_data_path <-
-  file.path(data_prep_inputs_path, factset_financial_data_filename)
+  file.path(factset_data_path, factset_financial_data_filename)
 factset_entity_info_path <-
-  file.path(data_prep_inputs_path, factset_entity_info_filename)
+  file.path(factset_data_path, factset_entity_info_filename)
 factset_entity_financing_data_path <-
-  file.path(data_prep_inputs_path, factset_entity_financing_data_filename)
+  file.path(factset_data_path, factset_entity_financing_data_filename)
 factset_fund_data_path <-
-  file.path(data_prep_inputs_path, factset_fund_data_filename)
+  file.path(factset_data_path, factset_fund_data_filename)
 factset_isin_to_fund_table_path <-
-  file.path(data_prep_inputs_path, factset_isin_to_fund_table_filename)
+  file.path(factset_data_path, factset_isin_to_fund_table_filename)
 factset_iss_emissions_data_path <-
-  file.path(data_prep_inputs_path, factset_iss_emissions_data_filename)
+  file.path(factset_data_path, factset_iss_emissions_data_filename)
 
 
 # pre-flight filepaths ---------------------------------------------------------
 
-scenarios_analysis_input_path <- file.path(data_prep_inputs_path, "Scenarios_AnalysisInput.csv")
-scenario_regions_path <- file.path(data_prep_inputs_path, "scenario_regions.csv")
-currencies_data_path <- file.path(data_prep_inputs_path, "currencies.rds")
+scenarios_analysis_input_path <- file.path(asset_impact_data_path, "Scenarios_AnalysisInput.csv")
+scenario_regions_path <- file.path(asset_impact_data_path, "scenario_regions.csv")
+currencies_data_path <- file.path(asset_impact_data_path, "currencies.rds")
 
 
 # computed options -------------------------------------------------------------
@@ -783,6 +784,7 @@ parameters <-
     ),
     timestamps = list(
       imf_quarter_timestamp = imf_quarter_timestamp,
+      factset_data_identifier = basename(factset_data_path),
       pacta_financial_timestamp = pacta_financial_timestamp
     ),
     scenarios = list(
@@ -811,7 +813,8 @@ parameters <-
 pacta.data.preparation::write_manifest(
   path = file.path(data_prep_outputs_path, "manifest.json"),
   parameters = parameters,
-  data_prep_inputs_path = data_prep_inputs_path,
+  asset_impact_data_path = asset_impact_data_path,
+  facset_data_path = facset_data_path,
   data_prep_outputs_path = data_prep_outputs_path
 )
 
