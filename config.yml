@@ -1,5 +1,4 @@
 default:
-  data_prep_inputs_path: "/inputs"
   data_prep_outputs_path: "/outputs"
   asset_impact_data_path: "/inputs"
   factset_data_path: ""
@@ -86,7 +85,7 @@ default:
   global_aggregate_sector_list: ["Power"]
 
 2022Q4:
-  factset_data_path: ""
+  factset_data_path: "factset-pacta_timestamp-20221231T000000Z_pulled-20231221T195325Z"
   masterdata_ownership_filename: "2023-06-18_AI_RMI Bespoke_Company Data Products_masterdata_ownership_2022Q4.csv"
   masterdata_debt_filename: "2023-06-18_AI_RMI Bespoke_Company Data Products_masterdata_debt_2022Q4.csv"
   ar_company_id__factset_entity_id_filename: "2023-02-15_AI_RMI_Bespoke_Company_Data_Products_Company_ID_List_2022Q4.csv"
