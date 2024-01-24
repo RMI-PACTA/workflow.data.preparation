@@ -28,20 +28,21 @@ config <-
     use_parent = FALSE
   )
 
-data_prep_inputs_path <- config$data_prep_inputs_path
+asset_impact_data_path <- config$asset_impact_data_path
+factset_data_path <- config$factset_data_path
 data_prep_outputs_path <- config$data_prep_outputs_path
 masterdata_ownership_filename <- config$masterdata_ownership_filename
 masterdata_debt_filename <- config$masterdata_debt_filename
 ar_company_id__factset_entity_id_filename <- config$ar_company_id__factset_entity_id_filename
-dbname <- config$dbname
-host <- config$host
-username <- Sys.getenv("R_DATABASE_USER")
-password <- Sys.getenv("R_DATABASE_PASSWORD")
-update_factset <- config$update_factset
+factset_financial_data_filename <- config$factset_financial_data_filename
+factset_entity_info_filename <- config$factset_entity_info_filename
+factset_entity_financing_data_filename <- config$factset_entity_financing_data_filename
+factset_fund_data_filename <- config$factset_fund_data_filename
+factset_isin_to_fund_table_filename <- config$factset_isin_to_fund_table_filename
+factset_iss_emissions_data_filename <- config$factset_iss_emissions_data_filename
 update_currencies <- config$update_currencies
 export_sqlite_files <- config$export_sqlite_files
 imf_quarter_timestamp <- config$imf_quarter_timestamp
-factset_data_timestamp <- config$factset_data_timestamp
 pacta_financial_timestamp <- config$pacta_financial_timestamp
 market_share_target_reference_year <- config$market_share_target_reference_year
 iss_emissions_year <- config$iss_emissions_year
@@ -62,24 +63,31 @@ global_aggregate_sector_list <- config$global_aggregate_sector_list
 # input filepaths --------------------------------------------------------------
 
 masterdata_ownership_path <-
-  file.path(data_prep_inputs_path, masterdata_ownership_filename)
+  file.path(asset_impact_data_path, masterdata_ownership_filename)
 masterdata_debt_path <-
-  file.path(data_prep_inputs_path, masterdata_debt_filename)
+  file.path(asset_impact_data_path, masterdata_debt_filename)
 ar_company_id__factset_entity_id_path <-
-  file.path(data_prep_inputs_path, ar_company_id__factset_entity_id_filename)
+  file.path(asset_impact_data_path, ar_company_id__factset_entity_id_filename)
+
+factset_financial_data_path <-
+  file.path(factset_data_path, factset_financial_data_filename)
+factset_entity_info_path <-
+  file.path(factset_data_path, factset_entity_info_filename)
+factset_entity_financing_data_path <-
+  file.path(factset_data_path, factset_entity_financing_data_filename)
+factset_fund_data_path <-
+  file.path(factset_data_path, factset_fund_data_filename)
+factset_isin_to_fund_table_path <-
+  file.path(factset_data_path, factset_isin_to_fund_table_filename)
+factset_iss_emissions_data_path <-
+  file.path(factset_data_path, factset_iss_emissions_data_filename)
 
 
 # pre-flight filepaths ---------------------------------------------------------
 
-scenarios_analysis_input_path <- file.path(data_prep_inputs_path, "Scenarios_AnalysisInput.csv")
-scenario_regions_path <- file.path(data_prep_inputs_path, "scenario_regions.csv")
-currencies_data_path <- file.path(data_prep_inputs_path, "currencies.rds")
-factset_financial_data_path <- file.path(data_prep_inputs_path, "factset_financial_data.rds")
-factset_entity_info_path <- file.path(data_prep_inputs_path, "factset_entity_info.rds")
-factset_entity_financing_data_path <- file.path(data_prep_inputs_path, "factset_entity_financing_data.rds")
-factset_fund_data_path <- file.path(data_prep_inputs_path, "factset_fund_data.rds")
-factset_isin_to_fund_table_path <- file.path(data_prep_inputs_path, "factset_isin_to_fund_table.rds")
-factset_iss_emissions_data_path <- file.path(data_prep_inputs_path, "factset_iss_emissions.rds")
+scenarios_analysis_input_path <- file.path(asset_impact_data_path, "Scenarios_AnalysisInput.csv")
+scenario_regions_path <- file.path(asset_impact_data_path, "scenario_regions.csv")
+currencies_data_path <- file.path(asset_impact_data_path, "currencies.rds")
 
 
 # computed options -------------------------------------------------------------
@@ -101,25 +109,21 @@ scenario_raw_data_to_include <- lapply(scenario_raw_data_to_include, get, envir 
 stopifnot(file.exists(masterdata_ownership_path))
 stopifnot(file.exists(masterdata_debt_path))
 stopifnot(file.exists(ar_company_id__factset_entity_id_path))
+stopifnot(file.exists(factset_financial_data_path))
+stopifnot(file.exists(factset_entity_info_path))
+stopifnot(file.exists(factset_entity_financing_data_path))
+stopifnot(file.exists(factset_fund_data_path))
+stopifnot(file.exists(factset_isin_to_fund_table_path))
+stopifnot(file.exists(factset_iss_emissions_data_path))
 
 if (!update_currencies) {
   stopifnot(file.exists(currencies_data_path))
-}
-
-if (!update_factset) {
-  stopifnot(file.exists(factset_financial_data_path))
-  stopifnot(file.exists(factset_entity_info_path))
-  stopifnot(file.exists(factset_entity_financing_data_path))
-  stopifnot(file.exists(factset_fund_data_path))
-  stopifnot(file.exists(factset_isin_to_fund_table_path))
-  stopifnot(file.exists(factset_iss_emissions_data_path))
 }
 
 
 # pre-flight -------------------------------------------------------------------
 
 logger::log_info("Fetching pre-flight data.")
-
 
 logger::log_info("Preparing scenario data.")
 scenario_raw_data <- bind_rows(scenario_raw_data_to_include)
@@ -145,6 +149,9 @@ scenario_raw_data %>%
 pacta.scenario.preparation::scenario_regions %>%
   write_csv(scenario_regions_path, na = "")
 
+logger::log_info("Pre-flight data prepared.")
+
+
 # web scraping -----------------------------------------------------------------
 
 if (update_currencies) {
@@ -157,72 +164,6 @@ if (update_currencies) {
 
 logger::log_info("Scraping index regions.")
 index_regions <- pacta.data.scraping::get_index_regions()
-
-
-# pull factset data ------------------------------------------------------------
-
-if (update_factset) {
-
-  logger::log_info("Fetching financial data.")
-  pacta.data.preparation::get_factset_financial_data(
-    data_timestamp = factset_data_timestamp,
-    dbname = dbname,
-    host = host,
-    username = username,
-    password = password
-  ) %>%
-    saveRDS(factset_financial_data_path)
-
-  logger::log_info("Fetching entity info data.")
-  pacta.data.preparation::get_factset_entity_info(
-    dbname = dbname,
-    host = host,
-    username = username,
-    password = password
-  ) %>%
-    saveRDS(factset_entity_info_path)
-
-  logger::log_info("Fetching entity financing data.")
-  pacta.data.preparation::get_factset_entity_financing_data(
-    data_timestamp = factset_data_timestamp,
-    dbname = dbname,
-    host = host,
-    username = username,
-    password = password
-  ) %>%
-    saveRDS(factset_entity_financing_data_path)
-
-  logger::log_info("Fetching fund data.")
-  pacta.data.preparation::get_factset_fund_data(
-    data_timestamp = factset_data_timestamp,
-    dbname = dbname,
-    host = host,
-    username = username,
-    password = password
-  ) %>%
-    saveRDS(factset_fund_data_path)
-
-  logger::log_info("Fetching fund ISINs.")
-  pacta.data.preparation::get_factset_isin_to_fund_table(
-    dbname = dbname,
-    host = host,
-    username = username,
-    password = password
-  ) %>%
-    saveRDS(factset_isin_to_fund_table_path)
-
-  logger::log_info("Fetching ISS emissions data.")
-  pacta.data.preparation::get_factset_iss_emissions_data(
-    year = iss_emissions_year,
-    dbname = dbname,
-    host = host,
-    username = username,
-    password = password
-  ) %>%
-    saveRDS(factset_iss_emissions_data_path)
-}
-
-logger::log_info("Pre-flight data prepared.")
 
 
 # intermediary files -----------------------------------------------------------
@@ -830,26 +771,20 @@ parameters <-
     input_filepaths = list(
       masterdata_ownership_path = masterdata_ownership_path,
       masterdata_debt_path = masterdata_debt_path,
-      ar_company_id__factset_entity_id_path = ar_company_id__factset_entity_id_path
-    ),
-    preflight_filepaths = list(
-      scenarios_analysis_input_path = scenarios_analysis_input_path,
-      scenario_regions_path = scenario_regions_path,
-      currencies_data_path = currencies_data_path,
+      ar_company_id__factset_entity_id_path = ar_company_id__factset_entity_id_path,
       factset_financial_data_path = factset_financial_data_path,
       factset_entity_info_path = factset_entity_info_path,
       factset_fund_data_path = factset_fund_data_path,
       factset_isin_to_fund_table_path = factset_isin_to_fund_table_path
     ),
-    factset_database = list(
-      dbname = dbname,
-      host = host,
-      username = username,
-      ent_entity_affiliates_last_update = ent_entity_affiliates_last_update
+    preflight_filepaths = list(
+      scenarios_analysis_input_path = scenarios_analysis_input_path,
+      scenario_regions_path = scenario_regions_path,
+      currencies_data_path = currencies_data_path
     ),
     timestamps = list(
       imf_quarter_timestamp = imf_quarter_timestamp,
-      factset_data_timestamp = factset_data_timestamp,
+      factset_data_identifier = basename(factset_data_path),
       pacta_financial_timestamp = pacta_financial_timestamp
     ),
     scenarios = list(
@@ -872,14 +807,14 @@ parameters <-
       green_techs = green_techs,
       tech_exclude = tech_exclude
     ),
-    update_factset = update_factset,
     package_news = package_news
   )
 
 pacta.data.preparation::write_manifest(
   path = file.path(data_prep_outputs_path, "manifest.json"),
   parameters = parameters,
-  data_prep_inputs_path = data_prep_inputs_path,
+  asset_impact_data_path = asset_impact_data_path,
+  facset_data_path = facset_data_path,
   data_prep_outputs_path = data_prep_outputs_path
 )
 
