@@ -45,7 +45,6 @@ export_sqlite_files <- config$export_sqlite_files
 imf_quarter_timestamp <- config$imf_quarter_timestamp
 pacta_financial_timestamp <- config$pacta_financial_timestamp
 market_share_target_reference_year <- config$market_share_target_reference_year
-iss_emissions_year <- config$iss_emissions_year
 time_horizon <- config$time_horizon
 tdm_delta_years <- config$tdm_delta_years
 scenario_sources_list <- config$scenario_sources_list
