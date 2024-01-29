@@ -16,7 +16,6 @@ default:
   imf_quarter_timestamp: "2021-Q4"
   pacta_financial_timestamp: "2021Q4"
   market_share_target_reference_year: 2021
-  iss_emissions_year: 2019
   time_horizon: 5
   scenario_sources_list: ["ETP2020", "GECO2021", "IPR2021", "ISF2021", "WEO2021"]
   sector_list: ["Automotive", "Power", "Fossil Fuels", "Oil&Gas", "Coal"]
@@ -38,7 +37,6 @@ default:
   imf_quarter_timestamp: "2021-Q4"
   pacta_financial_timestamp: "2021Q4"
   market_share_target_reference_year: 2021
-  iss_emissions_year: 2019
   scenario_sources_list: ["ETP2020", "GECO2021", "IPR2021", "ISF2021", "WEO2021"]
   sector_list: ["Automotive", "Power", "Fossil Fuels", "Oil&Gas", "Coal"]
   other_sector_list: ["Steel", "Aviation", "Cement"]
@@ -72,7 +70,6 @@ default:
   imf_quarter_timestamp: "2022-Q2"
   pacta_financial_timestamp: "2022Q2"
   market_share_target_reference_year: 2022
-  iss_emissions_year: 2021
   scenario_sources_list: ["ETP2020", "GECO2021", "IPR2021", "ISF2021", "WEO2021"]
   sector_list: ["Automotive", "Power", "Fossil Fuels", "Oil&Gas", "Coal"]
   other_sector_list: ["Steel", "Aviation", "Cement"]
@@ -92,7 +89,6 @@ default:
   imf_quarter_timestamp: "2022-Q4"
   pacta_financial_timestamp: "2022Q4"
   market_share_target_reference_year: 2022
-  iss_emissions_year: 2021
   scenario_sources_list: ["GECO2022", "IPR2021", "ISF2021", "WEO2022"]
   scenario_raw_data_to_include: ["geco_2022", "ipr_2021", "isf_2021", "weo_2022"]
   global_aggregate_scenario_sources_list: ["WEO2022"]
