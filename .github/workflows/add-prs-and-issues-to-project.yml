@@ -1,4 +1,4 @@
-name: Adds all new issues and PRs to the Transition Monitor project
+name: Adds all new issues and PRs to appropriate projects
 
 on:
   issues:
@@ -11,11 +11,20 @@ on:
       - opened
 
 jobs:
-  add-to-project:
-    name: Add issue to project
+  add-to-tm-project:
+    name: Add issue/PR to Transition Monitor project
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/add-to-project@v0.4.0
+      - uses: actions/add-to-project@v0.5.0
         with:
           project-url: https://github.com/orgs/RMI-PACTA/projects/8
+          github-token: ${{ secrets.PAT_ADD_ISSUES_TO_PROJECT }}
+  
+  add-to-maintainer-project:
+    name: Add issue/PR to @cjyetman's maintainer project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/add-to-project@v0.5.0
+        with:
+          project-url: https://github.com/orgs/RMI-PACTA/projects/13
           github-token: ${{ secrets.PAT_ADD_ISSUES_TO_PROJECT }}
