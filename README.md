@@ -1,6 +1,6 @@
 # workflow.data.preparation
 
-`workflow.data.preparation` orchestrates the PACTA data preparation process, combining production, financial, scenario, and currency data into a format suitable for use in the PACTA analysis.
+`workflow.data.preparation` orchestrates the PACTA data preparation process, combining production, financial, scenario, and currency data into a format suitable for use in a PACTA for investors analysis. Assuming that the computing resource being used has sufficient memory (which can be >16gb depending on the inputs), storage space, and access to the necessary inputs, this is intended to work on a desktop or laptop using RStudio or in an ephemeral Docker instance created by the included [Dockerfile](https://github.com/RMI-PACTA/workflow.data.preparation/blob/main/Dockerfile) and [docker-compose.yml](https://github.com/RMI-PACTA/workflow.data.preparation/blob/main/docker-compose.yml).
 
 ## Running locally with `docker-compose`
 
