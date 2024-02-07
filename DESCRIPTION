@@ -46,3 +46,4 @@ Remotes:
     RMI-PACTA/pacta.scenario.preparation
 Depends: 
     R (>= 3.5.0)
+License: MIT + file LICENSE
