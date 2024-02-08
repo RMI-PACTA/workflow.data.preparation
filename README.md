@@ -26,7 +26,7 @@ Before you begin, you must set the active config in an open R session with `Sys.
 
 ### Running data.prep
 
-Once the above steps have been completed, you should be able to run run_pacta_data_preparation.R, either by sourcing it, e.g. `source("run_pacta_data_preparation.R")`, or by running it line-by-line (or select lines of it) interactively.
+Once the above steps have been completed, you should be able to [run run_pacta_data_preparation.R](https://github.com/RMI-PACTA/workflow.data.preparation/blob/main/run_pacta_data_preparation.R), either by sourcing it, e.g. `source("run_pacta_data_preparation.R")`, or by running it line-by-line (or select lines of it) interactively.
 
 ## Running locally with `docker-compose`
 
