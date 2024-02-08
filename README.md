@@ -6,7 +6,7 @@
 
 ### R package dependencies
 
-Running workflow.data.preparation has a number of R package dependencies that are listed in the DESCRIPTION file. These can be installed manually or by using something like `pak::local_install_deps()`. Also, because of a dependency of 
+Running workflow.data.preparation has a number of R package dependencies that are listed in the DESCRIPTION file. These can be installed manually or by using something like `pak::local_install_deps()`.
 
 ### Setting appropriate config options
 
