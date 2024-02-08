@@ -114,6 +114,7 @@ stopifnot(file.exists(factset_entity_financing_data_path))
 stopifnot(file.exists(factset_fund_data_path))
 stopifnot(file.exists(factset_isin_to_fund_table_path))
 stopifnot(file.exists(factset_iss_emissions_data_path))
+stopifnot(file.exists(data_prep_outputs_path))
 
 if (!update_currencies) {
   stopifnot(file.exists(currencies_data_path))
