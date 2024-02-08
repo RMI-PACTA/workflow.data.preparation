@@ -2,6 +2,32 @@
 
 `workflow.data.preparation` orchestrates the PACTA data preparation process, combining production, financial, scenario, and currency data into a format suitable for use in a PACTA for investors analysis. Assuming that the computing resource being used has sufficient memory (which can be >16gb depending on the inputs), storage space, and access to the necessary inputs, this is intended to work on a desktop or laptop using RStudio or run using the included [Dockerfile](https://github.com/RMI-PACTA/workflow.data.preparation/blob/main/Dockerfile) and [docker-compose.yml](https://github.com/RMI-PACTA/workflow.data.preparation/blob/main/docker-compose.yml).
 
+## Running in RStudio
+
+### R package dependencies
+
+Running workflow.data.preparation has a number of R package dependencies that are listed in the DESCRIPTION file. These can be installed manually or by using something like `pak::local_install_deps()`.
+
+### Setting appropriate config options
+
+To make things easier, the recommended way to specify the desired config set when running locally in RStudio is by setting the active config set to `desktop` and modifying/adding only a few of the properties in the `desktop` config set. By doing so, you benefit from inheriting many of the appropriate configuration values without having to explicitly specify each one.
+
+You will need to set the `inherits` parameter, e.g. `inherits: 2022Q4`, to select which of the config sets specified in the config.yml file that is desired. 
+
+You will need to set `data_prep_outputs_path` to an *existing* directory where you want the outputs to be saved, e.g. `data_prep_outputs_path: "./outputs"` to point to an existing directory named `outputs` in the working directory of the R session you will be running data.prep in. This directory must exist before running data.prep (and ideally be empty). The script will throw an error early on if it does not exist.
+
+You will need to set `asset_impact_data_path` to the locally accessible directory where the necessary asset data files are located (absolute, or relative to the working directory of the R session you will be running data.prep in).
+
+You will need to set `factset_data_path` to the locally accessible directory where the necessary financial data files are located (absolute, or relative to the working directory of the R session you will be running data.prep in).
+
+### Setting the active config set
+
+Before you begin, you must set the active config in an open R session with `Sys.setenv(R_CONFIG_ACTIVE = "desktop")`.
+
+### Running data.prep
+
+Once the above steps have been completed, you should be able to [run run_pacta_data_preparation.R](https://github.com/RMI-PACTA/workflow.data.preparation/blob/main/run_pacta_data_preparation.R), either by sourcing it, e.g. `source("run_pacta_data_preparation.R")`, or by running it line-by-line (or select lines of it) interactively.
+
 ## Running locally with `docker-compose`
 
 Running the workflow requires a file `.env` to exist in the root directory, that looks like...
