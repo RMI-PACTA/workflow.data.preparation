@@ -1,4 +1,4 @@
-logger::log_threshold(Sys.getenv("LOG_LEVEL", "INFO"))
+logger::log_threshold(Sys.getenv("LOG_LEVEL", ifelse(interactive(), "FATAL", "INFO")))
 logger::log_formatter(logger::formatter_glue)
 
 # necessary packages -----------------------------------------------------------
