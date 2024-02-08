@@ -814,7 +814,7 @@ pacta.data.preparation::write_manifest(
   path = file.path(data_prep_outputs_path, "manifest.json"),
   parameters = parameters,
   asset_impact_data_path = asset_impact_data_path,
-  facset_data_path = facset_data_path,
+  factset_data_path = factset_data_path,
   data_prep_outputs_path = data_prep_outputs_path
 )
 
