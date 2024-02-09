@@ -9,13 +9,14 @@ RUN Rscript -e '\
   )) \
   '
 
-COPY . /workflow.data.preparation
-
-WORKDIR /workflow.data.preparation
+COPY .env /.env
+COPY DESCRIPTION /DESCRIPTION
 
 RUN Rscript -e '\
   readRenviron(".env"); \
   pak::local_install_deps(); \
   '
+
+COPY . /
 
 CMD Rscript run_pacta_data_preparation.R
