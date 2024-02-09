@@ -34,7 +34,7 @@ Running the workflow requires a file `.env` to exist in the root directory, that
 
 ```sh
 # .env
-HOST_INPUTS_PATH=/PATH/TO/AR_YYYYQQ
+HOST_INPUTS_PATH=/PATH/TO/inputs
 HOST_OUTPUTS_PATH=/PATH/TO/YYYYQQ_pacta_analysis_inputs_YYYY-MM-DD/YYYYQQ
 GITHUB_PAT=ghp_XXXXxxXxXXXxXxxX
 R_CONFIG_ACTIVE=YYYYQQ
