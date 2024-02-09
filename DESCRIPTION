@@ -30,6 +30,7 @@ Encoding: UTF-8
 Imports: 
     config,
     DBI,
+    dbplyr,
     dplyr,
     logger,
     pacta.data.preparation, 
