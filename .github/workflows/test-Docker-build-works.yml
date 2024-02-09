@@ -22,7 +22,7 @@ jobs:
           cat <<EOF > .env
           HOST_INPUTS_PATH=/inputs
           HOST_OUTPUTS_PATH=/outputs
-          GITHUB_PAT=${{ secrets.GITHUB_TOKEN }}
+          GITHUB_PAT='${{ secrets.GITHUB_TOKEN }}'
           R_CONFIG_ACTIVE=2022Q4
           EOF
 
