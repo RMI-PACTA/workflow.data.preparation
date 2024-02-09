@@ -1,0 +1,16 @@
+on:
+  push:
+      branches: [main]
+  pull_request:
+
+jobs:
+  docker-compose-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout workflow.data.preparation
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker-compose build --no-cache
