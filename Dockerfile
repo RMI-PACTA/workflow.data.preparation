@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 rocker/tidyverse
+FROM rocker/r-ver
 
 RUN Rscript -e 'install.packages("pak")'
 
