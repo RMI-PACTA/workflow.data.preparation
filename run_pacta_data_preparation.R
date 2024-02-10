@@ -59,16 +59,6 @@ global_aggregate_scenario_sources_list <- config$global_aggregate_scenario_sourc
 global_aggregate_sector_list <- config$global_aggregate_sector_list
 
 
-# check that parameters are not blank ------------------------------------------
-
-stopifnot(isFALSE(is.null(factset_financial_data_filename) || factset_financial_data_filename == ""))
-stopifnot(isFALSE(is.null(factset_entity_info_filename) || factset_entity_info_filename == ""))
-stopifnot(isFALSE(is.null(factset_entity_financing_data_filename) || factset_entity_financing_data_filename == ""))
-stopifnot(isFALSE(is.null(factset_fund_data_filename) || factset_fund_data_filename == ""))
-stopifnot(isFALSE(is.null(factset_isin_to_fund_table_filename) || factset_isin_to_fund_table_filename == ""))
-stopifnot(isFALSE(is.null(factset_iss_emissions_data_filename) || factset_iss_emissions_data_filename == ""))
-
-
 # input filepaths --------------------------------------------------------------
 
 masterdata_ownership_path <-
