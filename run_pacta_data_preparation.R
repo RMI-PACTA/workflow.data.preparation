@@ -91,11 +91,11 @@ currencies_data_path <- file.path(asset_impact_data_path, "currencies.rds")
 
 # computed options -------------------------------------------------------------
 
-relevant_years <- sort(
-  unique(
-    market_share_target_reference_year:(market_share_target_reference_year + time_horizon)
+relevant_years <- 
+  pacta.data.preparation::determine_relevant_years(
+    market_share_target_reference_year,
+    time_horizon
   )
-)
 logger::log_info(
   "Full time horizon set to: {paste0(relevant_years, collapse = ', ')}."
 )
