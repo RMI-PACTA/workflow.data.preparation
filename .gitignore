@@ -2,5 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
+.Rbuildignore
 .env
 .DS_Store
