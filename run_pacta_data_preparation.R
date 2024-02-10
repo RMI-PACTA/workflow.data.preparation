@@ -253,7 +253,8 @@ factset_entity_id__ar_company_id <-
   select(
     factset_entity_id = "factset_id",
     ar_company_id = "company_id"
-  )
+  ) %>%
+  distinct()
 readRDS(factset_entity_info_path) %>%
   pacta.data.preparation::prepare_entity_info(factset_entity_id__ar_company_id) %>%
   saveRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
