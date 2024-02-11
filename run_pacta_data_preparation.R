@@ -218,7 +218,7 @@ logger::log_info("Scenario data prepared.")
 
 logger::log_info("Saving file: \"currencies.rds\".")
 currencies %>%
-  saveRDS(file.path(data_prep_outputs_path, "currencies.rds"))
+  saveRDS(currencies_data_path)
 
 
 # financial data output --------------------------------------------------------
