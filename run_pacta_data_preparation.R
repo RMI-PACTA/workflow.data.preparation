@@ -102,6 +102,16 @@ logger::log_info(
 
 scenario_raw_data_to_include <- lapply(scenario_raw_data_to_include, get, envir = asNamespace("pacta.scenario.preparation"))
 
+factset_timestamp <-
+  unique(sub("_factset_.*[.]rds$", "", c(
+    factset_financial_data_filename,
+    factset_entity_info_filename,
+    factset_entity_financing_data_filename,
+    factset_fund_data_filename,
+    factset_isin_to_fund_table_filename,
+    factset_iss_emissions_data_filename
+  )))
+
 
 # check that everything is ready to go -----------------------------------------
 
@@ -785,7 +795,7 @@ parameters <-
     ),
     timestamps = list(
       imf_quarter_timestamp = imf_quarter_timestamp,
-      factset_data_identifier = basename(factset_data_path),
+      factset_data_identifier = factset_timestamp,
       pacta_financial_timestamp = pacta_financial_timestamp
     ),
     scenarios = list(
