@@ -86,8 +86,7 @@ factset_iss_emissions_data_path <-
 
 scenarios_analysis_input_path <- file.path(asset_impact_data_path, "Scenarios_AnalysisInput.csv")
 scenario_regions_path <- file.path(asset_impact_data_path, "scenario_regions.csv")
-currencies_data_path <- file.path(asset_impact_data_path, "currencies.rds")
-
+currencies_data_path <- file.path(data_prep_outputs_path, "currencies.rds")
 
 # computed options -------------------------------------------------------------
 
@@ -156,10 +155,9 @@ logger::log_info("Pre-flight data prepared.")
 
 if (update_currencies) {
   logger::log_info("Fetching currency data.")
-  pacta.data.scraping::get_currency_exchange_rates(
+  currencies <- pacta.data.scraping::get_currency_exchange_rates(
     quarter = imf_quarter_timestamp
-  ) %>%
-    saveRDS(currencies_data_path)
+  )
 }
 
 logger::log_info("Scraping index regions.")
@@ -218,7 +216,7 @@ logger::log_info("Scenario data prepared.")
 # currency data output ---------------------------------------------------------
 
 logger::log_info("Saving file: \"currencies.rds\".")
-readRDS(currencies_data_path) %>%
+currencies %>%
   saveRDS(file.path(data_prep_outputs_path, "currencies.rds"))
 
 
@@ -485,8 +483,6 @@ logger::log_info("Fund data prepared.")
 
 # emission data output ---------------------------------------------------------
 
-currencies <- readRDS(file.path(data_prep_outputs_path, "currencies.rds"))
-
 iss_company_emissions <-
   readRDS(factset_iss_emissions_data_path) %>%
   group_by(factset_entity_id) %>%
@@ -565,7 +561,6 @@ iss_entity_emission_intensities %>%
   saveRDS(file.path(data_prep_outputs_path, "iss_average_sector_emission_intensities.rds"))
 
 
-rm(currencies)
 rm(iss_company_emissions)
 rm(iss_entity_emission_intensities)
 rm(factset_entity_info)
