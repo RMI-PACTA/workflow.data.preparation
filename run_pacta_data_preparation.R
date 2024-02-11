@@ -84,8 +84,6 @@ factset_iss_emissions_data_path <-
 
 # pre-flight filepaths ---------------------------------------------------------
 
-scenarios_analysis_input_path <- file.path(asset_impact_data_path, "Scenarios_AnalysisInput.csv")
-scenario_regions_path <- file.path(asset_impact_data_path, "scenario_regions.csv")
 currencies_data_path <- file.path(asset_impact_data_path, "currencies.rds")
 
 
@@ -121,38 +119,7 @@ if (!update_currencies) {
 }
 
 
-# pre-flight -------------------------------------------------------------------
-
-logger::log_info("Fetching pre-flight data.")
-
-logger::log_info("Preparing scenario data.")
-scenario_raw_data <- bind_rows(scenario_raw_data_to_include)
-
-# scenario values will be linearly interpolated for each group below
-interpolation_groups <- c(
-  "source",
-  "scenario",
-  "sector",
-  "technology",
-  "scenario_geography",
-  "indicator",
-  "units"
-)
-
-scenario_raw_data %>%
-  pacta.scenario.preparation::interpolate_yearly(!!!rlang::syms(interpolation_groups)) %>%
-  filter(.data$year >= .env$market_share_target_reference_year) %>%
-  pacta.scenario.preparation::add_market_share_columns(reference_year = market_share_target_reference_year) %>%
-  pacta.scenario.preparation::format_p4i(green_techs) %>%
-  write_csv(scenarios_analysis_input_path, na = "")
-
-pacta.scenario.preparation::scenario_regions %>%
-  write_csv(scenario_regions_path, na = "")
-
-logger::log_info("Pre-flight data prepared.")
-
-
-# web scraping -----------------------------------------------------------------
+# web scraping (pre-flight) ----------------------------------------------------
 
 if (update_currencies) {
   logger::log_info("Fetching currency data.")
@@ -167,10 +134,6 @@ index_regions <- pacta.data.scraping::get_index_regions()
 
 
 # intermediary files -----------------------------------------------------------
-
-logger::log_info("Preparing scenario data.")
-
-scenario_regions <- readr::read_csv(scenario_regions_path, na = "", show_col_types = FALSE)
 
 factset_issue_code_bridge <-
   pacta.data.preparation::factset_issue_code_bridge %>%
@@ -189,11 +152,31 @@ factset_industry_map_bridge <-
   pacta.data.preparation::factset_industry_map_bridge %>%
   select(factset_industry_code, pacta_sector)
 
-# scenarios_analysisinput_inputs
-scenario_raw <- readr::read_csv(scenarios_analysis_input_path, show_col_types = FALSE)
+logger::log_info("Preparing scenario data.")
+
+scenario_regions <- pacta.scenario.preparation::scenario_regions
+
+# scenario values will be linearly interpolated for each group below
+interpolation_groups <- c(
+  "source",
+  "scenario",
+  "sector",
+  "technology",
+  "scenario_geography",
+  "indicator",
+  "units"
+)
+
+scenario_raw <-
+  bind_rows(scenario_raw_data_to_include) %>%
+  pacta.scenario.preparation::interpolate_yearly(!!!rlang::syms(interpolation_groups)) %>%
+  filter(.data$year >= .env$market_share_target_reference_year) %>%
+  pacta.scenario.preparation::add_market_share_columns(reference_year = market_share_target_reference_year) %>%
+  pacta.scenario.preparation::format_p4i(green_techs)
 
 # filter for relevant scenario data
-scenarios_long <- scenario_raw %>%
+scenarios_long <-
+  scenario_raw %>%
   inner_join(
     pacta.scenario.preparation::scenario_source_pacta_geography_bridge,
     by = c(
@@ -779,8 +762,6 @@ parameters <-
       factset_isin_to_fund_table_path = factset_isin_to_fund_table_path
     ),
     preflight_filepaths = list(
-      scenarios_analysis_input_path = scenarios_analysis_input_path,
-      scenario_regions_path = scenario_regions_path,
       currencies_data_path = currencies_data_path
     ),
     timestamps = list(
