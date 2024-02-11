@@ -88,6 +88,7 @@ scenarios_analysis_input_path <- file.path(asset_impact_data_path, "Scenarios_An
 scenario_regions_path <- file.path(asset_impact_data_path, "scenario_regions.csv")
 currencies_data_path <- file.path(data_prep_outputs_path, "currencies.rds")
 
+
 # computed options -------------------------------------------------------------
 
 relevant_years <- sort(
