@@ -137,7 +137,7 @@ index_regions <- pacta.data.scraping::get_index_regions()
 logger::log_info("Fetching pre-flight data done.")
 
 
-# intermediary files -----------------------------------------------------------
+# intermediary objects ---------------------------------------------------------
 
 factset_issue_code_bridge <-
   pacta.data.preparation::factset_issue_code_bridge %>%
