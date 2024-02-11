@@ -119,7 +119,9 @@ if (!update_currencies) {
 }
 
 
-# web scraping (pre-flight) ----------------------------------------------------
+# pre-flight -------------------------------------------------------------------
+
+logger::log_info("Fetching pre-flight data.")
 
 if (update_currencies) {
   logger::log_info("Fetching currency data.")
@@ -131,6 +133,8 @@ if (update_currencies) {
 
 logger::log_info("Scraping index regions.")
 index_regions <- pacta.data.scraping::get_index_regions()
+
+logger::log_info("Fetching pre-flight data done.")
 
 
 # intermediary files -----------------------------------------------------------
