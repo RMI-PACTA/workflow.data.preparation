@@ -19,12 +19,15 @@ suppressPackageStartupMessages({
 
 # config -----------------------------------------------------------------------
 
-readRenviron(".env")
+if (Sys.getenv("R_CONFIG_ACTIVE") != "desktop") {
+  readRenviron(".env")
+}
 
+config_name <- Sys.getenv("R_CONFIG_ACTIVE")
 config <-
   config::get(
     file = "config.yml",
-    config = Sys.getenv("R_CONFIG_ACTIVE"),
+    config = config_name,
     use_parent = FALSE
   )
 
@@ -84,8 +87,6 @@ factset_iss_emissions_data_path <-
 
 # pre-flight filepaths ---------------------------------------------------------
 
-scenarios_analysis_input_path <- file.path(asset_impact_data_path, "Scenarios_AnalysisInput.csv")
-scenario_regions_path <- file.path(asset_impact_data_path, "scenario_regions.csv")
 currencies_data_path <- file.path(asset_impact_data_path, "currencies.rds")
 
 
@@ -125,35 +126,6 @@ if (!update_currencies) {
 
 logger::log_info("Fetching pre-flight data.")
 
-logger::log_info("Preparing scenario data.")
-scenario_raw_data <- bind_rows(scenario_raw_data_to_include)
-
-# scenario values will be linearly interpolated for each group below
-interpolation_groups <- c(
-  "source",
-  "scenario",
-  "sector",
-  "technology",
-  "scenario_geography",
-  "indicator",
-  "units"
-)
-
-scenario_raw_data %>%
-  pacta.scenario.preparation::interpolate_yearly(!!!rlang::syms(interpolation_groups)) %>%
-  filter(.data$year >= .env$market_share_target_reference_year) %>%
-  pacta.scenario.preparation::add_market_share_columns(reference_year = market_share_target_reference_year) %>%
-  pacta.scenario.preparation::format_p4i(green_techs) %>%
-  write_csv(scenarios_analysis_input_path, na = "")
-
-pacta.scenario.preparation::scenario_regions %>%
-  write_csv(scenario_regions_path, na = "")
-
-logger::log_info("Pre-flight data prepared.")
-
-
-# web scraping -----------------------------------------------------------------
-
 if (update_currencies) {
   logger::log_info("Fetching currency data.")
   pacta.data.scraping::get_currency_exchange_rates(
@@ -165,12 +137,10 @@ if (update_currencies) {
 logger::log_info("Scraping index regions.")
 index_regions <- pacta.data.scraping::get_index_regions()
 
+logger::log_info("Fetching pre-flight data done.")
 
-# intermediary files -----------------------------------------------------------
 
-logger::log_info("Preparing scenario data.")
-
-scenario_regions <- readr::read_csv(scenario_regions_path, na = "", show_col_types = FALSE)
+# intermediary objects ---------------------------------------------------------
 
 factset_issue_code_bridge <-
   pacta.data.preparation::factset_issue_code_bridge %>%
@@ -189,11 +159,31 @@ factset_industry_map_bridge <-
   pacta.data.preparation::factset_industry_map_bridge %>%
   select(factset_industry_code, pacta_sector)
 
-# scenarios_analysisinput_inputs
-scenario_raw <- readr::read_csv(scenarios_analysis_input_path, show_col_types = FALSE)
+logger::log_info("Preparing scenario data.")
+
+scenario_regions <- pacta.scenario.preparation::scenario_regions
+
+# scenario values will be linearly interpolated for each group below
+interpolation_groups <- c(
+  "source",
+  "scenario",
+  "sector",
+  "technology",
+  "scenario_geography",
+  "indicator",
+  "units"
+)
+
+scenario_raw <-
+  bind_rows(scenario_raw_data_to_include) %>%
+  pacta.scenario.preparation::interpolate_yearly(!!!rlang::syms(interpolation_groups)) %>%
+  filter(.data$year >= .env$market_share_target_reference_year) %>%
+  pacta.scenario.preparation::add_market_share_columns(reference_year = market_share_target_reference_year) %>%
+  pacta.scenario.preparation::format_p4i(green_techs)
 
 # filter for relevant scenario data
-scenarios_long <- scenario_raw %>%
+scenarios_long <-
+  scenario_raw %>%
   inner_join(
     pacta.scenario.preparation::scenario_source_pacta_geography_bridge,
     by = c(
@@ -769,6 +759,8 @@ package_news <-
 
 parameters <-
   list(
+    config_name = config_name,
+    config = unclass(config),
     input_filepaths = list(
       masterdata_ownership_path = masterdata_ownership_path,
       masterdata_debt_path = masterdata_debt_path,
@@ -779,8 +771,6 @@ parameters <-
       factset_isin_to_fund_table_path = factset_isin_to_fund_table_path
     ),
     preflight_filepaths = list(
-      scenarios_analysis_input_path = scenarios_analysis_input_path,
-      scenario_regions_path = scenario_regions_path,
       currencies_data_path = currencies_data_path
     ),
     timestamps = list(
