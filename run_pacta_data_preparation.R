@@ -19,12 +19,15 @@ suppressPackageStartupMessages({
 
 # config -----------------------------------------------------------------------
 
-readRenviron(".env")
+if (Sys.getenv("R_CONFIG_ACTIVE") != "desktop") {
+  readRenviron(".env")
+}
 
+config_name <- Sys.getenv("R_CONFIG_ACTIVE")
 config <-
   config::get(
     file = "config.yml",
-    config = Sys.getenv("R_CONFIG_ACTIVE"),
+    config = config_name,
     use_parent = FALSE
   )
 
@@ -779,6 +782,8 @@ package_news <-
 
 parameters <-
   list(
+    config_name = config_name,
+    config = unclass(config),
     input_filepaths = list(
       masterdata_ownership_path = masterdata_ownership_path,
       masterdata_debt_path = masterdata_debt_path,
