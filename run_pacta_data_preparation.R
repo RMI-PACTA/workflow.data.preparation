@@ -775,7 +775,7 @@ parameters <-
     ),
     timestamps = list(
       imf_quarter_timestamp = imf_quarter_timestamp,
-      factset_data_identifier = basename(factset_data_path),
+      factset_data_identifier = sub("_factset_financial_data.rds$", "", factset_financial_data_filename),
       pacta_financial_timestamp = pacta_financial_timestamp
     ),
     scenarios = list(
