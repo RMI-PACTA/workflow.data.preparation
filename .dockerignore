@@ -1,6 +1,10 @@
-**/.git
-**/.github
-**/.gitignore
-**/Dockerfile
-**/*.Rproj
-docker-compose.yml
+# ignore everything
+*
+# include certain files
+!config.yml
+!DESCRIPTION
+!Dockerfile
+!LICENSE
+!LICENSE.md
+!README.md
+!run_pacta_data_preparation.R
