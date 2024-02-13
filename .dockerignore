@@ -1,6 +1,7 @@
 # ignore everything
 *
 # include certain files
+!.env
 !config.yml
 !DESCRIPTION
 !Dockerfile
