@@ -1,0 +1,10 @@
+# ignore everything
+*
+# include certain files
+!.env
+!config.yml
+!DESCRIPTION
+!LICENSE
+!LICENSE.md
+!README.md
+!run_pacta_data_preparation.R
