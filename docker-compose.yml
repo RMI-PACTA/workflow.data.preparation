@@ -11,6 +11,3 @@ services:
       - type: bind
         source: ${HOST_OUTPUTS_PATH}
         target: /outputs
-      - type: bind
-        source: .
-        target: /workflow.data.preparation
