@@ -779,7 +779,8 @@ parameters <-
       factset_financial_data_path = factset_financial_data_path,
       factset_entity_info_path = factset_entity_info_path,
       factset_fund_data_path = factset_fund_data_path,
-      factset_isin_to_fund_table_path = factset_isin_to_fund_table_path
+      factset_isin_to_fund_table_path = factset_isin_to_fund_table_path,
+      factset_issue_code_bridge_path = factset_issue_code_bridge_path
     ),
     preflight_filepaths = list(
       currencies_data_path = currencies_data_path
