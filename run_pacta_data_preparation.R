@@ -175,8 +175,7 @@ factset_issue_code_bridge <-
   )
 
 factset_industry_map_bridge <-
-  readRDS(factset_industry_map_bridge_path) %>%
-  select(factset_industry_code, pacta_sector)
+  readRDS(factset_industry_map_bridge_path)
 
 logger::log_info("Preparing scenario data.")
 
@@ -257,7 +256,7 @@ factset_entity_id__ar_company_id <-
 readRDS(factset_entity_info_path) %>%
   pacta.data.preparation::prepare_entity_info(
     factset_entity_id__ar_company_id, 
-    readRDS(factset_industry_map_bridge_path)
+    factset_industry_map_bridge
   ) %>%
   saveRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
 
