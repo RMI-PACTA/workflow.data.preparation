@@ -11,6 +11,7 @@ default:
   factset_fund_data_filename: ""
   factset_isin_to_fund_table_filename: ""
   factset_iss_emissions_data_filename: ""
+  factset_issue_code_bridge_filename: ""
   update_currencies: TRUE
   export_sqlite_files: TRUE
   imf_quarter_timestamp: "2021-Q4"
@@ -39,6 +40,7 @@ default:
   factset_fund_data_filename: ""
   factset_isin_to_fund_table_filename: ""
   factset_iss_emissions_data_filename: ""
+  factset_issue_code_bridge_filename: ""
   imf_quarter_timestamp: "2021-Q4"
   pacta_financial_timestamp: "2021Q4"
   market_share_target_reference_year: 2021
@@ -77,6 +79,7 @@ default:
   factset_fund_data_filename: ""
   factset_isin_to_fund_table_filename: ""
   factset_iss_emissions_data_filename: ""
+  factset_issue_code_bridge_filename: ""
   imf_quarter_timestamp: "2022-Q2"
   pacta_financial_timestamp: "2022Q2"
   market_share_target_reference_year: 2022
@@ -101,6 +104,7 @@ default:
   factset_fund_data_filename: "timestamp-20221231T000000Z_pulled-20240207T161053Z_factset_fund_data.rds"
   factset_isin_to_fund_table_filename: "timestamp-20221231T000000Z_pulled-20240207T161053Z_factset_isin_to_fund_table.rds"
   factset_iss_emissions_data_filename: "timestamp-20221231T000000Z_pulled-20240207T161053Z_factset_iss_emissions.rds"
+  factset_issue_code_bridge_filename: "test-from-fds-test-20240207-03-postgres_factset_issue_code_bridge.rds"
   imf_quarter_timestamp: "2022-Q4"
   pacta_financial_timestamp: "2022Q4"
   market_share_target_reference_year: 2022
