@@ -255,7 +255,10 @@ factset_entity_id__ar_company_id <-
   ) %>%
   distinct()
 readRDS(factset_entity_info_path) %>%
-  pacta.data.preparation::prepare_entity_info(factset_entity_id__ar_company_id) %>%
+  pacta.data.preparation::prepare_entity_info(
+    factset_entity_id__ar_company_id, 
+    readRDS(factset_industry_map_bridge_path)
+  ) %>%
   saveRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
 
 logger::log_info("Financial data prepared.")
