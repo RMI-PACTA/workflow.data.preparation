@@ -773,8 +773,10 @@ parameters <-
       ar_company_id__factset_entity_id_path = ar_company_id__factset_entity_id_path,
       factset_financial_data_path = factset_financial_data_path,
       factset_entity_info_path = factset_entity_info_path,
+      factset_entity_financing_data_path = factset_entity_financing_data_path,
       factset_fund_data_path = factset_fund_data_path,
-      factset_isin_to_fund_table_path = factset_isin_to_fund_table_path
+      factset_isin_to_fund_table_path = factset_isin_to_fund_table_path,
+      factset_iss_emissions_data_path = factset_iss_emissions_data_path
     ),
     preflight_filepaths = list(
       currencies_data_path = currencies_data_path
