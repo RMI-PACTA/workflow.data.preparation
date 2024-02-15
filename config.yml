@@ -94,6 +94,7 @@ default:
   global_aggregate_scenario_sources_list: ["ETP2020", "GECO2021", "IPR2021", "ISF2021", "WEO2021"]
   global_aggregate_sector_list: ["Power"]
 
+
 2022Q4:
   masterdata_ownership_filename: "2023-06-18_AI_RMI Bespoke_Company Data Products_masterdata_ownership_2022Q4.csv"
   masterdata_debt_filename: "2023-06-18_AI_RMI Bespoke_Company Data Products_masterdata_debt_2022Q4.csv"
@@ -111,6 +112,7 @@ default:
   scenario_sources_list: ["GECO2022", "IPR2021", "ISF2021", "WEO2022"]
   scenario_raw_data_to_include: ["geco_2022", "ipr_2021", "isf_2021", "weo_2022"]
   global_aggregate_scenario_sources_list: ["WEO2022"]
+
 
 desktop:
   inherits: 2022Q4
