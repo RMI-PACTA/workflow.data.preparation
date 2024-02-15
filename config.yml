@@ -112,6 +112,26 @@ default:
   scenario_raw_data_to_include: ["geco_2022", "ipr_2021", "isf_2021", "weo_2022"]
   global_aggregate_scenario_sources_list: ["WEO2022"]
 
+
+2023Q4:
+  masterdata_ownership_filename: ""
+  masterdata_debt_filename: ""
+  ar_company_id__factset_entity_id_filename: ""
+  factset_financial_data_filename: ""
+  factset_entity_info_filename: ""
+  factset_entity_financing_data_filename: ""
+  factset_fund_data_filename: ""
+  factset_isin_to_fund_table_filename: ""
+  factset_iss_emissions_data_filename: ""
+  factset_issue_code_bridge_filename: ""
+  imf_quarter_timestamp: "2023-Q4"
+  pacta_financial_timestamp: "2023Q4"
+  market_share_target_reference_year: 2023
+  scenario_sources_list: ["GECO2023", "ISF2023", "WEO2023"]
+  scenario_raw_data_to_include: ["geco_2023", "isf_2023", "weo_2023"]
+  global_aggregate_scenario_sources_list: ["WEO2023"]
+
+
 desktop:
   inherits: 2022Q4
   data_prep_outputs_path: "./outputs"
