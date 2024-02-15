@@ -124,6 +124,7 @@ default:
   factset_isin_to_fund_table_filename: ""
   factset_iss_emissions_data_filename: ""
   factset_issue_code_bridge_filename: ""
+  factset_industry_map_bridge_filename: ""
   imf_quarter_timestamp: "2023-Q4"
   pacta_financial_timestamp: "2023Q4"
   market_share_target_reference_year: 2023
