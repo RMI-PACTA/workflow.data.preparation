@@ -108,8 +108,8 @@ default:
   imf_quarter_timestamp: "2022-Q4"
   pacta_financial_timestamp: "2022Q4"
   market_share_target_reference_year: 2022
-  scenario_sources_list: ["GECO2022", "IPR2021", "ISF2021", "WEO2022"]
-  scenario_raw_data_to_include: ["geco_2022", "ipr_2021", "isf_2021", "weo_2022"]
+  scenario_sources_list: ["GECO2022", "ISF2021", "WEO2022"]
+  scenario_raw_data_to_include: ["geco_2022", "isf_2021", "weo_2022"]
   global_aggregate_scenario_sources_list: ["WEO2022"]
 
 
