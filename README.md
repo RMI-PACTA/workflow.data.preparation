@@ -84,3 +84,4 @@ The required files are:
 - factset_isin_to_fund_table.rds
 - factset_iss_emissions.rds
 - factset_issue_code_bridge.rds
+- factset_industry_map_bridge.rds
