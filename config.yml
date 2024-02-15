@@ -144,7 +144,7 @@ default:
 
 
 desktop:
-  inherits: 2022Q4
+  inherits: 2023Q4
   data_prep_outputs_path: "./outputs"
   asset_impact_data_path: "./ai_inputs"
   factset_data_path: "./factset_inputs"
