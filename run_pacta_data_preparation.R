@@ -45,6 +45,7 @@ factset_isin_to_fund_table_filename <- config$factset_isin_to_fund_table_filenam
 factset_iss_emissions_data_filename <- config$factset_iss_emissions_data_filename
 factset_issue_code_bridge_filename <- config$factset_issue_code_bridge_filename
 factset_industry_map_bridge_filename <- config$factset_industry_map_bridge_filename
+factset_manual_pacta_sector_override_filename <- config$factset_manual_pacta_sector_override_filename
 update_currencies <- config$update_currencies
 export_sqlite_files <- config$export_sqlite_files
 imf_quarter_timestamp <- config$imf_quarter_timestamp
@@ -89,6 +90,8 @@ factset_issue_code_bridge_path <-
   file.path(factset_data_path, factset_issue_code_bridge_filename)
 factset_industry_map_bridge_path <-
   file.path(factset_data_path, factset_industry_map_bridge_filename)
+factset_manual_pacta_sector_override_path <-
+  file.path(factset_data_path, factset_manual_pacta_sector_override_filename)
 
 
 # pre-flight filepaths ---------------------------------------------------------
@@ -118,7 +121,8 @@ factset_timestamp <-
     factset_isin_to_fund_table_filename,
     factset_iss_emissions_data_filename,
     factset_issue_code_bridge_filename,
-    factset_industry_map_bridge_filename
+    factset_industry_map_bridge_filename,
+    factset_manual_pacta_sector_override_filename
   )))
 
 
@@ -135,6 +139,7 @@ stopifnot(file.exists(factset_isin_to_fund_table_path))
 stopifnot(file.exists(factset_iss_emissions_data_path))
 stopifnot(file.exists(factset_issue_code_bridge_path))
 stopifnot(file.exists(factset_industry_map_bridge_path))
+stopifnot(file.exists(factset_manual_pacta_sector_override_path))
 stopifnot(file.exists(data_prep_outputs_path))
 
 if (!update_currencies) {
@@ -176,6 +181,9 @@ factset_issue_code_bridge <-
 
 factset_industry_map_bridge <-
   readRDS(factset_industry_map_bridge_path)
+
+factset_manual_pacta_sector_override <-
+  readRDS(factset_manual_pacta_sector_override_path)
 
 logger::log_info("Preparing scenario data.")
 
@@ -255,8 +263,9 @@ factset_entity_id__ar_company_id <-
   distinct()
 readRDS(factset_entity_info_path) %>%
   pacta.data.preparation::prepare_entity_info(
-    factset_entity_id__ar_company_id, 
-    factset_industry_map_bridge
+    factset_entity_id__ar_company_id,
+    factset_industry_map_bridge,
+    factset_manual_pacta_sector_override
   ) %>%
   saveRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
 
@@ -790,7 +799,8 @@ parameters <-
       factset_isin_to_fund_table_path = factset_isin_to_fund_table_path,
       factset_iss_emissions_data_path = factset_iss_emissions_data_path,
       factset_issue_code_bridge_path = factset_issue_code_bridge_path,
-      factset_industry_map_bridge_path = factset_industry_map_bridge_path
+      factset_industry_map_bridge_path = factset_industry_map_bridge_path,
+      factset_manual_pacta_sector_override_path = factset_manual_pacta_sector_override_path
     ),
     preflight_filepaths = list(
       currencies_data_path = currencies_data_path
