@@ -248,10 +248,12 @@ logger::log_info("Formatting and saving file: \"financial_data.rds\".")
 readRDS(factset_financial_data_path) %>%
   pacta.data.preparation::prepare_financial_data(factset_issue_code_bridge) %>%
   saveRDS(file.path(data_prep_outputs_path, "financial_data.rds"))
+invisible(gc())
 
 logger::log_info("Formatting and saving file: \"entity_financing.rds\".")
 readRDS(factset_entity_financing_data_path) %>%
   saveRDS(file.path(data_prep_outputs_path, "entity_financing.rds"))
+invisible(gc())
 
 logger::log_info("Formatting and saving file: \"entity_info.rds\".")
 factset_entity_id__ar_company_id <-
@@ -268,6 +270,7 @@ readRDS(factset_entity_info_path) %>%
     factset_manual_pacta_sector_override
   ) %>%
   saveRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
+invisible(gc())
 
 logger::log_info("Financial data prepared.")
 
@@ -291,6 +294,7 @@ ar_company_id__credit_parent_ar_company_id <-
   distinct()
 
 rm(entity_info)
+invisible(gc())
 
 
 logger::log_info(
@@ -303,6 +307,7 @@ readr::read_csv(masterdata_ownership_path, na = "", show_col_types = FALSE) %>%
     zero_emission_factor_techs
   ) %>%
   saveRDS(file.path(data_prep_outputs_path, "masterdata_ownership_datastore.rds"))
+invisible(gc())
 
 
 logger::log_info(
@@ -339,12 +344,15 @@ masterdata_debt %>%
     .groups = "drop"
   ) %>%
   saveRDS(file.path(data_prep_outputs_path, "masterdata_debt_datastore.rds"))
+invisible(gc())
 
 rm(masterdata_debt)
 rm(company_id__creditor_company_id)
+invisible(gc())
 
 rm(ar_company_id__country_of_domicile)
 rm(ar_company_id__credit_parent_ar_company_id)
+invisible(gc())
 
 logger::log_info("ABCD prepared.")
 
@@ -364,6 +372,13 @@ factset_entity_id__ar_company_id <-
 factset_entity_id__security_mapped_sector <-
   entity_info %>%
   select(factset_entity_id, security_mapped_sector)
+
+factset_entity_id__credit_parent_id <-
+  entity_info %>%
+  select("factset_entity_id", "credit_parent_id")
+
+rm(entity_info)
+invisible(gc())
 
 
 logger::log_info("Formatting and saving file: \"abcd_flags_equity.rds\".")
@@ -389,6 +404,7 @@ financial_data %>%
     sectors_with_assets
   ) %>%
   saveRDS(file.path(data_prep_outputs_path, "abcd_flags_equity.rds"))
+invisible(gc())
 
 
 logger::log_info("Formatting and saving file: \"abcd_flags_bonds.rds\".")
@@ -407,10 +423,7 @@ financial_data %>%
   left_join(ar_company_id__sectors_with_assets__debt, by = "ar_company_id") %>%
   mutate(has_asset_level_data = if_else(is.na(sectors_with_assets) | sectors_with_assets == "", FALSE, TRUE)) %>%
   mutate(has_ald_in_fin_sector = if_else(stringr::str_detect(sectors_with_assets, security_mapped_sector), TRUE, FALSE)) %>%
-  left_join(
-    select(entity_info, "factset_entity_id", "credit_parent_id"),
-    by = "factset_entity_id"
-  ) %>%
+  left_join(factset_entity_id__credit_parent_id, by = "factset_entity_id") %>%
   mutate(
     # If FactSet has no credit_parent, we define the company as it's own parent
     credit_parent_id = if_else(is.na(credit_parent_id), factset_entity_id, credit_parent_id)
@@ -423,12 +436,15 @@ financial_data %>%
   ) %>%
   ungroup() %>%
   saveRDS(file.path(data_prep_outputs_path, "abcd_flags_bonds.rds"))
+invisible(gc())
 
 
 rm(financial_data)
-rm(entity_info)
 rm(factset_entity_id__ar_company_id)
 rm(factset_entity_id__security_mapped_sector)
+rm(factset_entity_id__credit_parent_id)
+invisible(gc())
+
 logger::log_info("ABCD flags prepared.")
 
 
@@ -499,6 +515,7 @@ isin_to_fund_table %>%
 
 rm(fund_data)
 rm(isin_to_fund_table)
+invisible(gc())
 
 logger::log_info("Fund data prepared.")
 
@@ -586,6 +603,7 @@ iss_entity_emission_intensities %>%
 rm(iss_company_emissions)
 rm(iss_entity_emission_intensities)
 rm(factset_entity_info)
+invisible(gc())
 
 logger::log_info("Emissions data prepared.")
 
@@ -617,7 +635,11 @@ for (scenario_source in unique(scenarios_long$scenario_source)) {
     index_regions = index_regions
   ) %>%
     saveRDS(file.path(data_prep_outputs_path, filename))
+  invisible(gc())
 }
+
+rm(masterdata_ownership_datastore)
+invisible(gc())
 
 logger::log_info("Formatting and saving file: \"equity_abcd_scenario.rds\".")
 list.files(
@@ -653,7 +675,11 @@ for (scenario_source in unique(scenarios_long$scenario_source)) {
     index_regions = index_regions
   ) %>%
     saveRDS(file.path(data_prep_outputs_path, filename))
+  invisible(gc())
 }
+
+rm(masterdata_debt_datastore)
+invisible(gc())
 
 logger::log_info("Formatting and saving file: \"bonds_abcd_scenario.rds\".")
 list.files(
@@ -694,6 +720,7 @@ if (export_sqlite_files) {
 
   DBI::dbDisconnect(con)
   rm(entity_info)
+  invisible(gc())
 
   # equity_abcd_scenario
   logger::log_info(
@@ -726,6 +753,7 @@ if (export_sqlite_files) {
 
   DBI::dbDisconnect(con)
   rm(equity_abcd_scenario)
+  invisible(gc())
 
   # bonds_abcd_scenario
   logger::log_info(
@@ -758,6 +786,7 @@ if (export_sqlite_files) {
 
   DBI::dbDisconnect(con)
   rm(bonds_abcd_scenario)
+  invisible(gc())
 }
 
 
