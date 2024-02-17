@@ -141,6 +141,13 @@ default:
   scenario_sources_list: ["GECO2023", "ISF2023", "WEO2023"]
   scenario_raw_data_to_include: ["geco_2023", "isf_2023", "weo_2023"]
   global_aggregate_scenario_sources_list: ["WEO2023"]
+  sector_list: []
+  other_sector_list: []
+  zero_emission_factor_techs: []
+  green_techs: []
+  tech_exclude: []
+  scenario_geographies_list: []
+  global_aggregate_sector_list: []
 
 
 desktop:
