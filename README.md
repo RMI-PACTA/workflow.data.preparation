@@ -62,20 +62,85 @@ Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
 *Instructions specific to the RMI-PACTA team's Azure instance are in Italics.*
 
 0. **Prerequisites:**
+    *These steps have been completed on the RMI Azure instance.*
+    - Ensure a Virtual Network with a Gateway has been set up, permitting SSH (Port 22) access.
+      Details of setting this up are out of scope for these instructions.
+      Talk to your network coordinator for help.
     - Set up Storage Accounts containing the [required files](#required-input-files).
       While all the files can exist on a single file share, in a single storage account, the workflow can access different storage accounts, to allow for read-only access to raw data, to prevent accident manipulation of source data.
-      The recommended structure (used by RMI) is:
-      - Storage Account: `pactadatadev`: (read/write) *RMI QAs datasets prior to moving them to PROD with[ `workflow.pacta.data.qa`](https://github.com/RMI-PACTA/workflow.pacta.data.qa)*
+      The recommended structure (*used by RMI*) is:
+      - Storage Account: `pactadatadev`: (read/write).
+        Naming note: *RMI QAs datasets prior to moving them to PROD with [`workflow.pacta.data.qa`](https://github.com/RMI-PACTA/workflow.pacta.data.qa)*.
         - File Share `workflow-data-preparation-outputs`: Outputs from this workflow.
       - Storage Account: `pactarawdata` (read-only)
         - File Share `factset-extracted`: Outputs from [`workflow.factset`](https://github.com/RMI-PACTA/workflow.factset)
         - File Share `AssetImpact` Raw data files from [Asset Impact](https://asset-impact.gresb.com/)
     - (Optional, but recommended) Create a User Assigned Managed Identity.
-      Alternately, after creating the VM with a system-managed identity, you can assign all appropriate permissions.
-      * **RMI:** The `workflow-data-preparation` Identity exists with all the appropriate permissions.*
+      Alternately, after creating the VM with a system-managed identity, you can assign all appropriate permissions. ***RMI:** The `workflow-data-preparation` Identity exists with all the appropriate permissions.*
     - Grant Appropriate permissions to the Identity:
       - `pactadatadev`: "Storage File Data SMB Share Contributor"
       - `pactarawdata`: "Storage File Data SMB Share Reader"
+
+1. Start a VM.
+  While the machine can be deployed via the Portal (WebUI), for simplicity, the following code block is provided which ensures consistency:
+
+    ```sh
+    # The options here work with the RMI-PACTA team's Azure setup.
+    # Change values for your own instance as needed.
+
+    # Get Network details.
+    VNET_RESOURCE_GROUP="RMI-PROD-EU-VNET-RG"
+    VNET_NAME="RMI-PROD-EU-VNET"
+    SUBNET_NAME="RMI-SP-PACTA-DEV-VNET"
+    SUBNET_ID=$(az network vnet subnet show --resource-group $VNET_RESOURCE_GROUP --name $SUBNET_NAME --vnet-name $VNET_NAME --query id -o tsv)
+
+    # Use the identity previously setup (see Prerequisites)
+    MACHINEIDENTITY="/subscriptions/feef729b-4584-44af-a0f9-4827075512f9/resourceGroups/RMI-SP-PACTA-PROD/providers/Microsoft.ManagedIdentity/userAssignedIdentities/workflow-data-preparation"
+    # This size has 2 vCPU, and 32GiB memory, recommended settings.
+    MACHINE_SIZE="Standard_E4-2as_v4"
+    # Using epoch to give machine a (probably) unique name
+    MACHINE_NAME="dataprep-runner-$(date +%s)"
+    # NOTE: Change this to your own RG as needed.
+    VM_RESOURCE_GROUP="RMI-SP-PACTA-DEV"
+
+    # **NOTE: Check these options prior to running**
+    # Non-RMI users may choose to omit the --public-ip-address line for public SSH Access.
+
+    az vm create \
+      --admin-username azureuser \
+      --assign-identity "$MACHINEIDENTITY" \
+      --generate-ssh-keys  \
+      --image Ubuntu2204 \
+      --name "$MACHINE_NAME" \
+      --nic-delete-option delete \
+      --os-disk-delete-option delete \
+      --public-ip-address "" \
+      --resource-group "$VM_RESOURCE_GROUP" \
+      --size "$MACHINE_SIZE" \
+      --subnet "$SUBNETID"
+
+    ```
+
+    If this command successfully runs, it will output a JSON block describing the resource (VM) created.
+
+2. **Connect to the Network.** (Optional) 
+  ***RMI:** Connecting to the VPN will enable SSH access.*
+  Connect to the Virtual Network specified above, as the comand above does not create a Public IP Address.
+  Details for this are out of scope for these instructions.
+  Contact your network coordinator for help.
+
+2. Connect to the newly created VM via SSH.
+
+    ```sh
+    This connects to the VM created above via SSH.
+
+    az ssh vm \
+        --local-user azureuser \
+        --name "$MACHINE_NAME" \
+        --prefer-private-ip \
+        --resource-group "$VM_RESOURCE_GROUP"
+
+    ```
 
 ## Required Input Files
 
