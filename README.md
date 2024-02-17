@@ -1,6 +1,6 @@
 # workflow.data.preparation
 
-`workflow.data.preparation` orchestrates the PACTA data preparation process, combining production, financial, scenario, and currency data into a format suitable for use in a PACTA for investors analysis. Assuming that the computing resource being used has sufficient memory (which can be >16gb depending on the inputs), storage space, and access to the necessary inputs, this is intended to work on a desktop or laptop using RStudio or run using the included [Dockerfile](https://github.com/RMI-PACTA/workflow.data.preparation/blob/main/Dockerfile) and [docker-compose.yml](https://github.com/RMI-PACTA/workflow.data.preparation/blob/main/docker-compose.yml).
+`workflow.data.preparation` orchestrates the PACTA data preparation process, combining production, financial, scenario, and currency data into a format suitable for use in a PACTA for investors analysis. Assuming that the computing resource being used has sufficient memory (which can be >16Gb depending on the inputs), storage space, and access to the necessary inputs, this is intended to work on a desktop or laptop using RStudio or run using the included [Dockerfile](https://github.com/RMI-PACTA/workflow.data.preparation/blob/main/Dockerfile) and [docker-compose.yml](https://github.com/RMI-PACTA/workflow.data.preparation/blob/main/docker-compose.yml).
 
 ## Running in RStudio
 
@@ -12,7 +12,7 @@ Running workflow.data.preparation has a number of R package dependencies that ar
 
 To make things easier, the recommended way to specify the desired config set when running locally in RStudio is by setting the active config set to `desktop` and modifying/adding only a few of the properties in the `desktop` config set. By doing so, you benefit from inheriting many of the appropriate configuration values without having to explicitly specify each one.
 
-You will need to set the `inherits` parameter, e.g. `inherits: 2022Q4`, to select which of the config sets specified in the config.yml file that is desired. 
+You will need to set the `inherits` parameter, e.g. `inherits: 2022Q4`, to select which of the config sets specified in the config.yml file that is desired.
 
 You will need to set `data_prep_outputs_path` to an *existing* directory where you want the outputs to be saved, e.g. `data_prep_outputs_path: "./outputs"` to point to an existing directory named `outputs` in the working directory of the R session you will be running data.prep in. This directory must exist before running data.prep (and ideally be empty). The script will throw an error early on if it does not exist.
 
@@ -56,6 +56,26 @@ R_CONFIG_ACTIVE=YYYYQQ
 Run `docker-compose up` from the root directory, and docker will build the image (if necessary), and then run the data.prep process given the specified options in the .env file.
 
 Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
+
+## Running Data Preparation interactively on Azure VM
+
+*Instructions specific to the RMI-PACTA team's Azure instance are in Italics.*
+
+0. **Prerequisites:**
+    - Set up Storage Accounts containing the [required files](#required-input-files).
+      While all the files can exist on a single file share, in a single storage account, the workflow can access different storage accounts, to allow for read-only access to raw data, to prevent accident manipulation of source data.
+      The recommended structure (used by RMI) is:
+      - Storage Account: `pactadatadev`: (read/write) *RMI QAs datasets prior to moving them to PROD with[ `workflow.pacta.data.qa`](https://github.com/RMI-PACTA/workflow.pacta.data.qa)*
+        - File Share `workflow-data-preparation-outputs`: Outputs from this workflow.
+      - Storage Account: `pactarawdata` (read-only)
+        - File Share `factset-extracted`: Outputs from [`workflow.factset`](https://github.com/RMI-PACTA/workflow.factset)
+        - File Share `AssetImpact` Raw data files from [Asset Impact](https://asset-impact.gresb.com/)
+    - (Optional, but recommended) Create a User Assigned Managed Identity.
+      Alternately, after creating the VM with a system-managed identity, you can assign all appropriate permissions.
+      * **RMI:** The `workflow-data-preparation` Identity exists with all the appropriate permissions.*
+    - Grant Appropriate permissions to the Identity:
+      - `pactadatadev`: "Storage File Data SMB Share Contributor"
+      - `pactarawdata`: "Storage File Data SMB Share Reader"
 
 ## Required Input Files
 
