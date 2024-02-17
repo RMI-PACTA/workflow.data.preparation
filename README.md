@@ -78,10 +78,12 @@ Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
     - (Optional, but recommended) Create a User Assigned Managed Identity.
       Alternately, after creating the VM with a system-managed identity, you can assign all appropriate permissions. ***RMI:** The `workflow-data-preparation` Identity exists with all the appropriate permissions.*
     - Grant Appropriate permissions to the Identity:
-      - `pactadatadev`: "Storage File Data SMB Share Contributor"
-      - `pactarawdata`: "Storage File Data SMB Share Reader"
+      - `pactadatadev`: "Reader and Data Access".
+      - `pactarawdata`: "Reader and Data Access"
+        Note that this gives read/write access the Storage Account via the Storage Account Key.
+        To grant read-only access to the VM, use the `mount_afs` script without the `-w` flag, as shown below.
 
-1. Start a VM.
+1. **Start a VM**
   While the machine can be deployed via the Portal (WebUI), for simplicity, the following code block is provided which ensures consistency:
 
     ```sh
@@ -123,13 +125,13 @@ Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
 
     If this command successfully runs, it will output a JSON block describing the resource (VM) created.
 
-2. **Connect to the Network.** (Optional) 
+2. **Connect to the Network.** (Optional)
   ***RMI:** Connecting to the VPN will enable SSH access.*
   Connect to the Virtual Network specified above, as the comand above does not create a Public IP Address.
   Details for this are out of scope for these instructions.
   Contact your network coordinator for help.
 
-2. Connect to the newly created VM via SSH.
+3. **Connect to the newly created VM via SSH.**
 
     ```sh
     This connects to the VM created above via SSH.
@@ -139,6 +141,30 @@ Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
         --name "$MACHINE_NAME" \
         --prefer-private-ip \
         --resource-group "$VM_RESOURCE_GROUP"
+
+    ```
+
+4. **Connect the VM to required resources**
+    Clone this repo, install the `az` cli utility, and mount the appropriate Azure File Shares.
+
+    ```sh
+    # Clone this repo through https to avoid need for an SSH key
+    git clone https://github.com/RMI-PACTA/workflow.data.preparation.git ~/workflow.data.preparation
+
+    # Install az cli
+    sudo apt update
+    # See https://aka.ms/installcli for alternate instructions
+    curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+    # Login to azure with assigned identity
+    az login --identity
+
+    # Use script from this repo to connect to file shares
+    ~/workflow.data.preparation/scripts/mount_afs.sh -r "RMI-SP-PACTA-PROD" -a "pactarawdata" -f "factset-extracted" -m "/mnt/factset-extracted"
+    ~/workflow.data.preparation/scripts/mount_afs.sh -r "RMI-SP-PACTA-PROD" -a "pactarawdata" -f "asset-impact" -m "/mnt/asset-impact"
+
+    # Note the outputs directory has the -w flag, meaning write permissions are enabled.
+    ~/workflow.data.preparation/scripts/mount_afs.sh -r "RMI-SP-PACTA-DEV" -a "pactadatadev" -f "workflow-data-preparation-outputs" -m "/mnt/workflow-data-preparation-outputs" -w
 
     ```
 

@@ -7,6 +7,7 @@ usage() {
     echo "Usage: mount_afs.sh [-h] [-v] -r <resource group> -a <storage account name> -f <file share name> -m <mount point>"
     echo "  -h: help (this message)"
     echo "  -v: verbose"
+    echo "  -w: Allow write access to the file share (default is read-only)"
     echo "  -r: resource group (Required)"
     echo "  -a: storage account name (Required)"
     echo "  -f: file share name (Required)"
@@ -15,12 +16,14 @@ usage() {
     exit 1
 }
 
-while getopts "h?vr:a:f:m:" opt; do
+while getopts "h?vwr:a:f:m:" opt; do
     case "$opt" in
     h|\?)
         usage
         ;;
     v)  VERBOSE=1
+        ;;
+    w)  ALLOW_WRITE=1
         ;;
     r)  RESOURCEGROUP=$OPTARG
         ;;
@@ -104,4 +107,11 @@ sudo mkdir -p "$MOUNTPOINT"
 if [ -n "$VERBOSE" ]; then
     echo "Mounting $smbPath to $MOUNTPOINT"
 fi
-sudo mount -t cifs "$smbPath" "$MOUNTPOINT" -o username="$STORAGEACCOUNTNAME",password="$storageAccountKey",serverino,nosharesock,actimeo=30,file_mode=0777,nobrl,dir_mode=0777,vers=3.1.1
+
+if [ -n "$ALLOW_WRITE" ]; then
+  permissions="file_mode=0777,dir_mode=0777"
+else
+  permissions="file_mode=0555,dir_mode=0555"
+fi
+
+sudo mount -t cifs "$smbPath" "$MOUNTPOINT" -o username="$STORAGEACCOUNTNAME",password="$storageAccountKey",serverino,nosharesock,actimeo=30,nobrl,"$permissions",vers=3.1.1
