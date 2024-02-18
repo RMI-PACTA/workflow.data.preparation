@@ -921,14 +921,15 @@ output_files <- normalizePath(
   )
 )
 
-logger::log_trace("Writing manifest file.")
+manifest_path <- file.path(data_prep_outputs_path, "manifest.json")
+logger::log_trace("Writing manifest file: \"{manifest_path}\".")
 pacta.data.preparation::write_manifest(
-  path = file.path(data_prep_outputs_path, "manifest.json"),
+  path = manifest_path,
   parameters = parameters,
   input_files = input_filepaths,
   output_files = output_files
 )
-
+output_files <- c(output_files, manifest_path = manifest_path)
 
 # copy in NEWs.md files from relevant PACTA packages ---------------------------
 
@@ -950,7 +951,7 @@ inputs_zip_file_path <- paste0(data_prep_outputs_path, "_inputs.zip")
 logger::log_trace("Zip file path: \"{inputs_zip_file_path}\".")
 zip(
   zipfile = inputs_zip_file_path,
-  files = unlist(parameters[["input_filepaths"]]),
+  files = input_filepaths,
   extras = c(
     "--junk-paths", # do not preserve paths
     "--no-dir-entries", # do not include directory entries
@@ -964,7 +965,7 @@ outputs_zip_file_path <- paste0(data_prep_outputs_path, ".zip")
 logger::log_trace("Zip file path: \"{outputs_zip_file_path}\".")
 zip(
   zipfile = outputs_zip_file_path,
-  files = list.files(data_prep_outputs_path, full.names = TRUE, recursive = TRUE),
+  files = output_files,
   extras = c(
     "--junk-paths", # do not preserve paths
     "--no-dir-entries", # do not include directory entries
