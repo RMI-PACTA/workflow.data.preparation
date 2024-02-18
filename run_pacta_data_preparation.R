@@ -846,20 +846,7 @@ parameters <-
   list(
     config_name = config_name,
     config = unclass(config),
-    input_filepaths = list(
-      masterdata_ownership_path = masterdata_ownership_path,
-      masterdata_debt_path = masterdata_debt_path,
-      ar_company_id__factset_entity_id_path = ar_company_id__factset_entity_id_path,
-      factset_financial_data_path = factset_financial_data_path,
-      factset_entity_info_path = factset_entity_info_path,
-      factset_entity_financing_data_path = factset_entity_financing_data_path,
-      factset_fund_data_path = factset_fund_data_path,
-      factset_isin_to_fund_table_path = factset_isin_to_fund_table_path,
-      factset_iss_emissions_data_path = factset_iss_emissions_data_path,
-      factset_issue_code_bridge_path = factset_issue_code_bridge_path,
-      factset_industry_map_bridge_path = factset_industry_map_bridge_path,
-      factset_manual_pacta_sector_override_path = factset_manual_pacta_sector_override_path
-    ),
+    input_filepaths = as.list(input_filepaths),
     preflight_filepaths = list(
       currencies_data_path = currencies_data_path
     ),
