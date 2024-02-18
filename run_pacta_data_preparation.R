@@ -140,8 +140,7 @@ input_filepaths <- c(
   factset_iss_emissions_data_path = factset_iss_emissions_data_path,
   factset_issue_code_bridge_path = factset_issue_code_bridge_path,
   factset_industry_map_bridge_path = factset_industry_map_bridge_path,
-  factset_manual_pacta_sector_override_path = factset_manual_pacta_sector_override_path,
-  data_prep_outputs_path = data_prep_outputs_path
+  factset_manual_pacta_sector_override_path = factset_manual_pacta_sector_override_path
 )
 
 if (!update_currencies) {
@@ -161,6 +160,16 @@ if (length(missing_input_files) > 0L) {
     "Input files are missing: ",
     toString(missing_input_files)
   )
+}
+
+if (dir.exists(data_prep_outputs_path)) {
+  logger::log_trace("data_prep_outputs_path exists: \"{data_prep_outputs_path}\".")
+} else {
+  logger::log_warn(
+    "data_prep_outputs_path ({data_prep_outputs_path}) does not exist. Creating."
+  )
+  warning("creating data_prep_outputs_path")
+  dir.create(data_prep_outputs_path, recursive = TRUE)
 }
 
 # pre-flight -------------------------------------------------------------------
@@ -882,13 +891,16 @@ parameters <-
     package_news = package_news
   )
 
+logger::log_trace("Getting list of output files.")
 output_files <- normalizePath(
   list.files(
     data_prep_outputs_path,
-    full.names = TRUE
+    full.names = TRUE,
+    recursive = TRUE
   )
 )
 
+logger::log_trace("Writing manifest file.")
 pacta.data.preparation::write_manifest(
   path = file.path(data_prep_outputs_path, "manifest.json"),
   parameters = parameters,
