@@ -128,24 +128,40 @@ factset_timestamp <-
 
 # check that everything is ready to go -----------------------------------------
 
-stopifnot(file.exists(masterdata_ownership_path))
-stopifnot(file.exists(masterdata_debt_path))
-stopifnot(file.exists(ar_company_id__factset_entity_id_path))
-stopifnot(file.exists(factset_financial_data_path))
-stopifnot(file.exists(factset_entity_info_path))
-stopifnot(file.exists(factset_entity_financing_data_path))
-stopifnot(file.exists(factset_fund_data_path))
-stopifnot(file.exists(factset_isin_to_fund_table_path))
-stopifnot(file.exists(factset_iss_emissions_data_path))
-stopifnot(file.exists(factset_issue_code_bridge_path))
-stopifnot(file.exists(factset_industry_map_bridge_path))
-stopifnot(file.exists(factset_manual_pacta_sector_override_path))
-stopifnot(file.exists(data_prep_outputs_path))
+input_filepaths <- c(
+  masterdata_ownership_path = masterdata_ownership_path,
+  masterdata_debt_path = masterdata_debt_path,
+  ar_company_id__factset_entity_id_path = ar_company_id__factset_entity_id_path,
+  factset_financial_data_path = factset_financial_data_path,
+  factset_entity_info_path = factset_entity_info_path,
+  factset_entity_financing_data_path = factset_entity_financing_data_path,
+  factset_fund_data_path = factset_fund_data_path,
+  factset_isin_to_fund_table_path = factset_isin_to_fund_table_path,
+  factset_iss_emissions_data_path = factset_iss_emissions_data_path,
+  factset_issue_code_bridge_path = factset_issue_code_bridge_path,
+  factset_industry_map_bridge_path = factset_industry_map_bridge_path,
+  factset_manual_pacta_sector_override_path = factset_manual_pacta_sector_override_path,
+  data_prep_outputs_path = data_prep_outputs_path
+)
 
 if (!update_currencies) {
-  stopifnot(file.exists(currencies_data_path))
+  input_filepaths <- c(
+    input_filepaths,
+    currencies_data_path = currencies_data_path
+  )
 }
 
+missing_input_files <- input_filepaths[!file.exists(input_filepaths)]
+
+if (length(missing_input_files) > 0L) {
+  logger::log_error(
+    "Input file cannot be found: {names(missing_input_files)} ({missing_input_files})."
+  )
+  stop(
+    "Input files are missing: ",
+    toString(missing_input_files)
+  )
+}
 
 # pre-flight -------------------------------------------------------------------
 
@@ -155,6 +171,10 @@ if (update_currencies) {
   logger::log_info("Fetching currency data.")
   currencies <- pacta.data.scraping::get_currency_exchange_rates(
     quarter = imf_quarter_timestamp
+  )
+  input_filepaths <- c(
+    input_filepaths,
+    currencies_data_path = currencies_data_path
   )
 }
 
@@ -862,12 +882,18 @@ parameters <-
     package_news = package_news
   )
 
+output_files <- normalizePath(
+  list.files(
+    data_prep_outputs_path,
+    full.names = TRUE
+  )
+)
+
 pacta.data.preparation::write_manifest(
   path = file.path(data_prep_outputs_path, "manifest.json"),
   parameters = parameters,
-  asset_impact_data_path = asset_impact_data_path,
-  factset_data_path = factset_data_path,
-  data_prep_outputs_path = data_prep_outputs_path
+  input_files = input_filepaths,
+  output_files = output_files
 )
 
 
