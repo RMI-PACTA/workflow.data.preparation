@@ -127,7 +127,7 @@ default:
 
 2023Q4:
   asset_impact_data_path: "/mnt/asset-impact/2024-02-15_AI_RMI_2023Q4"
-  factset_data_path: "/factset-extracted/factset-pacta_timestamp-20231231T000000Z_pulled-20240217T135833Z"
+  factset_data_path: "/mnt/factset-extracted/factset-pacta_timestamp-20231231T000000Z_pulled-20240217T135833Z"
   masterdata_ownership_filename: "2024-02-14_AI_RMI Bespoke_Company Data Products_masterdata_ownership_2023Q4.csv"
   masterdata_debt_filename: "2024-02-14_AI_RMI Bespoke_Company Data Products_masterdata_debt_2023Q4.csv"
   ar_company_id__factset_entity_id_filename: "2024-02-14_AI_RMI_Bespoke_Company_Data_Products_Company_ID_List_2023Q4.csv"
