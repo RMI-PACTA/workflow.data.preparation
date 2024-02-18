@@ -153,6 +153,12 @@ Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
     # Clone this repo through https to avoid need for an SSH key
     git clone https://github.com/RMI-PACTA/workflow.data.preparation.git ~/workflow.data.preparation
 
+    # **Temporary Step: change to develop-vm branch
+    cd ~/workflow.data.preparation
+    git fetch
+    git checkout develop-vm
+    cd ~
+
     # Install az cli
     sudo apt update
     # See https://aka.ms/installcli for alternate instructions
