@@ -33,7 +33,6 @@ config <-
 
 asset_impact_data_path <- config$asset_impact_data_path
 factset_data_path <- config$factset_data_path
-data_prep_outputs_path <- config$data_prep_outputs_path
 masterdata_ownership_filename <- config$masterdata_ownership_filename
 masterdata_debt_filename <- config$masterdata_debt_filename
 ar_company_id__factset_entity_id_filename <- config$ar_company_id__factset_entity_id_filename
@@ -64,6 +63,24 @@ scenario_geographies_list <- config$scenario_geographies_list
 global_aggregate_scenario_sources_list <- config$global_aggregate_scenario_sources_list
 global_aggregate_sector_list <- config$global_aggregate_sector_list
 
+system_timestamp <- format(
+      Sys.time(),
+      format = "%Y%m%dT%H%M%SZ",
+      tz = "UTC"
+    )
+
+data_prep_outputs_path <- file.path(
+  config$data_prep_outputs_path,
+  paste(pacta_financial_timestamp, system_timestamp, sep = "_")
+)
+
+if (dir.exists(data_prep_outputs_path)) {
+  logger::log_warn("POTENTIAL DATA LOSS: Output directory already exists, and files may be overwritten ({data_prep_outputs_path}).")
+  warning("Output directory exists. Files may be overwritten.")
+} else {
+  logger::log_trace("Creating output directory: \"{data_prep_outputs_path}\"")
+  dir.create(data_prep_outputs_path, recursive = TRUE)
+}
 
 # input filepaths --------------------------------------------------------------
 
@@ -925,6 +942,36 @@ for (pkg_name in pacta_packages) {
   )
 }
 
+# Create archive files
+logger::log_info("Exporting input and output archives.")
+
+logger::log_debug("Creating inputs zip file.")
+inputs_zip_file_path <- paste0(data_prep_outputs_path, "_inputs.zip")
+logger::log_trace("Zip file path: \"{inputs_zip_file_path}\".")
+zip(
+  zipfile = inputs_zip_file_path,
+  files = unlist(parameters[["input_filepaths"]]),
+  extras = c(
+    "--junk-paths", # do not preserve paths
+    "--no-dir-entries", # do not include directory entries
+    "--quiet" # do not print progress to stdout
+  )
+)
+logger::log_debug("Inputs archive created.")
+
+logger::log_debug("Creating outputs zip file.")
+outputs_zip_file_path <- paste0(data_prep_outputs_path, ".zip")
+logger::log_trace("Zip file path: \"{outputs_zip_file_path}\".")
+zip(
+  zipfile = outputs_zip_file_path,
+  files = list.files(data_prep_outputs_path, full.names = TRUE, recursive = TRUE),
+  extras = c(
+    "--junk-paths", # do not preserve paths
+    "--no-dir-entries", # do not include directory entries
+    "--quiet" # do not print progress to stdout
+  )
+)
+logger::log_debug("Outputs archive created.")
 
 # ------------------------------------------------------------------------------
 
