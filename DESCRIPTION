@@ -33,7 +33,7 @@ Imports:
     dbplyr,
     dplyr,
     logger,
-    pacta.data.preparation (>= 0.1.0.9002), 
+    pacta.data.preparation (>= 0.1.0.9003), 
     pacta.data.scraping, 
     pacta.scenario.preparation, 
     readr, 
