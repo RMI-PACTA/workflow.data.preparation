@@ -1,5 +1,5 @@
 default:
-  data_prep_outputs_path: "/outputs"
+  data_prep_outputs_path: "/mnt/outputs"
   asset_impact_data_path: "/inputs"
   factset_data_path: "/inputs"
   masterdata_ownership_filename: ""
