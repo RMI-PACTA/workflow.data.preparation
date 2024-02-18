@@ -34,7 +34,8 @@ Running the workflow requires a file `.env` to exist in the root directory, that
 
 ```sh
 # .env
-HOST_INPUTS_PATH=/PATH/TO/inputs
+HOST_FACTSET_EXTRACTED_PATH=/PATH/TO/factset-extracted
+HOST_ASSET_IMPACT_PATH=/PATH/TO/asset-impact
 HOST_OUTPUTS_PATH=/PATH/TO/YYYYQQ_pacta_analysis_inputs_YYYY-MM-DD/YYYYQQ
 GITHUB_PAT=ghp_XXXXxxXxXXXxXxxX
 R_CONFIG_ACTIVE=YYYYQQ
@@ -119,7 +120,7 @@ Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
       --public-ip-address "" \
       --resource-group "$VM_RESOURCE_GROUP" \
       --size "$MACHINE_SIZE" \
-      --subnet "$SUBNETID"
+      --subnet "$SUBNET_ID"
 
     ```
 
@@ -134,7 +135,8 @@ Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
 3. **Connect to the newly created VM via SSH.**
 
     ```sh
-    This connects to the VM created above via SSH.
+    # This connects to the VM created above via SSH.
+    # See above block for envvars referenced here.
 
     az ssh vm \
         --local-user azureuser \
@@ -165,6 +167,49 @@ Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
 
     # Note the outputs directory has the -w flag, meaning write permissions are enabled.
     ~/workflow.data.preparation/scripts/mount_afs.sh -r "RMI-SP-PACTA-DEV" -a "pactadatadev" -f "workflow-data-preparation-outputs" -m "/mnt/workflow-data-preparation-outputs" -w
+
+    ```
+
+5. **Install Docker**
+
+    ```sh
+    # install docker
+    sudo apt -y install \
+        docker-compose \
+        docker.io
+
+    # Allow azureuser to run docker without sudo
+    sudo usermod -aG docker azureuser
+    ```
+
+    At this point, you need to log out of the shell to reevaluate group memberships (add the `docker` group to `azureuser`).
+    You can log back in with the `az ssh` command from step 3.
+    When you are back into the shell, you can run `docker run --rm hello-world` to confirm that docker is working correctly, and you are able to run as a non-root user.
+
+6. **Prepare `.env` file**
+  The `ubuntu2204` image used for the VM includes both `vim` and `nano`.
+  Create a `.env` file in the `workflow.data.preparation` directory, according to the instructions in the [running locally](running-locally-with-docker-compose) section of this file.
+
+7. **Build Docker image**
+    The cloned git repo in the home directory, and mounted directories should sill be in place after logging in again.
+    Additionally, `azureuser` should be part of the `docker` group.
+    you can confirm this with 
+
+    ```sh
+    groups
+    ls ~
+    ls /mnt
+    ```
+
+    With that in place, you are ready to build the `workflow.data.preparation` docker image.
+    
+    ```sh
+    # navigate to the workflow.data.preparation repo
+    cd ~/workflow.data.preparation
+
+    docker-compose build
+
+    docker-compose up
 
     ```
 
