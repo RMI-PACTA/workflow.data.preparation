@@ -6,8 +6,11 @@ services:
       context: .
     volumes:
       - type: bind
-        source: ${HOST_INPUTS_PATH}
-        target: /inputs
+        source: ${HOST_FACTSET_EXTRACTED_PATH}
+        target: /mnt/factset-extracted
+      - type: bind
+        source: ${HOST_ASSET_IMPACT_PATH}
+        target: /asset-impact
       - type: bind
         source: ${HOST_OUTPUTS_PATH}
         target: /outputs
