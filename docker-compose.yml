@@ -10,9 +10,11 @@ services:
       - type: bind
         source: ${HOST_FACTSET_EXTRACTED_PATH}
         target: /mnt/factset-extracted
+        read_only: true
       - type: bind
         source: ${HOST_ASSET_IMPACT_PATH}
         target: /mnt/asset-impact
+        read_only: true
       - type: bind
         source: ${HOST_OUTPUTS_PATH}
         target: /outputs
