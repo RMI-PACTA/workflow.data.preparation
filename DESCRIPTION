@@ -42,7 +42,7 @@ Imports:
     stringr, 
     tidyr
 Remotes: 
-    RMI-PACTA/pacta.data.preparation, 
+    RMI-PACTA/pacta.data.preparation#341, 
     RMI-PACTA/pacta.data.scraping, 
     RMI-PACTA/pacta.scenario.preparation
 Depends: 
