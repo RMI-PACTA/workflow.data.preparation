@@ -2,6 +2,7 @@ default:
   data_prep_outputs_path: "/outputs"
   asset_impact_data_path: "/inputs"
   factset_data_path: "/inputs"
+  preflight_data_path: ""
   masterdata_ownership_filename: ""
   masterdata_debt_filename: ""
   ar_company_id__factset_entity_id_filename: ""
@@ -127,3 +128,4 @@ desktop:
   data_prep_outputs_path: "./outputs"
   asset_impact_data_path: "./ai_inputs"
   factset_data_path: "./factset_inputs"
+  preflight_data_path: ""
