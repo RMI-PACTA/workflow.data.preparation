@@ -12,7 +12,7 @@ services:
         target: /mnt/factset-extracted
       - type: bind
         source: ${HOST_ASSET_IMPACT_PATH}
-        target: /asset-impact
+        target: /mnt/asset-impact
       - type: bind
         source: ${HOST_OUTPUTS_PATH}
         target: /outputs
