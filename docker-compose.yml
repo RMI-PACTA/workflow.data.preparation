@@ -4,10 +4,17 @@ services:
   data_prep:
     build:
       context: .
+    environment:
+      - LOG_LEVEL=TRACE
     volumes:
       - type: bind
-        source: ${HOST_INPUTS_PATH}
-        target: /inputs
+        source: ${HOST_FACTSET_EXTRACTED_PATH}
+        target: /mnt/factset-extracted
+        read_only: true
+      - type: bind
+        source: ${HOST_ASSET_IMPACT_PATH}
+        target: /mnt/asset-impact
+        read_only: true
       - type: bind
         source: ${HOST_OUTPUTS_PATH}
         target: /outputs
