@@ -193,7 +193,7 @@ Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
 7. **Build Docker image**
     The cloned git repo in the home directory, and mounted directories should sill be in place after logging in again.
     Additionally, `azureuser` should be part of the `docker` group.
-    you can confirm this with 
+    you can confirm this with:
 
     ```sh
     groups
@@ -202,10 +202,13 @@ Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
     ```
 
     With that in place, you are ready to build the `workflow.data.preparation` docker image.
+    **To ensure that a dropped network connection does not kill the process, you should run this in `tmux`.**
     
     ```sh
     # navigate to the workflow.data.preparation repo
     cd ~/workflow.data.preparation
+
+    tmux
 
     docker-compose build
 
