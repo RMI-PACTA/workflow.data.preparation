@@ -187,7 +187,7 @@ if (update_currencies) {
   logger::log_info("Fetching currency data.")
   input_filepaths <- c(
     input_filepaths,
-    currencies_data_path = currencies_data_path
+    currencies_preflight_data_path = currencies_preflight_data_path
   )
   currencies <- pacta.data.scraping::get_currency_exchange_rates(
     quarter = imf_quarter_timestamp
@@ -200,6 +200,10 @@ if (update_currencies) {
 }
 
 logger::log_info("Scraping index regions.")
+input_filepaths <- c(
+  input_filepaths,
+  index_regions_preflight_data_path = index_regions_preflight_data_path
+)
 index_regions <- pacta.data.scraping::get_index_regions()
 saveRDS(index_regions, index_regions_preflight_data_path)
 
