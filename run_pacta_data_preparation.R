@@ -178,12 +178,12 @@ logger::log_info("Fetching pre-flight data.")
 
 if (update_currencies) {
   logger::log_info("Fetching currency data.")
-  currencies <- pacta.data.scraping::get_currency_exchange_rates(
-    quarter = imf_quarter_timestamp
-  )
   input_filepaths <- c(
     input_filepaths,
     currencies_data_path = currencies_data_path
+  )
+  currencies <- pacta.data.scraping::get_currency_exchange_rates(
+    quarter = imf_quarter_timestamp
   )
 }
 
