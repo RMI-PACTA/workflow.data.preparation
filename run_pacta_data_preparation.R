@@ -45,6 +45,7 @@ factset_isin_to_fund_table_filename <- config$factset_isin_to_fund_table_filenam
 factset_iss_emissions_data_filename <- config$factset_iss_emissions_data_filename
 factset_issue_code_bridge_filename <- config$factset_issue_code_bridge_filename
 factset_industry_map_bridge_filename <- config$factset_industry_map_bridge_filename
+factset_manual_pacta_sector_override_filename <- config$factset_manual_pacta_sector_override_filename
 update_currencies <- config$update_currencies
 export_sqlite_files <- config$export_sqlite_files
 imf_quarter_timestamp <- config$imf_quarter_timestamp
@@ -89,6 +90,8 @@ factset_issue_code_bridge_path <-
   file.path(factset_data_path, factset_issue_code_bridge_filename)
 factset_industry_map_bridge_path <-
   file.path(factset_data_path, factset_industry_map_bridge_filename)
+factset_manual_pacta_sector_override_path <-
+  file.path(factset_data_path, factset_manual_pacta_sector_override_filename)
 
 
 # pre-flight filepaths ---------------------------------------------------------
@@ -118,7 +121,8 @@ factset_timestamp <-
     factset_isin_to_fund_table_filename,
     factset_iss_emissions_data_filename,
     factset_issue_code_bridge_filename,
-    factset_industry_map_bridge_filename
+    factset_industry_map_bridge_filename,
+    factset_manual_pacta_sector_override_filename
   )))
 
 
@@ -135,6 +139,7 @@ stopifnot(file.exists(factset_isin_to_fund_table_path))
 stopifnot(file.exists(factset_iss_emissions_data_path))
 stopifnot(file.exists(factset_issue_code_bridge_path))
 stopifnot(file.exists(factset_industry_map_bridge_path))
+stopifnot(file.exists(factset_manual_pacta_sector_override_path))
 stopifnot(file.exists(data_prep_outputs_path))
 
 if (!update_currencies) {
@@ -176,6 +181,9 @@ factset_issue_code_bridge <-
 
 factset_industry_map_bridge <-
   readRDS(factset_industry_map_bridge_path)
+
+factset_manual_pacta_sector_override <-
+  readRDS(factset_manual_pacta_sector_override_path)
 
 logger::log_info("Preparing scenario data.")
 
@@ -240,10 +248,12 @@ logger::log_info("Formatting and saving file: \"financial_data.rds\".")
 readRDS(factset_financial_data_path) %>%
   pacta.data.preparation::prepare_financial_data(factset_issue_code_bridge) %>%
   saveRDS(file.path(data_prep_outputs_path, "financial_data.rds"))
+invisible(gc())
 
 logger::log_info("Formatting and saving file: \"entity_financing.rds\".")
 readRDS(factset_entity_financing_data_path) %>%
   saveRDS(file.path(data_prep_outputs_path, "entity_financing.rds"))
+invisible(gc())
 
 logger::log_info("Formatting and saving file: \"entity_info.rds\".")
 factset_entity_id__ar_company_id <-
@@ -255,10 +265,12 @@ factset_entity_id__ar_company_id <-
   distinct()
 readRDS(factset_entity_info_path) %>%
   pacta.data.preparation::prepare_entity_info(
-    factset_entity_id__ar_company_id, 
-    factset_industry_map_bridge
+    factset_entity_id__ar_company_id,
+    factset_industry_map_bridge,
+    factset_manual_pacta_sector_override
   ) %>%
   saveRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
+invisible(gc())
 
 logger::log_info("Financial data prepared.")
 
@@ -282,6 +294,7 @@ ar_company_id__credit_parent_ar_company_id <-
   distinct()
 
 rm(entity_info)
+invisible(gc())
 
 
 logger::log_info(
@@ -294,6 +307,7 @@ readr::read_csv(masterdata_ownership_path, na = "", show_col_types = FALSE) %>%
     zero_emission_factor_techs
   ) %>%
   saveRDS(file.path(data_prep_outputs_path, "masterdata_ownership_datastore.rds"))
+invisible(gc())
 
 
 logger::log_info(
@@ -330,12 +344,15 @@ masterdata_debt %>%
     .groups = "drop"
   ) %>%
   saveRDS(file.path(data_prep_outputs_path, "masterdata_debt_datastore.rds"))
+invisible(gc())
 
 rm(masterdata_debt)
 rm(company_id__creditor_company_id)
+invisible(gc())
 
 rm(ar_company_id__country_of_domicile)
 rm(ar_company_id__credit_parent_ar_company_id)
+invisible(gc())
 
 logger::log_info("ABCD prepared.")
 
@@ -355,6 +372,13 @@ factset_entity_id__ar_company_id <-
 factset_entity_id__security_mapped_sector <-
   entity_info %>%
   select(factset_entity_id, security_mapped_sector)
+
+factset_entity_id__credit_parent_id <-
+  entity_info %>%
+  select("factset_entity_id", "credit_parent_id")
+
+rm(entity_info)
+invisible(gc())
 
 
 logger::log_info("Formatting and saving file: \"abcd_flags_equity.rds\".")
@@ -380,6 +404,7 @@ financial_data %>%
     sectors_with_assets
   ) %>%
   saveRDS(file.path(data_prep_outputs_path, "abcd_flags_equity.rds"))
+invisible(gc())
 
 
 logger::log_info("Formatting and saving file: \"abcd_flags_bonds.rds\".")
@@ -398,10 +423,7 @@ financial_data %>%
   left_join(ar_company_id__sectors_with_assets__debt, by = "ar_company_id") %>%
   mutate(has_asset_level_data = if_else(is.na(sectors_with_assets) | sectors_with_assets == "", FALSE, TRUE)) %>%
   mutate(has_ald_in_fin_sector = if_else(stringr::str_detect(sectors_with_assets, security_mapped_sector), TRUE, FALSE)) %>%
-  left_join(
-    select(entity_info, "factset_entity_id", "credit_parent_id"),
-    by = "factset_entity_id"
-  ) %>%
+  left_join(factset_entity_id__credit_parent_id, by = "factset_entity_id") %>%
   mutate(
     # If FactSet has no credit_parent, we define the company as it's own parent
     credit_parent_id = if_else(is.na(credit_parent_id), factset_entity_id, credit_parent_id)
@@ -414,12 +436,15 @@ financial_data %>%
   ) %>%
   ungroup() %>%
   saveRDS(file.path(data_prep_outputs_path, "abcd_flags_bonds.rds"))
+invisible(gc())
 
 
 rm(financial_data)
-rm(entity_info)
 rm(factset_entity_id__ar_company_id)
 rm(factset_entity_id__security_mapped_sector)
+rm(factset_entity_id__credit_parent_id)
+invisible(gc())
+
 logger::log_info("ABCD flags prepared.")
 
 
@@ -490,6 +515,7 @@ isin_to_fund_table %>%
 
 rm(fund_data)
 rm(isin_to_fund_table)
+invisible(gc())
 
 logger::log_info("Fund data prepared.")
 
@@ -577,6 +603,7 @@ iss_entity_emission_intensities %>%
 rm(iss_company_emissions)
 rm(iss_entity_emission_intensities)
 rm(factset_entity_info)
+invisible(gc())
 
 logger::log_info("Emissions data prepared.")
 
@@ -608,7 +635,11 @@ for (scenario_source in unique(scenarios_long$scenario_source)) {
     index_regions = index_regions
   ) %>%
     saveRDS(file.path(data_prep_outputs_path, filename))
+  invisible(gc())
 }
+
+rm(masterdata_ownership_datastore)
+invisible(gc())
 
 logger::log_info("Formatting and saving file: \"equity_abcd_scenario.rds\".")
 list.files(
@@ -644,7 +675,11 @@ for (scenario_source in unique(scenarios_long$scenario_source)) {
     index_regions = index_regions
   ) %>%
     saveRDS(file.path(data_prep_outputs_path, filename))
+  invisible(gc())
 }
+
+rm(masterdata_debt_datastore)
+invisible(gc())
 
 logger::log_info("Formatting and saving file: \"bonds_abcd_scenario.rds\".")
 list.files(
@@ -685,6 +720,7 @@ if (export_sqlite_files) {
 
   DBI::dbDisconnect(con)
   rm(entity_info)
+  invisible(gc())
 
   # equity_abcd_scenario
   logger::log_info(
@@ -717,6 +753,7 @@ if (export_sqlite_files) {
 
   DBI::dbDisconnect(con)
   rm(equity_abcd_scenario)
+  invisible(gc())
 
   # bonds_abcd_scenario
   logger::log_info(
@@ -749,6 +786,7 @@ if (export_sqlite_files) {
 
   DBI::dbDisconnect(con)
   rm(bonds_abcd_scenario)
+  invisible(gc())
 }
 
 
@@ -790,7 +828,8 @@ parameters <-
       factset_isin_to_fund_table_path = factset_isin_to_fund_table_path,
       factset_iss_emissions_data_path = factset_iss_emissions_data_path,
       factset_issue_code_bridge_path = factset_issue_code_bridge_path,
-      factset_industry_map_bridge_path = factset_industry_map_bridge_path
+      factset_industry_map_bridge_path = factset_industry_map_bridge_path,
+      factset_manual_pacta_sector_override_path = factset_manual_pacta_sector_override_path
     ),
     preflight_filepaths = list(
       currencies_data_path = currencies_data_path
