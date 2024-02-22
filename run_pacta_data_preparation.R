@@ -900,36 +900,6 @@ for (pkg_name in pacta_packages) {
   )
 }
 
-# Create archive files
-logger::log_info("Exporting input and output archives.")
-
-logger::log_debug("Creating inputs zip file.")
-inputs_zip_file_path <- paste0(data_prep_outputs_path, "_inputs.zip")
-logger::log_trace("Zip file path: \"{inputs_zip_file_path}\".")
-zip(
-  zipfile = inputs_zip_file_path,
-  files = unlist(parameters[["input_filepaths"]]),
-  extras = c(
-    "--junk-paths", # do not preserve paths
-    "--no-dir-entries", # do not include directory entries
-    "--quiet" # do not print progress to stdout
-  )
-)
-logger::log_debug("Inputs archive created.")
-
-logger::log_debug("Creating outputs zip file.")
-outputs_zip_file_path <- paste0(data_prep_outputs_path, ".zip")
-logger::log_trace("Zip file path: \"{outputs_zip_file_path}\".")
-zip(
-  zipfile = outputs_zip_file_path,
-  files = list.files(data_prep_outputs_path, full.names = TRUE, recursive = TRUE),
-  extras = c(
-    "--junk-paths", # do not preserve paths
-    "--no-dir-entries", # do not include directory entries
-    "--quiet" # do not print progress to stdout
-  )
-)
-logger::log_debug("Outputs archive created.")
 
 # ------------------------------------------------------------------------------
 
