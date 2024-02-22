@@ -16,6 +16,7 @@ default:
   factset_manual_pacta_sector_override_filename: ""
   update_currencies: TRUE
   export_sqlite_files: TRUE
+  export_archives: TRUE
   imf_quarter_timestamp: "2021-Q4"
   pacta_financial_timestamp: "2021Q4"
   market_share_target_reference_year: 2021
@@ -127,3 +128,4 @@ desktop:
   data_prep_outputs_path: "./outputs"
   asset_impact_data_path: "./ai_inputs"
   factset_data_path: "./factset_inputs"
+  export_archives: FALSE
