@@ -118,6 +118,7 @@ factset_manual_pacta_sector_override_path <-
 # pre-flight filepaths ---------------------------------------------------------
 
 currencies_data_path <- file.path(data_prep_outputs_path, "currencies.rds")
+index_regions_data_path <- file.path(data_prep_outputs_path, "index_regions.rds")
 
 
 # computed options -------------------------------------------------------------
@@ -257,6 +258,12 @@ logger::log_info("Scenario data prepared.")
 logger::log_info("Saving file: \"currencies.rds\".")
 currencies %>%
   saveRDS(currencies_data_path)
+
+
+# index_regions output ---------------------------------------------------------
+
+logger::log_info("Saving file: \"index_regions.rds\".")
+index_regions %>% saveRDS(index_regions_data_path)
 
 
 # financial data output --------------------------------------------------------
