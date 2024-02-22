@@ -103,6 +103,7 @@ if (preflight_data_path == "") {
 
 currencies_preflight_data_path <- file.path(preflight_data_path, "currencies.rds")
 currencies_data_path <- file.path(data_prep_outputs_path, "currencies.rds")
+index_regions_data_path <- file.path(data_prep_outputs_path, "index_regions.rds")
 
 index_regions_preflight_data_path <- file.path(preflight_data_path, "index_regions.rds")
 
@@ -249,6 +250,12 @@ logger::log_info("Scenario data prepared.")
 logger::log_info("Saving file: \"currencies.rds\".")
 currencies %>%
   saveRDS(currencies_data_path)
+
+
+# index_regions output ---------------------------------------------------------
+
+logger::log_info("Saving file: \"index_regions.rds\".")
+index_regions %>% saveRDS(index_regions_data_path)
 
 
 # financial data output --------------------------------------------------------

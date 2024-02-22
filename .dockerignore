@@ -2,6 +2,7 @@
 *
 # include certain files
 !.env
+!.git
 !config.yml
 !DESCRIPTION
 !LICENSE
