@@ -15,7 +15,6 @@ default:
   factset_industry_map_bridge_filename: ""
   factset_manual_pacta_sector_override_filename: ""
   update_currencies: TRUE
-  timestamp_export_directory: TRUE
   export_sqlite_files: TRUE
   imf_quarter_timestamp: "2021-Q4"
   pacta_financial_timestamp: "2021Q4"
