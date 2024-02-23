@@ -122,7 +122,7 @@ docker:
   market_share_target_reference_year: 2022
   time_horizon: 5
   scenario_sources_list: ["GECO2022", "ISF2021", "WEO2022"]
-  sector_list: ["Automotive", "Power", "Fossil Fuels", "Oil&Gas", "Coal"]
+  sector_list: ["Automotive", "Power", "Oil&Gas", "Coal"]
   other_sector_list: ["Steel", "Aviation", "Cement"]
   zero_emission_factor_techs: ["Electric", "HydroCap", "NuclearCap", "RenewablesCap"]
   green_techs: ["FuelCell", "Electric", "Hybrid", "RenewablesCap", "HydroCap", "NuclearCap", "FuelCell_HDV", "Electric_HDV", "Hybrid_HDV"]
