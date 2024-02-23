@@ -48,6 +48,7 @@ factset_industry_map_bridge_filename <- config$factset_industry_map_bridge_filen
 factset_manual_pacta_sector_override_filename <- config$factset_manual_pacta_sector_override_filename
 update_currencies <- config$update_currencies
 export_sqlite_files <- config$export_sqlite_files
+export_archives <- config$export_archives
 imf_quarter_timestamp <- config$imf_quarter_timestamp
 pacta_financial_timestamp <- config$pacta_financial_timestamp
 market_share_target_reference_year <- config$market_share_target_reference_year
@@ -64,6 +65,24 @@ scenario_geographies_list <- config$scenario_geographies_list
 global_aggregate_scenario_sources_list <- config$global_aggregate_scenario_sources_list
 global_aggregate_sector_list <- config$global_aggregate_sector_list
 
+# create timestamped output directory
+system_timestamp <- format(
+  Sys.time(),
+  format = "%Y%m%dT%H%M%SZ",
+  tz = "UTC"
+)
+data_prep_outputs_path <- file.path(
+  data_prep_outputs_path,
+  paste(pacta_financial_timestamp, system_timestamp, sep = "_")
+)
+
+if (dir.exists(data_prep_outputs_path)) {
+  logger::log_warn("POTENTIAL DATA LOSS: Output directory already exists, and files may be overwritten ({data_prep_outputs_path}).")
+  warning("Output directory exists. Files may be overwritten.")
+} else {
+  logger::log_trace("Creating output directory: \"{data_prep_outputs_path}\"")
+  dir.create(data_prep_outputs_path, recursive = TRUE)
+}
 
 # input filepaths --------------------------------------------------------------
 
@@ -96,9 +115,16 @@ factset_manual_pacta_sector_override_path <-
 
 # pre-flight filepaths ---------------------------------------------------------
 
+preflight_data_path <- config$preflight_data_path
+if (preflight_data_path == "") {
+  preflight_data_path <- data_prep_outputs_path
+}
+
+currencies_preflight_data_path <- file.path(preflight_data_path, "currencies.rds")
 currencies_data_path <- file.path(data_prep_outputs_path, "currencies.rds")
 index_regions_data_path <- file.path(data_prep_outputs_path, "index_regions.rds")
 
+index_regions_preflight_data_path <- file.path(preflight_data_path, "index_regions.rds")
 
 # computed options -------------------------------------------------------------
 
@@ -129,24 +155,39 @@ factset_timestamp <-
 
 # check that everything is ready to go -----------------------------------------
 
-stopifnot(file.exists(masterdata_ownership_path))
-stopifnot(file.exists(masterdata_debt_path))
-stopifnot(file.exists(ar_company_id__factset_entity_id_path))
-stopifnot(file.exists(factset_financial_data_path))
-stopifnot(file.exists(factset_entity_info_path))
-stopifnot(file.exists(factset_entity_financing_data_path))
-stopifnot(file.exists(factset_fund_data_path))
-stopifnot(file.exists(factset_isin_to_fund_table_path))
-stopifnot(file.exists(factset_iss_emissions_data_path))
-stopifnot(file.exists(factset_issue_code_bridge_path))
-stopifnot(file.exists(factset_industry_map_bridge_path))
-stopifnot(file.exists(factset_manual_pacta_sector_override_path))
-stopifnot(file.exists(data_prep_outputs_path))
+input_filepaths <- c(
+  masterdata_ownership_path = masterdata_ownership_path,
+  masterdata_debt_path = masterdata_debt_path,
+  ar_company_id__factset_entity_id_path = ar_company_id__factset_entity_id_path,
+  factset_financial_data_path = factset_financial_data_path,
+  factset_entity_info_path = factset_entity_info_path,
+  factset_entity_financing_data_path = factset_entity_financing_data_path,
+  factset_fund_data_path = factset_fund_data_path,
+  factset_isin_to_fund_table_path = factset_isin_to_fund_table_path,
+  factset_iss_emissions_data_path = factset_iss_emissions_data_path,
+  factset_issue_code_bridge_path = factset_issue_code_bridge_path,
+  factset_industry_map_bridge_path = factset_industry_map_bridge_path,
+  factset_manual_pacta_sector_override_path = factset_manual_pacta_sector_override_path
+)
 
 if (!update_currencies) {
-  stopifnot(file.exists(currencies_data_path))
+  input_filepaths <- c(
+    input_filepaths,
+    currencies_preflight_data_path = currencies_preflight_data_path
+  )
 }
 
+missing_input_files <- input_filepaths[!file.exists(input_filepaths)]
+
+if (length(missing_input_files) > 0L) {
+  logger::log_error(
+    "Input file cannot be found: {names(missing_input_files)} ({missing_input_files})."
+  )
+  stop(
+    "Input files are missing: ",
+    toString(missing_input_files)
+  )
+}
 
 # pre-flight -------------------------------------------------------------------
 
@@ -154,13 +195,27 @@ logger::log_info("Fetching pre-flight data.")
 
 if (update_currencies) {
   logger::log_info("Fetching currency data.")
+  input_filepaths <- c(
+    input_filepaths,
+    currencies_preflight_data_path = currencies_preflight_data_path
+  )
   currencies <- pacta.data.scraping::get_currency_exchange_rates(
     quarter = imf_quarter_timestamp
   )
+  saveRDS(currencies, currencies_preflight_data_path)
+} else {
+  logger::log_info("Using pre-existing currency data.")
+  # This requires the preflight path to be defined in the config
+  currencies <- readRDS(currencies_preflight_data_path)
 }
 
 logger::log_info("Scraping index regions.")
+input_filepaths <- c(
+  input_filepaths,
+  index_regions_preflight_data_path = index_regions_preflight_data_path
+)
 index_regions <- pacta.data.scraping::get_index_regions()
+saveRDS(index_regions, index_regions_preflight_data_path)
 
 logger::log_info("Fetching pre-flight data done.")
 
@@ -824,23 +879,7 @@ parameters <-
   list(
     config_name = config_name,
     config = unclass(config),
-    input_filepaths = list(
-      masterdata_ownership_path = masterdata_ownership_path,
-      masterdata_debt_path = masterdata_debt_path,
-      ar_company_id__factset_entity_id_path = ar_company_id__factset_entity_id_path,
-      factset_financial_data_path = factset_financial_data_path,
-      factset_entity_info_path = factset_entity_info_path,
-      factset_entity_financing_data_path = factset_entity_financing_data_path,
-      factset_fund_data_path = factset_fund_data_path,
-      factset_isin_to_fund_table_path = factset_isin_to_fund_table_path,
-      factset_iss_emissions_data_path = factset_iss_emissions_data_path,
-      factset_issue_code_bridge_path = factset_issue_code_bridge_path,
-      factset_industry_map_bridge_path = factset_industry_map_bridge_path,
-      factset_manual_pacta_sector_override_path = factset_manual_pacta_sector_override_path
-    ),
-    preflight_filepaths = list(
-      currencies_data_path = currencies_data_path
-    ),
+    input_filepaths = as.list(input_filepaths),
     timestamps = list(
       imf_quarter_timestamp = imf_quarter_timestamp,
       factset_data_identifier = factset_timestamp,
@@ -869,14 +908,24 @@ parameters <-
     package_news = package_news
   )
 
-pacta.data.preparation::write_manifest(
-  path = file.path(data_prep_outputs_path, "manifest.json"),
-  parameters = parameters,
-  asset_impact_data_path = asset_impact_data_path,
-  factset_data_path = factset_data_path,
-  data_prep_outputs_path = data_prep_outputs_path
+logger::log_trace("Getting list of output files.")
+output_files <- normalizePath(
+  list.files(
+    data_prep_outputs_path,
+    full.names = TRUE,
+    recursive = TRUE
+  )
 )
 
+manifest_path <- file.path(data_prep_outputs_path, "manifest.json")
+logger::log_trace("Writing manifest file: \"{manifest_path}\".")
+pacta.data.preparation::write_manifest(
+  path = manifest_path,
+  parameters = parameters,
+  input_files = input_filepaths,
+  output_files = output_files
+)
+output_files <- c(output_files, manifest_path = manifest_path)
 
 # copy in NEWs.md files from relevant PACTA packages ---------------------------
 
@@ -890,6 +939,38 @@ for (pkg_name in pacta_packages) {
   )
 }
 
+# Create archive files
+if (export_archives) {
+  logger::log_info("Exporting input and output archives.")
+
+  logger::log_debug("Creating inputs zip file.")
+  inputs_zip_file_path <- paste0(data_prep_outputs_path, "_inputs.zip")
+  logger::log_trace("Zip file path: \"{inputs_zip_file_path}\".")
+  zip(
+    zipfile = inputs_zip_file_path,
+    files = normalizePath(unlist(parameters[["input_filepaths"]])),
+    extras = c(
+      "--junk-paths", # do not preserve paths
+      "--no-dir-entries", # do not include directory entries
+      "--quiet" # do not print progress to stdout
+    )
+  )
+  logger::log_debug("Inputs archive created.")
+
+  logger::log_debug("Creating outputs zip file.")
+  outputs_zip_file_path <- paste0(data_prep_outputs_path, ".zip")
+  logger::log_trace("Zip file path: \"{outputs_zip_file_path}\".")
+  zip(
+    zipfile = outputs_zip_file_path,
+    files = output_files,
+    extras = c(
+      "--junk-paths", # do not preserve paths
+      "--no-dir-entries", # do not include directory entries
+      "--quiet" # do not print progress to stdout
+    )
+  )
+  logger::log_debug("Outputs archive created.")
+}
 
 # ------------------------------------------------------------------------------
 
