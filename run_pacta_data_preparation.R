@@ -172,7 +172,7 @@ input_filepaths <- c(
 if (!update_currencies) {
   input_filepaths <- c(
     input_filepaths,
-    currencies_data_path = currencies_data_path
+    currencies_preflight_data_path = currencies_preflight_data_path
   )
 }
 
