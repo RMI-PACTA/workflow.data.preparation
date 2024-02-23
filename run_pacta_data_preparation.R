@@ -892,7 +892,7 @@ for (pkg_name in pacta_packages) {
 }
 
 # Create archive files
-if (config[["export_archives"]]) {
+if (export_archives) {
   logger::log_info("Exporting input and output archives.")
 
   logger::log_debug("Creating inputs zip file.")
