@@ -17,4 +17,4 @@ services:
         read_only: true
       - type: bind
         source: ${HOST_OUTPUTS_PATH}
-        target: /outputs
+        target: /mnt/outputs
