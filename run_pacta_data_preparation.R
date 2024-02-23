@@ -880,9 +880,6 @@ parameters <-
     config_name = config_name,
     config = unclass(config),
     input_filepaths = as.list(input_filepaths),
-    preflight_filepaths = list(
-      currencies_data_path = currencies_data_path
-    ),
     timestamps = list(
       imf_quarter_timestamp = imf_quarter_timestamp,
       factset_data_identifier = factset_timestamp,
