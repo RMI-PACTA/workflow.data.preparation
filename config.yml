@@ -39,12 +39,6 @@ desktop:
   asset_impact_data_path: "./ai_inputs"
   factset_data_path: "./factset_inputs"
 
-docker:
-  inherits: 2022Q4
-  data_prep_outputs_path: "/mnt/outputs"
-  asset_impact_data_path: "/mnt/inputs"
-  factset_data_path: "/mnt/inputs"
-
 
 2021Q4:
   masterdata_ownership_filename: "2023-06-05_AI_RMI Bespoke_Company Data Products_masterdata_ownership_2021q4.csv"
