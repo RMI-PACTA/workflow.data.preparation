@@ -900,7 +900,7 @@ if (export_archives) {
   logger::log_trace("Zip file path: \"{inputs_zip_file_path}\".")
   zip(
     zipfile = inputs_zip_file_path,
-    files = unlist(parameters[["input_filepaths"]]),
+    files = normalizePath(unlist(parameters[["input_filepaths"]])),
     extras = c(
       "--junk-paths", # do not preserve paths
       "--no-dir-entries", # do not include directory entries
