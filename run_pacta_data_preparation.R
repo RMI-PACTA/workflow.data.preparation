@@ -63,14 +63,14 @@ scenario_geographies_list <- config$scenario_geographies_list
 global_aggregate_scenario_sources_list <- config$global_aggregate_scenario_sources_list
 global_aggregate_sector_list <- config$global_aggregate_sector_list
 
+# create timestamped output directory
 system_timestamp <- format(
-      Sys.time(),
-      format = "%Y%m%dT%H%M%SZ",
-      tz = "UTC"
-    )
-
+  Sys.time(),
+  format = "%Y%m%dT%H%M%SZ",
+  tz = "UTC"
+)
 data_prep_outputs_path <- file.path(
-  config$data_prep_outputs_path,
+  data_prep_outputs_path,
   paste(pacta_financial_timestamp, system_timestamp, sep = "_")
 )
 
