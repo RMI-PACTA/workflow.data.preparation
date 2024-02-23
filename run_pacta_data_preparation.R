@@ -188,16 +188,6 @@ if (length(missing_input_files) > 0L) {
   )
 }
 
-if (dir.exists(data_prep_outputs_path)) {
-  logger::log_trace("data_prep_outputs_path exists: \"{data_prep_outputs_path}\".")
-} else {
-  logger::log_warn(
-    "data_prep_outputs_path ({data_prep_outputs_path}) does not exist. Creating."
-  )
-  warning("creating data_prep_outputs_path")
-  dir.create(data_prep_outputs_path, recursive = TRUE)
-}
-
 # pre-flight -------------------------------------------------------------------
 
 logger::log_info("Fetching pre-flight data.")
