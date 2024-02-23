@@ -48,6 +48,7 @@ factset_industry_map_bridge_filename <- config$factset_industry_map_bridge_filen
 factset_manual_pacta_sector_override_filename <- config$factset_manual_pacta_sector_override_filename
 update_currencies <- config$update_currencies
 export_sqlite_files <- config$export_sqlite_files
+export_archives <- config$export_archives
 imf_quarter_timestamp <- config$imf_quarter_timestamp
 pacta_financial_timestamp <- config$pacta_financial_timestamp
 market_share_target_reference_year <- config$market_share_target_reference_year
