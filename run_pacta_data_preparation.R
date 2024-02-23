@@ -962,7 +962,7 @@ if (export_archives) {
   logger::log_trace("Zip file path: \"{outputs_zip_file_path}\".")
   zip(
     zipfile = outputs_zip_file_path,
-    files = list.files(data_prep_outputs_path, full.names = TRUE, recursive = TRUE),
+    files = output_files,
     extras = c(
       "--junk-paths", # do not preserve paths
       "--no-dir-entries", # do not include directory entries
