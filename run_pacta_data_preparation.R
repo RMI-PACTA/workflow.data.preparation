@@ -64,6 +64,24 @@ scenario_geographies_list <- config$scenario_geographies_list
 global_aggregate_scenario_sources_list <- config$global_aggregate_scenario_sources_list
 global_aggregate_sector_list <- config$global_aggregate_sector_list
 
+# create timestamped output directory
+system_timestamp <- format(
+  Sys.time(),
+  format = "%Y%m%dT%H%M%SZ",
+  tz = "UTC"
+)
+data_prep_outputs_path <- file.path(
+  data_prep_outputs_path,
+  paste(pacta_financial_timestamp, system_timestamp, sep = "_")
+)
+
+if (dir.exists(data_prep_outputs_path)) {
+  logger::log_warn("POTENTIAL DATA LOSS: Output directory already exists, and files may be overwritten ({data_prep_outputs_path}).")
+  warning("Output directory exists. Files may be overwritten.")
+} else {
+  logger::log_trace("Creating output directory: \"{data_prep_outputs_path}\"")
+  dir.create(data_prep_outputs_path, recursive = TRUE)
+}
 
 # input filepaths --------------------------------------------------------------
 
