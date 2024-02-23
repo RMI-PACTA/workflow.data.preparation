@@ -114,9 +114,16 @@ factset_manual_pacta_sector_override_path <-
 
 # pre-flight filepaths ---------------------------------------------------------
 
+preflight_data_path <- config$preflight_data_path
+if (preflight_data_path == "") {
+  preflight_data_path <- data_prep_outputs_path
+}
+
+currencies_preflight_data_path <- file.path(preflight_data_path, "currencies.rds")
 currencies_data_path <- file.path(data_prep_outputs_path, "currencies.rds")
 index_regions_data_path <- file.path(data_prep_outputs_path, "index_regions.rds")
 
+index_regions_preflight_data_path <- file.path(preflight_data_path, "index_regions.rds")
 
 # computed options -------------------------------------------------------------
 
@@ -175,10 +182,16 @@ if (update_currencies) {
   currencies <- pacta.data.scraping::get_currency_exchange_rates(
     quarter = imf_quarter_timestamp
   )
+  saveRDS(currencies, currencies_preflight_data_path)
+} else {
+  logger::log_info("Using pre-existing currency data.")
+  # This requires the preflight path to be defined in the config
+  currencies <- readRDS(currencies_preflight_data_path)
 }
 
 logger::log_info("Scraping index regions.")
 index_regions <- pacta.data.scraping::get_index_regions()
+saveRDS(index_regions, index_regions_preflight_data_path)
 
 logger::log_info("Fetching pre-flight data done.")
 
