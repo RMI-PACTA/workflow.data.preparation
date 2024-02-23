@@ -33,6 +33,7 @@ config <-
 
 asset_impact_data_path <- config$asset_impact_data_path
 factset_data_path <- config$factset_data_path
+data_prep_outputs_path <- config$data_prep_outputs_path
 masterdata_ownership_filename <- config$masterdata_ownership_filename
 masterdata_debt_filename <- config$masterdata_debt_filename
 ar_company_id__factset_entity_id_filename <- config$ar_company_id__factset_entity_id_filename
