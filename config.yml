@@ -16,6 +16,7 @@ default:
   factset_manual_pacta_sector_override_filename: ""  # a single filename of the intended factset_manual_pacta_sector_override RDS (must exist in the `factset_data_path` directory)
   update_currencies: TRUE  # a single `TRUE` or `FALSE` specifying whether currency data should be pulled on-the-fly (or a previously pulled version should be used)
   export_sqlite_files: TRUE  # a single `TRUE` or `FALSE` specifying whether sqlite versions of some output files should be included in the outputs
+  export_archives: TRUE # Boolean: Export zip archives of input files and output files?
   imf_quarter_timestamp: ""  # a single string specifying the IMF quarter timestamp (for pulling of currency data) in the form "YYYY-QX", e.g. "2021-Q4"
   pacta_financial_timestamp: ""  # a single string specifying the PACTA quarter timestamp in the form "YYYYQX", e.g. "2021Q4"
   market_share_target_reference_year: 0  # a single integer specifying the market share target reference year in the form YYYY, e.g. 2021
