@@ -1,10 +1,55 @@
 default:
-  data_prep_outputs_path: "/outputs"
+  data_prep_outputs_path: ""  # a single, absolute or relative path to a directory where the outputs will be saved
+  asset_impact_data_path: ""  # a single, absolute or relative path to a directory that contains the AI inputs (can be the same as `factset_data_path`)
+  factset_data_path: ""  # a single, absolute or relative path to a directory that contains the FactSet inputs (can be the same as `asset_impact_data_path`)
+  preflight_data_path: ""  # a single, absolute or relative path to a directory that contains a previous "currencies.rds" file and/or will be used to save a copy of pre-flight data files generated on-the-fly (by default [""], this is set the same path as `data_prep_outputs_path`)
+  masterdata_ownership_filename: ""  # a single filename of the intended masterdata_ownership CSV (must exist in the `asset_impact_data_path` directory)
+  masterdata_debt_filename: ""  # a single filename of the intended masterdata_debt CSV (must exist in the `asset_impact_data_path` directory)
+  ar_company_id__factset_entity_id_filename: ""  # a single filename of the intended ar_company_id__factset_entity_id CSV (must exist in the `asset_impact_data_path` directory)
+  factset_financial_data_filename: ""  # a single filename of the intended factset_financial_data RDS (must exist in the `factset_data_path` directory)
+  factset_entity_info_filename: ""  # a single filename of the intended factset_entity_info RDS (must exist in the `factset_data_path` directory)
+  factset_entity_financing_data_filename: ""  # a single filename of the intended factset_entity_financing_data RDS (must exist in the `factset_data_path` directory)
+  factset_fund_data_filename: ""  # a single filename of the intended factset_fund_data RDS (must exist in the `factset_data_path` directory)
+  factset_isin_to_fund_table_filename: ""  # a single filename of the intended factset_isin_to_fund_table RDS (must exist in the `factset_data_path` directory)
+  factset_iss_emissions_data_filename: ""  # a single filename of the intended factset_iss_emissions_data RDS (must exist in the `factset_data_path` directory)
+  factset_issue_code_bridge_filename: ""  # a single filename of the intended factset_issue_code_bridge RDS (must exist in the `factset_data_path` directory)
+  factset_industry_map_bridge_filename: ""  # a single filename of the intended factset_industry_map_bridge RDS (must exist in the `factset_data_path` directory)
+  factset_manual_pacta_sector_override_filename: ""  # a single filename of the intended factset_manual_pacta_sector_override RDS (must exist in the `factset_data_path` directory)
+  update_currencies: TRUE  # a single `TRUE` or `FALSE` specifying whether currency data should be pulled on-the-fly (or a previously pulled version should be used)
+  export_sqlite_files: TRUE  # a single `TRUE` or `FALSE` specifying whether sqlite versions of some output files should be included in the outputs
+  export_archives: TRUE # Boolean: Export zip archives of input files and output files?
+  imf_quarter_timestamp: ""  # a single string specifying the IMF quarter timestamp (for pulling of currency data) in the form "YYYY-QX", e.g. "2021-Q4"
+  pacta_financial_timestamp: ""  # a single string specifying the PACTA quarter timestamp in the form "YYYYQX", e.g. "2021Q4"
+  market_share_target_reference_year: 0  # a single integer specifying the market share target reference year in the form YYYY, e.g. 2021
+  time_horizon: 5  # a single integer specifying the time horizon (number of forward looking years) in years in the form N, e.g. 5
+  scenario_sources_list: []  # an array of strings specifying the scenario sources to be included, e.g. ["ETP2020", "GECO2021"]
+  sector_list: []  # an array of strings specifying the primary PACTA sectors to be included, e.g. ["Automotive", "Power"]
+  other_sector_list: []  # an array of strings specifying the additional PACTA sectors to be included, e.g. ["Steel", "Aviation"]
+  zero_emission_factor_techs: []  # an array of strings specifying the technologies to be considered as zero emission, e.g. ["Electric", "HydroCap"]
+  green_techs: []  # an array of strings specifying the technologies to be considered "green", e.g. ["FuelCell", "Hybrid"]
+  scenario_raw_data_to_include: []  # an array of strings specifying the raw scenario data from pacta.scenario.preparation to be included, e.g. ["etp_2020", "geco_2021"]
+  tech_exclude: []  # an array of strings specifying the technologies to be excluded, e.g. ["OtherCap", "OtherFF"]
+  scenario_geographies_list: []  # an array of strings specifying the scenario geographies to be included, e.g. ["Global", "NonOECD"]
+  global_aggregate_scenario_sources_list: []  # an array of strings specifying the scenarios to be used in the global aggregates, e.g. ["ETP2020", "GECO2021"]
+  global_aggregate_sector_list: []  # an array of strings specifying the sectors to be included in the global aggregates, e.g. ["Power"]
+
+desktop:
+  inherits: 2022Q4
+  data_prep_outputs_path: "./outputs"
+  asset_impact_data_path: "./ai_inputs"
+  factset_data_path: "./factset_inputs"
+
+docker:
+  data_prep_outputs_path: "/mnt/outputs"
   asset_impact_data_path: "/inputs"
   factset_data_path: "/inputs"
-  masterdata_ownership_filename: ""
-  masterdata_debt_filename: ""
-  ar_company_id__factset_entity_id_filename: ""
+
+
+2021Q4:
+  inherits: docker
+  masterdata_ownership_filename: "2023-06-05_AI_RMI Bespoke_Company Data Products_masterdata_ownership_2021q4.csv"
+  masterdata_debt_filename: "2023-06-05_AI_RMI Bespoke_Company Data Products_masterdata_debt_2021q4.csv"
+  ar_company_id__factset_entity_id_filename: "2022-08-17_rmi_ar_fs_id_bridge_2021q4.csv"
   factset_financial_data_filename: ""
   factset_entity_info_filename: ""
   factset_entity_financing_data_filename: ""
@@ -14,8 +59,6 @@ default:
   factset_issue_code_bridge_filename: ""
   factset_industry_map_bridge_filename: ""
   factset_manual_pacta_sector_override_filename: ""
-  update_currencies: TRUE
-  export_sqlite_files: TRUE
   imf_quarter_timestamp: "2021-Q4"
   pacta_financial_timestamp: "2021Q4"
   market_share_target_reference_year: 2021
@@ -32,48 +75,8 @@ default:
   global_aggregate_sector_list: ["Power"]
 
 
-2021Q4:
-  masterdata_ownership_filename: "2023-06-05_AI_RMI Bespoke_Company Data Products_masterdata_ownership_2021q4.csv"
-  masterdata_debt_filename: "2023-06-05_AI_RMI Bespoke_Company Data Products_masterdata_debt_2021q4.csv"
-  ar_company_id__factset_entity_id_filename: "2022-08-17_rmi_ar_fs_id_bridge_2021q4.csv"
-  factset_financial_data_filename: ""
-  factset_entity_info_filename: ""
-  factset_entity_financing_data_filename: ""
-  factset_fund_data_filename: ""
-  factset_isin_to_fund_table_filename: ""
-  factset_iss_emissions_data_filename: ""
-  factset_issue_code_bridge_filename: ""
-  factset_industry_map_bridge_filename: ""
-  factset_manual_pacta_sector_override_filename: ""
-  imf_quarter_timestamp: "2021-Q4"
-  pacta_financial_timestamp: "2021Q4"
-  market_share_target_reference_year: 2021
-  scenario_sources_list: ["ETP2020", "GECO2021", "IPR2021", "ISF2021", "WEO2021"]
-  sector_list: ["Automotive", "Power", "Fossil Fuels", "Oil&Gas", "Coal"]
-  other_sector_list: ["Steel", "Aviation", "Cement"]
-  zero_emission_factor_techs: ["Electric", "HydroCap", "NuclearCap", "RenewablesCap"]
-  green_techs: ["FuelCell", "Electric", "Hybrid", "RenewablesCap", "HydroCap", "NuclearCap", "FuelCell_HDV", "Electric_HDV", "Hybrid_HDV"]
-  scenario_raw_data_to_include: ["etp_2020", "geco_2021", "ipr_2021", "isf_2021", "weo_2021"]
-  tech_exclude: ["OtherCap", "OtherFF", "Coking Plant", "Sintering Plant", "Direct Or Smelting Reduction Plant", "Pelletizing Plant", "Grinding Plant", "Passenger / Freight"]
-  scenario_geographies_list: ["Global", "NonOECD", "OECD"]
-  global_aggregate_scenario_sources_list: ["ETP2020", "GECO2021", "IPR2021", "ISF2021", "WEO2021"]
-  global_aggregate_sector_list: ["Power"]
-
-2021Q4_dev_vm:
-  inherits: 2021Q4
-
-2021Q4_dev_local:
-  inherits: 2021Q4
-
-2021Q4_prod_vm:
-  inherits: 2021Q4
-
-2021Q4_sqlite:
-  inherits: 2021Q4
-  export_sqlite_files: TRUE
-
-
 2022Q2:
+  inherits: docker
   masterdata_ownership_filename: "2022-08-30_rmi_masterdata_ownership_2022q2.csv"
   masterdata_debt_filename: "2022-10-03_rmi_masterdata_debt_2022q2.csv"
   ar_company_id__factset_entity_id_filename: "2022-08-17_rmi_ar_fs_id_bridge_2021q4.csv"
@@ -89,6 +92,7 @@ default:
   imf_quarter_timestamp: "2022-Q2"
   pacta_financial_timestamp: "2022Q2"
   market_share_target_reference_year: 2022
+  time_horizon: 5
   scenario_sources_list: ["ETP2020", "GECO2021", "IPR2021", "ISF2021", "WEO2021"]
   sector_list: ["Automotive", "Power", "Fossil Fuels", "Oil&Gas", "Coal"]
   other_sector_list: ["Steel", "Aviation", "Cement"]
@@ -102,6 +106,7 @@ default:
 
 
 2022Q4:
+  inherits: docker
   asset_impact_data_path: "/mnt/asset-impact"
   factset_data_path: "/mnt/factset-extracted/factset-pacta_timestamp-20221231T000000Z_pulled-20240217T134528Z"
   masterdata_ownership_filename: "2023-06-18/2023-06-18_AI_RMI Bespoke_Company Data Products_masterdata_ownership_2022Q4.csv"
@@ -119,13 +124,14 @@ default:
   imf_quarter_timestamp: "2022-Q4"
   pacta_financial_timestamp: "2022Q4"
   market_share_target_reference_year: 2022
+  time_horizon: 5
   scenario_sources_list: ["GECO2022", "ISF2021", "WEO2022"]
+  sector_list: ["Automotive", "Power", "Oil&Gas", "Coal"]
+  other_sector_list: ["Steel", "Aviation", "Cement"]
+  zero_emission_factor_techs: ["Electric", "HydroCap", "NuclearCap", "RenewablesCap"]
+  green_techs: ["FuelCell", "Electric", "Hybrid", "RenewablesCap", "HydroCap", "NuclearCap", "FuelCell_HDV", "Electric_HDV", "Hybrid_HDV"]
   scenario_raw_data_to_include: ["geco_2022", "isf_2021", "weo_2022"]
+  tech_exclude: ["OtherCap", "OtherFF", "Coking Plant", "Sintering Plant", "Direct Or Smelting Reduction Plant", "Pelletizing Plant", "Grinding Plant", "Passenger / Freight"]
+  scenario_geographies_list: ["Global", "NonOECD", "OECD"]
   global_aggregate_scenario_sources_list: ["WEO2022"]
-
-
-desktop:
-  inherits: 2022Q4
-  data_prep_outputs_path: "./outputs"
-  asset_impact_data_path: "./ai_inputs"
-  factset_data_path: "./factset_inputs"
+  global_aggregate_sector_list: ["Power"]
