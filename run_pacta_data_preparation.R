@@ -48,6 +48,7 @@ factset_industry_map_bridge_filename <- config$factset_industry_map_bridge_filen
 factset_manual_pacta_sector_override_filename <- config$factset_manual_pacta_sector_override_filename
 update_currencies <- config$update_currencies
 export_sqlite_files <- config$export_sqlite_files
+export_archives <- config$export_archives
 imf_quarter_timestamp <- config$imf_quarter_timestamp
 pacta_financial_timestamp <- config$pacta_financial_timestamp
 market_share_target_reference_year <- config$market_share_target_reference_year
@@ -64,6 +65,24 @@ scenario_geographies_list <- config$scenario_geographies_list
 global_aggregate_scenario_sources_list <- config$global_aggregate_scenario_sources_list
 global_aggregate_sector_list <- config$global_aggregate_sector_list
 
+# create timestamped output directory
+system_timestamp <- format(
+  Sys.time(),
+  format = "%Y%m%dT%H%M%SZ",
+  tz = "UTC"
+)
+data_prep_outputs_path <- file.path(
+  data_prep_outputs_path,
+  paste(pacta_financial_timestamp, system_timestamp, sep = "_")
+)
+
+if (dir.exists(data_prep_outputs_path)) {
+  logger::log_warn("POTENTIAL DATA LOSS: Output directory already exists, and files may be overwritten ({data_prep_outputs_path}).")
+  warning("Output directory exists. Files may be overwritten.")
+} else {
+  logger::log_trace("Creating output directory: \"{data_prep_outputs_path}\"")
+  dir.create(data_prep_outputs_path, recursive = TRUE)
+}
 
 # input filepaths --------------------------------------------------------------
 
@@ -96,9 +115,16 @@ factset_manual_pacta_sector_override_path <-
 
 # pre-flight filepaths ---------------------------------------------------------
 
+preflight_data_path <- config$preflight_data_path
+if (preflight_data_path == "") {
+  preflight_data_path <- data_prep_outputs_path
+}
+
+currencies_preflight_data_path <- file.path(preflight_data_path, "currencies.rds")
 currencies_data_path <- file.path(data_prep_outputs_path, "currencies.rds")
 index_regions_data_path <- file.path(data_prep_outputs_path, "index_regions.rds")
 
+index_regions_preflight_data_path <- file.path(preflight_data_path, "index_regions.rds")
 
 # computed options -------------------------------------------------------------
 
@@ -157,10 +183,16 @@ if (update_currencies) {
   currencies <- pacta.data.scraping::get_currency_exchange_rates(
     quarter = imf_quarter_timestamp
   )
+  saveRDS(currencies, currencies_preflight_data_path)
+} else {
+  logger::log_info("Using pre-existing currency data.")
+  # This requires the preflight path to be defined in the config
+  currencies <- readRDS(currencies_preflight_data_path)
 }
 
 logger::log_info("Scraping index regions.")
 index_regions <- pacta.data.scraping::get_index_regions()
+saveRDS(index_regions, index_regions_preflight_data_path)
 
 logger::log_info("Fetching pre-flight data done.")
 
@@ -890,6 +922,38 @@ for (pkg_name in pacta_packages) {
   )
 }
 
+# Create archive files
+if (export_archives) {
+  logger::log_info("Exporting input and output archives.")
+
+  logger::log_debug("Creating inputs zip file.")
+  inputs_zip_file_path <- paste0(data_prep_outputs_path, "_inputs.zip")
+  logger::log_trace("Zip file path: \"{inputs_zip_file_path}\".")
+  zip(
+    zipfile = inputs_zip_file_path,
+    files = normalizePath(unlist(parameters[["input_filepaths"]])),
+    extras = c(
+      "--junk-paths", # do not preserve paths
+      "--no-dir-entries", # do not include directory entries
+      "--quiet" # do not print progress to stdout
+    )
+  )
+  logger::log_debug("Inputs archive created.")
+
+  logger::log_debug("Creating outputs zip file.")
+  outputs_zip_file_path <- paste0(data_prep_outputs_path, ".zip")
+  logger::log_trace("Zip file path: \"{outputs_zip_file_path}\".")
+  zip(
+    zipfile = outputs_zip_file_path,
+    files = list.files(data_prep_outputs_path, full.names = TRUE, recursive = TRUE),
+    extras = c(
+      "--junk-paths", # do not preserve paths
+      "--no-dir-entries", # do not include directory entries
+      "--quiet" # do not print progress to stdout
+    )
+  )
+  logger::log_debug("Outputs archive created.")
+}
 
 # ------------------------------------------------------------------------------
 
