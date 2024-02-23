@@ -2,6 +2,7 @@ default:
   data_prep_outputs_path: ""  # a single, absolute or relative path to a directory where the outputs will be saved
   asset_impact_data_path: ""  # a single, absolute or relative path to a directory that contains the AI inputs (can be the same as `factset_data_path`)
   factset_data_path: ""  # a single, absolute or relative path to a directory that contains the FactSet inputs (can be the same as `asset_impact_data_path`)
+  preflight_data_path: ""  # a single, absolute or relative path to a directory that contains a previous "currencies.rds" file and/or will be used to save a copy of pre-flight data files generated on-the-fly (by default [""], this is set the same path as `data_prep_outputs_path`)
   masterdata_ownership_filename: ""  # a single filename of the intended masterdata_ownership CSV (must exist in the `asset_impact_data_path` directory)
   masterdata_debt_filename: ""  # a single filename of the intended masterdata_debt CSV (must exist in the `asset_impact_data_path` directory)
   ar_company_id__factset_entity_id_filename: ""  # a single filename of the intended ar_company_id__factset_entity_id CSV (must exist in the `asset_impact_data_path` directory)
