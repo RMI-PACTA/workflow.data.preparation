@@ -33,9 +33,9 @@ default:
 
 desktop:
   inherits: 2022Q4
-  data_prep_outputs_path: "~/Desktop/dataprep_local/outputs"
-  asset_impact_data_path: "~/Desktop/dataprep_local/inputs"
-  factset_data_path: "~/Desktop/dataprep_local/inputs"
+  data_prep_outputs_path: "./outputs"
+  asset_impact_data_path: "./ai_inputs"
+  factset_data_path: "./factset_inputs"
 
 docker:
   data_prep_outputs_path: "/outputs"
