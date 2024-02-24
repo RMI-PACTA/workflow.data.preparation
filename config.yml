@@ -161,15 +161,15 @@ docker:
   pacta_financial_timestamp: "2023Q4"
   market_share_target_reference_year: 2023
   time_horizon: 5
-  scenario_sources_list: ["GECO2023", "ISF2023", "WEO2023"]
+  scenario_sources_list: ["GECO2022", "ISF2021", "WEO2022"]
   sector_list: ["Automotive", "Power", "Oil&Gas", "Coal"]
   other_sector_list: ["Steel", "Aviation", "Cement"]
   zero_emission_factor_techs: ["Electric", "HydroCap", "NuclearCap", "RenewablesCap"]
   green_techs: ["FuelCell", "Electric", "Hybrid", "RenewablesCap", "HydroCap", "NuclearCap", "FuelCell_HDV", "Electric_HDV", "Hybrid_HDV"]
-  scenario_raw_data_to_include: ["geco_2023", "isf_2023", "weo_2023"]
+  scenario_raw_data_to_include: ["geco_2022", "isf_2021", "weo_2022"]
   tech_exclude: ["OtherCap", "OtherFF", "Coking Plant", "Sintering Plant", "Direct Or Smelting Reduction Plant", "Pelletizing Plant", "Grinding Plant", "Passenger / Freight"]
   scenario_geographies_list: ["Global", "NonOECD", "OECD"]
-  global_aggregate_scenario_sources_list: ["WEO2023"]
+  global_aggregate_scenario_sources_list: ["WEO2022"]
   global_aggregate_sector_list: ["Power"]
 
 2023Q4_azure:
