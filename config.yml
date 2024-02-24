@@ -136,7 +136,6 @@ docker:
 
 
 2023Q4:
-  inherits: docker
   masterdata_ownership_filename: "2024-02-14_AI_RMI Bespoke_Company Data Products_masterdata_ownership_2023Q4.csv"
   masterdata_debt_filename: "2024-02-14_AI_RMI Bespoke_Company Data Products_masterdata_debt_2023Q4.csv"
   ar_company_id__factset_entity_id_filename: "2024-02-14_AI_RMI_Bespoke_Company_Data_Products_Company_ID_List_2023Q4.csv"
@@ -163,3 +162,9 @@ docker:
   scenario_geographies_list: ["Global", "NonOECD", "OECD"]
   global_aggregate_scenario_sources_list: ["WEO2023"]
   global_aggregate_sector_list: ["Power"]
+
+2023Q4_azure:
+  inherits: 2023Q4
+  data_prep_outputs_path: "/mnt/outputs"
+  asset_impact_data_path: "/mnt/asset-impact"
+  factset_data_path: "/mnt/factset-extracted"
