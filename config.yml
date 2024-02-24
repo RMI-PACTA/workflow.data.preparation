@@ -106,9 +106,9 @@ docker:
 
 
 2022Q4:
-  masterdata_ownership_filename: "2023-06-18/2023-06-18_AI_RMI Bespoke_Company Data Products_masterdata_ownership_2022Q4.csv"
-  masterdata_debt_filename: "2023-06-18/2023-06-18_AI_RMI Bespoke_Company Data Products_masterdata_debt_2022Q4.csv"
-  ar_company_id__factset_entity_id_filename: "2023-02-15/2023-02-15_AI_RMI_Bespoke_Company_Data_Products_Company_ID_List_2022Q4.csv"
+  masterdata_ownership_filename: "2023-06-18_AI_RMI Bespoke_Company Data Products_masterdata_ownership_2022Q4.csv"
+  masterdata_debt_filename: "2023-06-18_AI_RMI Bespoke_Company Data Products_masterdata_debt_2022Q4.csv"
+  ar_company_id__factset_entity_id_filename: "2023-02-15_AI_RMI_Bespoke_Company_Data_Products_Company_ID_List_2022Q4.csv"
   factset_financial_data_filename: "timestamp-20221231T000000Z_pulled-20240217T134528Z_factset_financial_data.rds"
   factset_entity_info_filename: "timestamp-20221231T000000Z_pulled-20240217T134528Z_factset_entity_info.rds"
   factset_entity_financing_data_filename: "timestamp-20221231T000000Z_pulled-20240217T134528Z_factset_entity_financing_data.rds"
@@ -133,8 +133,12 @@ docker:
   global_aggregate_scenario_sources_list: ["WEO2022"]
   global_aggregate_sector_list: ["Power"]
 
-2022Q4_docker:
+2022Q4_azure:
   inherits: 2022Q4
   data_prep_outputs_path: "/mnt/outputs"
   asset_impact_data_path: "/mnt/asset-impact"
   factset_data_path: "/mnt/factset-extracted/factset-pacta_timestamp-20221231T000000Z_pulled-20240217T134528Z"
+  # Asset impact files are stored in separate subdirectories on Azure File Share.
+  masterdata_ownership_filename: "2023-06-18/2023-06-18_AI_RMI Bespoke_Company Data Products_masterdata_ownership_2022Q4.csv"
+  masterdata_debt_filename: "2023-06-18/2023-06-18_AI_RMI Bespoke_Company Data Products_masterdata_debt_2022Q4.csv"
+  ar_company_id__factset_entity_id_filename: "2023-02-15/2023-02-15_AI_RMI_Bespoke_Company_Data_Products_Company_ID_List_2022Q4.csv"
