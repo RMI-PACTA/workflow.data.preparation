@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "XXXXXX",
+  "title": "XXXXXXX",
+  "description": "XXXXXXXX",
+  "type": "object",
+  "properties": {
+    "data_prep_outputs_path": {
+      "description": "a single, absolute or relative path to a directory where the outputs will be saved",
+      "type": "string"
+    },
+    "asset_impact_data_path": {
+      "description": "a single, absolute or relative path to a directory that contains the AI inputs (can be the same as `factset_data_path`)",
+      "type": "string"
+    },
+    "factset_data_path": {
+      "description": "a single, absolute or relative path to a directory that contains the FactSet inputs (can be the same as `asset_impact_data_path`)",
+      "type": "string"
+    },
+    "preflight_data_path": {
+      "description": "a single, absolute or relative path to a directory that contains a previous \"currencies.rds\" file and/or will be used to save a copy of pre-flight data files generated on-the-fly (by default [\"\"], this is set the same path as `data_prep_outputs_path`)",
+      "type": "string"
+    },
+    "masterdata_ownership_filename": {
+      "description": "a single filename of the intended masterdata_ownership CSV (must exist in the `asset_impact_data_path` directory)",
+      "type": "string"
+    },
+    "masterdata_debt_filename": {
+      "description": "a single filename of the intended masterdata_debt CSV (must exist in the `asset_impact_data_path` directory)",
+      "type": "string"
+    },
+    "ar_company_id__factset_entity_id_filename": {
+      "description": "a single filename of the intended ar_company_id__factset_entity_id CSV (must exist in the `asset_impact_data_path` directory)",
+      "type": "string"
+    },
+    "factset_financial_data_filename": {
+      "description": "a single filename of the intended factset_financial_data RDS (must exist in the `factset_data_path` directory)",
+      "type": "string"
+    },
+    "factset_entity_info_filename": {
+      "description": "a single filename of the intended factset_entity_info RDS (must exist in the `factset_data_path` directory)",
+      "type": "string"
+    },
+    "factset_entity_financing_data_filename": {
+      "description": "a single filename of the intended factset_entity_financing_data RDS (must exist in the `factset_data_path` directory)",
+      "type": "string"
+    },
+    "factset_fund_data_filename": {
+      "description": "a single filename of the intended factset_fund_data RDS (must exist in the `factset_data_path` directory)",
+      "type": "string"
+    },
+    "factset_isin_to_fund_table_filename": {
+      "description": "a single filename of the intended factset_isin_to_fund_table RDS (must exist in the `factset_data_path` directory)",
+      "type": "string"
+    },
+    "factset_iss_emissions_data_filename": {
+      "description": "a single filename of the intended factset_iss_emissions_data RDS (must exist in the `factset_data_path` directory)",
+      "type": "string"
+    },
+    "factset_issue_code_bridge_filename": {
+      "description": "a single filename of the intended factset_issue_code_bridge RDS (must exist in the `factset_data_path` directory)",
+      "type": "string"
+    },
+    "factset_industry_map_bridge_filename": {
+      "description": "a single filename of the intended factset_industry_map_bridge RDS (must exist in the `factset_data_path` directory)",
+      "type": "string"
+    },
+    "factset_manual_pacta_sector_override_filename": {
+      "description": "a single filename of the intended factset_manual_pacta_sector_override RDS (must exist in the `factset_data_path` directory)",
+      "type": "string"
+    },
+    "update_currencies": {
+      "description": "a single `TRUE` or `FALSE` specifying whether currency data should be pulled on-the-fly (or a previously pulled version should be used)",
+      "type": "boolean"
+    },
+    "export_sqlite_files": {
+      "description": "a single `TRUE` or `FALSE` specifying whether sqlite versions of some output files should be included in the outputs",
+      "type": "boolean"
+    },
+    "export_archives": {
+      "description": "Boolean: Export zip archives of input files and output files?",
+      "type": "boolean"
+    },
+    "imf_quarter_timestamp": {
+      "description": "a single string specifying the IMF quarter timestamp (for pulling of currency data) in the form \"YYYY-QX\", e.g. \"2021-Q4\"",
+      "type": "string",
+      "pattern": "^20[2-5][0-9]-Q[1-4]$"
+    },
+    "pacta_financial_timestamp": {
+      "description": "a single string specifying the PACTA quarter timestamp in the form \"YYYYQX\", e.g. \"2021Q4\"",
+      "type": "string",
+      "pattern": "^20[2-5][0-9]Q[1-4]$"
+    },
+    "market_share_target_reference_year": {
+      "description": "a single integer specifying the market share target reference year in the form YYYY, e.g. 2021",
+      "type": "integer",
+      "minimum": 2020,
+      "maximum": 2050
+    },
+    "time_horizon": {
+      "description": "a single integer specifying the time horizon (number of forward looking years) in years in the form N, e.g. 5",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 30
+    },
+    "scenario_sources_list": {
+      "description": "an array of strings specifying the scenario sources to be included, e.g. [\"ETP2020\", \"GECO2021\"]",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sector_list": {
+      "description": "an array of strings specifying the primary PACTA sectors to be included, e.g. [\"Automotive\", \"Power\"]",
+      "type": "array",
+      "items": {
+        "enum": [ "Aviation", "Cement", "Coal", "HDV", "LDV", "Oil&Gas", "Power", "Shipping", "Steel", "Automotive", "Fossil Fuels" ]
+      }
+    },
+    "other_sector_list": {
+      "description": "an array of strings specifying the additional PACTA sectors to be included, e.g. [\"Steel\", \"Aviation\"]",
+      "type": "array",
+      "items": {
+        "enum": [ "Aviation", "Cement", "Coal", "HDV", "LDV", "Oil&Gas", "Power", "Shipping", "Steel", "Automotive", "Fossil Fuels" ]
+      }
+    },
+    "zero_emission_factor_techs": {
+      "description": "an array of strings specifying the technologies to be considered as zero emission, e.g. [\"Electric\", \"HydroCap\"]",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "green_techs": {
+      "description": "an array of strings specifying the technologies to be considered \"green\", e.g. [\"FuelCell\", \"Hybrid\"]",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "scenario_raw_data_to_include": {
+      "description": "an array of strings specifying the raw scenario data from pacta.scenario.preparation to be included, e.g. [\"etp_2020\", \"geco_2021\"]",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tech_exclude": {
+      "description": "an array of strings specifying the technologies to be excluded, e.g. [\"OtherCap\", \"OtherFF\"]",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "scenario_geographies_list": {
+      "description": "an array of strings specifying the scenario geographies to be included, e.g. [\"Global\", \"NonOECD\"]",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "global_aggregate_scenario_sources_list": {
+      "description": "an array of strings specifying the scenarios to be used in the global aggregates, e.g. [\"ETP2020\", \"GECO2021\"]",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "global_aggregate_sector_list": {
+      "description": "an array of strings specifying the sectors to be included in the global aggregates, e.g. [\"Power\"]",
+      "type": "array",
+      "items": {
+        "enum": [ "Aviation", "Cement", "Coal", "HDV", "LDV", "Oil&Gas", "Power", "Shipping", "Steel", "Automotive", "Fossil Fuels" ]
+      }
+    }
+  },
+  "required": [ "data_prep_outputs_path", "asset_impact_data_path", "factset_data_path", "preflight_data_path", "masterdata_ownership_filename", "masterdata_debt_filename", "ar_company_id__factset_entity_id_filename", "factset_financial_data_filename", "factset_entity_info_filename", "factset_entity_financing_data_filename", "factset_fund_data_filename", "factset_isin_to_fund_table_filename", "factset_iss_emissions_data_filename", "factset_issue_code_bridge_filename", "factset_industry_map_bridge_filename", "factset_manual_pacta_sector_override_filename", "update_currencies", "export_sqlite_files", "export_archives", "imf_quarter_timestamp", "pacta_financial_timestamp", "market_share_target_reference_year", "time_horizon", "scenario_sources_list", "sector_list", "other_sector_list", "zero_emission_factor_techs", "green_techs", "scenario_raw_data_to_include", "tech_exclude", "scenario_geographies_list", "global_aggregate_scenario_sources_list", "global_aggregate_sector_list" ]
+}
