@@ -41,8 +41,8 @@ desktop:
 
 docker:
   data_prep_outputs_path: "/mnt/outputs"
-  asset_impact_data_path: "/inputs"
-  factset_data_path: "/inputs"
+  asset_impact_data_path: "/mnt/asset-impact"
+  factset_data_path: "/mnt/factset-extracted"
 
 
 2021Q4:
@@ -106,6 +106,7 @@ docker:
 
 
 2022Q4:
+  inherits: docker
   masterdata_ownership_filename: "2023-06-18_AI_RMI Bespoke_Company Data Products_masterdata_ownership_2022Q4.csv"
   masterdata_debt_filename: "2023-06-18_AI_RMI Bespoke_Company Data Products_masterdata_debt_2022Q4.csv"
   ar_company_id__factset_entity_id_filename: "2023-02-15_AI_RMI_Bespoke_Company_Data_Products_Company_ID_List_2022Q4.csv"
