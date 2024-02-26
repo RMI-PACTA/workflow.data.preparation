@@ -53,7 +53,6 @@ imf_quarter_timestamp <- config$imf_quarter_timestamp
 pacta_financial_timestamp <- config$pacta_financial_timestamp
 market_share_target_reference_year <- config$market_share_target_reference_year
 time_horizon <- config$time_horizon
-tdm_delta_years <- config$tdm_delta_years
 scenario_sources_list <- config$scenario_sources_list
 sector_list <- config$sector_list
 other_sector_list <- config$other_sector_list
@@ -883,6 +882,7 @@ parameters <-
     timestamps = list(
       imf_quarter_timestamp = imf_quarter_timestamp,
       factset_data_identifier = factset_timestamp,
+      ent_entity_affiliates_last_update = ent_entity_affiliates_last_update,
       pacta_financial_timestamp = pacta_financial_timestamp
     ),
     scenarios = list(
