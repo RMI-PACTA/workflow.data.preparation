@@ -105,74 +105,91 @@
     },
     "scenario_sources_list": {
       "description": "an array of strings specifying the scenario sources to be included, e.g. [\"ETP2020\", \"GECO2021\"]",
-      "type": "array",
       "items": {
-        "type": "string"
-      }
+        "$ref": "#/definitions/scenario_sources"
+      },
+      "uniqueItems": true,
+      "minItems": 1
     },
     "sector_list": {
       "description": "an array of strings specifying the primary PACTA sectors to be included, e.g. [\"Automotive\", \"Power\"]",
-      "type": "array",
       "items": {
-        "enum": [ "Aviation", "Cement", "Coal", "HDV", "LDV", "Oil&Gas", "Power", "Shipping", "Steel", "Automotive", "Fossil Fuels" ]
-      }
+        "$ref": "#/definitions/sectors"
+      },
+      "uniqueItems": true,
+      "minItems": 1
     },
     "other_sector_list": {
       "description": "an array of strings specifying the additional PACTA sectors to be included, e.g. [\"Steel\", \"Aviation\"]",
-      "type": "array",
       "items": {
-        "enum": [ "Aviation", "Cement", "Coal", "HDV", "LDV", "Oil&Gas", "Power", "Shipping", "Steel", "Automotive", "Fossil Fuels" ]
-      }
+        "$ref": "#/definitions/sectors"
+      },
+      "uniqueItems": true,
+      "minItems": 1
     },
     "zero_emission_factor_techs": {
       "description": "an array of strings specifying the technologies to be considered as zero emission, e.g. [\"Electric\", \"HydroCap\"]",
-      "type": "array",
       "items": {
-        "type": "string"
-      }
+        "$ref": "#/definitions/technologies"
+      },
+      "uniqueItems": true,
+      "minItems": 1
     },
     "green_techs": {
       "description": "an array of strings specifying the technologies to be considered \"green\", e.g. [\"FuelCell\", \"Hybrid\"]",
-      "type": "array",
       "items": {
-        "type": "string"
-      }
+        "$ref": "#/definitions/technologies"
+      },
+      "uniqueItems": true,
+      "minItems": 1
     },
     "scenario_raw_data_to_include": {
       "description": "an array of strings specifying the raw scenario data from pacta.scenario.preparation to be included, e.g. [\"etp_2020\", \"geco_2021\"]",
-      "type": "array",
       "items": {
-        "type": "string"
-      }
+        "$ref": "#/definitions/scenarios_raw"
+      },
+      "uniqueItems": true,
+      "minItems": 1
     },
     "tech_exclude": {
       "description": "an array of strings specifying the technologies to be excluded, e.g. [\"OtherCap\", \"OtherFF\"]",
-      "type": "array",
       "items": {
-        "type": "string"
-      }
+        "$ref": "#/definitions/technologies"
+      },
+      "uniqueItems": true,
+      "minItems": 1
     },
     "scenario_geographies_list": {
       "description": "an array of strings specifying the scenario geographies to be included, e.g. [\"Global\", \"NonOECD\"]",
-      "type": "array",
       "items": {
-        "type": "string"
-      }
+        "$ref": "#/definitions/scenario_geographies"
+      },
+      "uniqueItems": true,
+      "minItems": 1
     },
     "global_aggregate_scenario_sources_list": {
       "description": "an array of strings specifying the scenarios to be used in the global aggregates, e.g. [\"ETP2020\", \"GECO2021\"]",
-      "type": "array",
       "items": {
-        "type": "string"
-      }
+        "$ref": "#/definitions/scenario_sources"
+      },
+      "uniqueItems": true,
+      "minItems": 1
     },
     "global_aggregate_sector_list": {
       "description": "an array of strings specifying the sectors to be included in the global aggregates, e.g. [\"Power\"]",
-      "type": "array",
       "items": {
-        "enum": [ "Aviation", "Cement", "Coal", "HDV", "LDV", "Oil&Gas", "Power", "Shipping", "Steel", "Automotive", "Fossil Fuels" ]
-      }
+        "$ref": "#/definitions/sectors"
+      },
+      "uniqueItems": true,
+      "minItems": 1
     }
   },
-  "required": [ "data_prep_outputs_path", "asset_impact_data_path", "factset_data_path", "preflight_data_path", "masterdata_ownership_filename", "masterdata_debt_filename", "ar_company_id__factset_entity_id_filename", "factset_financial_data_filename", "factset_entity_info_filename", "factset_entity_financing_data_filename", "factset_fund_data_filename", "factset_isin_to_fund_table_filename", "factset_iss_emissions_data_filename", "factset_issue_code_bridge_filename", "factset_industry_map_bridge_filename", "factset_manual_pacta_sector_override_filename", "update_currencies", "export_sqlite_files", "export_archives", "imf_quarter_timestamp", "pacta_financial_timestamp", "market_share_target_reference_year", "time_horizon", "scenario_sources_list", "sector_list", "other_sector_list", "zero_emission_factor_techs", "green_techs", "scenario_raw_data_to_include", "tech_exclude", "scenario_geographies_list", "global_aggregate_scenario_sources_list", "global_aggregate_sector_list" ]
+  "required": [ "data_prep_outputs_path", "asset_impact_data_path", "factset_data_path", "preflight_data_path", "masterdata_ownership_filename", "masterdata_debt_filename", "ar_company_id__factset_entity_id_filename", "factset_financial_data_filename", "factset_entity_info_filename", "factset_entity_financing_data_filename", "factset_fund_data_filename", "factset_isin_to_fund_table_filename", "factset_iss_emissions_data_filename", "factset_issue_code_bridge_filename", "factset_industry_map_bridge_filename", "factset_manual_pacta_sector_override_filename", "update_currencies", "export_sqlite_files", "export_archives", "imf_quarter_timestamp", "pacta_financial_timestamp", "market_share_target_reference_year", "time_horizon", "scenario_sources_list", "sector_list", "other_sector_list", "zero_emission_factor_techs", "green_techs", "scenario_raw_data_to_include", "tech_exclude", "scenario_geographies_list", "global_aggregate_scenario_sources_list", "global_aggregate_sector_list" ],
+  "definitions": {
+    "sectors": { "enum": ["Aviation", "Cement", "Coal", "HDV", "LDV", "Oil&Gas", "Power", "Shipping", "Steel", "Automotive", "Fossil Fuels"] },
+    "technologies": { "enum": ["Anthracite Metallurgical", "Anthracite Thermal", "Basic Oxygen Furnace", "Bituminous Metallurgical", "Bituminous Thermal", "CoalCap", "Electric", "Electric Arc Furnace", "Freight", "Fuel Cell", "Gas", "GasCap", "Hybrid No-Plug", "Hybrid Plug-In", "HydroCap", "ICE CNG", "ICE Diesel", "ICE E85+", "ICE Gasoline", "ICE Hydrogen", "ICE Propane", "Integrated facility", "Lignite Thermal", "Natural Gas Liquids", "NuclearCap", "Oil and Condensate", "OilCap", "Open Hearth Furnace", "Passenger", "RenewablesCap", "Sub-Bituminous Thermal", "Coking Plant", "Direct Or Smelting Reduction Plant", "Electric_HDV", "FuelCell", "FuelCell_HDV", "Grinding Plant", "Hybrid", "Hybrid_HDV", "OtherCap", "OtherFF", "Passenger / Freight", "Pelletizing Plant", "Sintering Plant"] },
+    "scenario_sources": { "enum": ["ETP2020", "GECO2021", "GECO2022", "IPR2021", "ISF2021", "WEO2021", "WEO2022"] },
+    "scenarios_raw": { "enum": ["etp_2020", "geco_2021", "geco_2022", "ipr_2021", "isf_2021", "weo_2021", "weo_2022"] },
+    "scenario_geographies": { "enum": ["Global", "NonOECD", "OECD"] }
+  }
 }
