@@ -889,7 +889,7 @@ parameters <-
       imf_quarter_timestamp = config[["imf_quarter_timestamp"]],
       factset_data_identifier = factset_timestamp,
       ent_entity_affiliates_last_update = ent_entity_affiliates_last_update,
-      pacta_financial_timestamp = pacta_financial_timestamp
+      pacta_financial_timestamp = config[["pacta_financial_timestamp"]]
     ),
     scenarios = list(
       scenario_sources_list = config[["scenario_sources_list"]],
