@@ -41,8 +41,12 @@ GITHUB_PAT=ghp_XXXXxxXxXXXxXxxX
 R_CONFIG_ACTIVE=YYYYQQ
 ```
 
-- `HOST_INPUTS_PATH` the local path to where the input files live.
-  `docker-compose` volume mounts this directory and reads and writes files to it, so it requires appropriate permissions on the host filesystem.
+- `HOST_FACTSET_EXTRACTED_PATH` the local path to where the FactSet input files live.
+  `docker-compose` volume mounts this directory and reads files from it, so it requires appropriate permissions on the host filesystem.
+  The pacta.data.preparation process requires input files that must exist in this directory and they must have filenames that match those specified in the [config.yml](config.yml) for the specified config.
+  See ["Required Input Files"](#required-input-files) (below) for more information.
+- `HOST_ASSET_IMPACT_PATH` the local path to where the Asset Impact input files live.
+  `docker-compose` volume mounts this directory and reads files from it, so it requires appropriate permissions on the host filesystem.
   The pacta.data.preparation process requires input files that must exist in this directory and they must have filenames that match those specified in the [config.yml](config.yml) for the specified config.
   See ["Required Input Files"](#required-input-files) (below) for more information.
 - `HOST_OUTPUTS_PATH` the local path to save the output files.
