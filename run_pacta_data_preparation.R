@@ -24,12 +24,14 @@ if (Sys.getenv("R_CONFIG_ACTIVE") != "desktop") {
 }
 
 config_name <- Sys.getenv("R_CONFIG_ACTIVE")
-config <-
+raw_config <-
   config::get(
     file = "config.yml",
     config = config_name,
     use_parent = FALSE
   )
+
+config <- raw_config
 
 expected_keys <- c(
   "asset_impact_data_path",
@@ -880,6 +882,7 @@ package_news <-
 parameters <-
   list(
     config_name = config_name,
+    raw_config = unclass(raw_config),
     config = unclass(config),
     input_filepaths = as.list(input_filepaths),
     timestamps = list(
