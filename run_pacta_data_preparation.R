@@ -31,39 +31,42 @@ config <-
     use_parent = FALSE
   )
 
-asset_impact_data_path <- config$asset_impact_data_path
-factset_data_path <- config$factset_data_path
-data_prep_outputs_path <- config$data_prep_outputs_path
-masterdata_ownership_filename <- config$masterdata_ownership_filename
-masterdata_debt_filename <- config$masterdata_debt_filename
-ar_company_id__factset_entity_id_filename <- config$ar_company_id__factset_entity_id_filename
-factset_financial_data_filename <- config$factset_financial_data_filename
-factset_entity_info_filename <- config$factset_entity_info_filename
-factset_entity_financing_data_filename <- config$factset_entity_financing_data_filename
-factset_fund_data_filename <- config$factset_fund_data_filename
-factset_isin_to_fund_table_filename <- config$factset_isin_to_fund_table_filename
-factset_iss_emissions_data_filename <- config$factset_iss_emissions_data_filename
-factset_issue_code_bridge_filename <- config$factset_issue_code_bridge_filename
-factset_industry_map_bridge_filename <- config$factset_industry_map_bridge_filename
-factset_manual_pacta_sector_override_filename <- config$factset_manual_pacta_sector_override_filename
-update_currencies <- config$update_currencies
-export_sqlite_files <- config$export_sqlite_files
-export_archives <- config$export_archives
-imf_quarter_timestamp <- config$imf_quarter_timestamp
-pacta_financial_timestamp <- config$pacta_financial_timestamp
-market_share_target_reference_year <- config$market_share_target_reference_year
-time_horizon <- config$time_horizon
-tdm_delta_years <- config$tdm_delta_years
-scenario_sources_list <- config$scenario_sources_list
-sector_list <- config$sector_list
-other_sector_list <- config$other_sector_list
-zero_emission_factor_techs <- config$zero_emission_factor_techs
-green_techs <- config$green_techs
-scenario_raw_data_to_include <- config$scenario_raw_data_to_include
-tech_exclude <- config$tech_exclude
-scenario_geographies_list <- config$scenario_geographies_list
-global_aggregate_scenario_sources_list <- config$global_aggregate_scenario_sources_list
-global_aggregate_sector_list <- config$global_aggregate_sector_list
+expected_keys <- c(
+  "asset_impact_data_path",
+  "factset_data_path",
+  "data_prep_outputs_path",
+  "preflight_data_path",
+  "masterdata_ownership_filename",
+  "masterdata_debt_filename",
+  "ar_company_id__factset_entity_id_filename",
+  "factset_financial_data_filename",
+  "factset_entity_info_filename",
+  "factset_entity_financing_data_filename",
+  "factset_fund_data_filename",
+  "factset_isin_to_fund_table_filename",
+  "factset_iss_emissions_data_filename",
+  "factset_issue_code_bridge_filename",
+  "factset_industry_map_bridge_filename",
+  "factset_manual_pacta_sector_override_filename",
+  "update_currencies",
+  "export_sqlite_files",
+  "export_archives",
+  "imf_quarter_timestamp",
+  "pacta_financial_timestamp",
+  "market_share_target_reference_year",
+  "time_horizon",
+  "scenario_sources_list",
+  "sector_list",
+  "other_sector_list",
+  "zero_emission_factor_techs",
+  "green_techs",
+  "scenario_raw_data_to_include",
+  "tech_exclude",
+  "scenario_geographies_list",
+  "global_aggregate_scenario_sources_list",
+  "global_aggregate_sector_list"
+)
+stopifnot(all(expected_keys %in% names(config)))
 
 # create timestamped output directory
 system_timestamp <- format(
@@ -71,85 +74,84 @@ system_timestamp <- format(
   format = "%Y%m%dT%H%M%SZ",
   tz = "UTC"
 )
-data_prep_outputs_path <- file.path(
-  data_prep_outputs_path,
-  paste(pacta_financial_timestamp, system_timestamp, sep = "_")
+config[["data_prep_outputs_path"]] <- file.path(
+  config[["data_prep_outputs_path"]],
+  paste(config[["pacta_financial_timestamp"]], system_timestamp, sep = "_")
 )
 
-if (dir.exists(data_prep_outputs_path)) {
-  logger::log_warn("POTENTIAL DATA LOSS: Output directory already exists, and files may be overwritten ({data_prep_outputs_path}).")
+if (dir.exists(config[["data_prep_outputs_path"]])) {
+  logger::log_warn("POTENTIAL DATA LOSS: Output directory already exists, and files may be overwritten ({config[[\"data_prep_outputs_path\"]]}).")
   warning("Output directory exists. Files may be overwritten.")
 } else {
-  logger::log_trace("Creating output directory: \"{data_prep_outputs_path}\"")
-  dir.create(data_prep_outputs_path, recursive = TRUE)
+  logger::log_trace("Creating output directory: \"{config[[\"data_prep_outputs_path\"]]}\"")
+  dir.create(config[["data_prep_outputs_path"]], recursive = TRUE)
 }
 
 # input filepaths --------------------------------------------------------------
 
 masterdata_ownership_path <-
-  file.path(asset_impact_data_path, masterdata_ownership_filename)
+  file.path(config[["asset_impact_data_path"]], config[["masterdata_ownership_filename"]])
 masterdata_debt_path <-
-  file.path(asset_impact_data_path, masterdata_debt_filename)
+  file.path(config[["asset_impact_data_path"]], config[["masterdata_debt_filename"]])
 ar_company_id__factset_entity_id_path <-
-  file.path(asset_impact_data_path, ar_company_id__factset_entity_id_filename)
+  file.path(config[["asset_impact_data_path"]], config[["ar_company_id__factset_entity_id_filename"]])
 
 factset_financial_data_path <-
-  file.path(factset_data_path, factset_financial_data_filename)
+  file.path(config[["factset_data_path"]], config[["factset_financial_data_filename"]])
 factset_entity_info_path <-
-  file.path(factset_data_path, factset_entity_info_filename)
+  file.path(config[["factset_data_path"]], config[["factset_entity_info_filename"]])
 factset_entity_financing_data_path <-
-  file.path(factset_data_path, factset_entity_financing_data_filename)
+  file.path(config[["factset_data_path"]], config[["factset_entity_financing_data_filename"]])
 factset_fund_data_path <-
-  file.path(factset_data_path, factset_fund_data_filename)
+  file.path(config[["factset_data_path"]], config[["factset_fund_data_filename"]])
 factset_isin_to_fund_table_path <-
-  file.path(factset_data_path, factset_isin_to_fund_table_filename)
+  file.path(config[["factset_data_path"]], config[["factset_isin_to_fund_table_filename"]])
 factset_iss_emissions_data_path <-
-  file.path(factset_data_path, factset_iss_emissions_data_filename)
+  file.path(config[["factset_data_path"]], config[["factset_iss_emissions_data_filename"]])
 factset_issue_code_bridge_path <-
-  file.path(factset_data_path, factset_issue_code_bridge_filename)
+  file.path(config[["factset_data_path"]], config[["factset_issue_code_bridge_filename"]])
 factset_industry_map_bridge_path <-
-  file.path(factset_data_path, factset_industry_map_bridge_filename)
+  file.path(config[["factset_data_path"]], config[["factset_industry_map_bridge_filename"]])
 factset_manual_pacta_sector_override_path <-
-  file.path(factset_data_path, factset_manual_pacta_sector_override_filename)
+  file.path(config[["factset_data_path"]], config[["factset_manual_pacta_sector_override_filename"]])
 
 
 # pre-flight filepaths ---------------------------------------------------------
 
-preflight_data_path <- config$preflight_data_path
-if (preflight_data_path == "") {
-  preflight_data_path <- data_prep_outputs_path
+if (config[["preflight_data_path"]] == "") {
+  config[["preflight_data_path"]] <- config[["data_prep_outputs_path"]]
 }
 
-currencies_preflight_data_path <- file.path(preflight_data_path, "currencies.rds")
-currencies_data_path <- file.path(data_prep_outputs_path, "currencies.rds")
-index_regions_data_path <- file.path(data_prep_outputs_path, "index_regions.rds")
+currencies_preflight_data_path <- file.path(config[["preflight_data_path"]], "currencies.rds")
+currencies_data_path <- file.path(config[["data_prep_outputs_path"]], "currencies.rds")
+index_regions_data_path <- file.path(config[["data_prep_outputs_path"]], "index_regions.rds")
 
-index_regions_preflight_data_path <- file.path(preflight_data_path, "index_regions.rds")
+index_regions_preflight_data_path <- file.path(config[["preflight_data_path"]], "index_regions.rds")
 
 # computed options -------------------------------------------------------------
 
 relevant_years <- sort(
   unique(
-    market_share_target_reference_year:(market_share_target_reference_year + time_horizon)
+    config[["market_share_target_reference_year"]]:(config[["market_share_target_reference_year"]] + config[["time_horizon"]])
   )
 )
 logger::log_info(
   "Full time horizon set to: {paste0(relevant_years, collapse = ', ')}."
 )
 
-scenario_raw_data_to_include <- lapply(scenario_raw_data_to_include, get, envir = asNamespace("pacta.scenario.preparation"))
+scenario_raw_data_to_include <- lapply(config[["scenario_raw_data_to_include"]], get, envir = asNamespace("pacta.scenario.preparation"))
 
 factset_timestamp <-
   unique(sub("_factset_.*[.]rds$", "", c(
-    factset_financial_data_filename,
-    factset_entity_info_filename,
-    factset_entity_financing_data_filename,
-    factset_fund_data_filename,
-    factset_isin_to_fund_table_filename,
-    factset_iss_emissions_data_filename,
-    factset_issue_code_bridge_filename,
-    factset_industry_map_bridge_filename,
-    factset_manual_pacta_sector_override_filename
+    config[["factset_financial_data_filename"]],
+    config[["factset_entity_info_filename"]],
+    config[["factset_entity_financing_data_filename"]],
+    config[["factset_fund_data_filename"]],
+    config[["factset_isin_to_fund_table_filename"]],
+    config[["factset_iss_emissions_data_filename"]],
+    config[["factset_issue_code_bridge_filename"]],
+    config[["factset_industry_map_bridge_filename"]],
+    config[["factset_manual_pacta_sector_override_filename"]]
   )))
 
 
@@ -170,7 +172,7 @@ input_filepaths <- c(
   factset_manual_pacta_sector_override_path = factset_manual_pacta_sector_override_path
 )
 
-if (!update_currencies) {
+if (!config[["update_currencies"]]) {
   input_filepaths <- c(
     input_filepaths,
     currencies_preflight_data_path = currencies_preflight_data_path
@@ -193,14 +195,14 @@ if (length(missing_input_files) > 0L) {
 
 logger::log_info("Fetching pre-flight data.")
 
-if (update_currencies) {
+if (config[["update_currencies"]]) {
   logger::log_info("Fetching currency data.")
   input_filepaths <- c(
     input_filepaths,
     currencies_preflight_data_path = currencies_preflight_data_path
   )
   currencies <- pacta.data.scraping::get_currency_exchange_rates(
-    quarter = imf_quarter_timestamp
+    quarter = config[["imf_quarter_timestamp"]]
   )
   saveRDS(currencies, currencies_preflight_data_path)
 } else {
@@ -259,9 +261,9 @@ interpolation_groups <- c(
 scenario_raw <-
   bind_rows(scenario_raw_data_to_include) %>%
   pacta.scenario.preparation::interpolate_yearly(!!!rlang::syms(interpolation_groups)) %>%
-  filter(.data$year >= .env$market_share_target_reference_year) %>%
-  pacta.scenario.preparation::add_market_share_columns(reference_year = market_share_target_reference_year) %>%
-  pacta.scenario.preparation::format_p4i(green_techs)
+  filter(.data$year >= .env$config[["market_share_target_reference_year"]]) %>%
+  pacta.scenario.preparation::add_market_share_columns(reference_year = config[["market_share_target_reference_year"]]) %>%
+  pacta.scenario.preparation::format_p4i(config[["green_techs"]])
 
 # filter for relevant scenario data
 scenarios_long <-
@@ -276,11 +278,11 @@ scenarios_long <-
   select(-"scenario_geography") %>%
   rename(scenario_geography = "scenario_geography_pacta") %>%
   filter(
-    .data$scenario_source %in% .env$scenario_sources_list,
-    .data$ald_sector %in% c(.env$sector_list, .env$other_sector_list),
+    .data$scenario_source %in% .env$config[["scenario_sources_list"]],
+    .data$ald_sector %in% c(.env$config[["sector_list"]], .env$config[["other_sector_list"]]),
     .data$scenario_geography %in% unique(.env$scenario_regions$scenario_geography),
     .data$year %in% unique(
-      c(.env$relevant_years, .env$market_share_target_reference_year + 10)
+      c(.env$relevant_years, .env$config[["market_share_target_reference_year"]] + 10)
     )
   )
 
@@ -309,12 +311,12 @@ logger::log_info("Preparing financial data.")
 logger::log_info("Formatting and saving file: \"financial_data.rds\".")
 readRDS(factset_financial_data_path) %>%
   pacta.data.preparation::prepare_financial_data(factset_issue_code_bridge) %>%
-  saveRDS(file.path(data_prep_outputs_path, "financial_data.rds"))
+  saveRDS(file.path(config[["data_prep_outputs_path"]], "financial_data.rds"))
 invisible(gc())
 
 logger::log_info("Formatting and saving file: \"entity_financing.rds\".")
 readRDS(factset_entity_financing_data_path) %>%
-  saveRDS(file.path(data_prep_outputs_path, "entity_financing.rds"))
+  saveRDS(file.path(config[["data_prep_outputs_path"]], "entity_financing.rds"))
 invisible(gc())
 
 logger::log_info("Formatting and saving file: \"entity_info.rds\".")
@@ -331,7 +333,7 @@ readRDS(factset_entity_info_path) %>%
     factset_industry_map_bridge,
     factset_manual_pacta_sector_override
   ) %>%
-  saveRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
+  saveRDS(file.path(config[["data_prep_outputs_path"]], "entity_info.rds"))
 invisible(gc())
 
 logger::log_info("Financial data prepared.")
@@ -341,7 +343,7 @@ logger::log_info("Financial data prepared.")
 
 logger::log_info("Preparing ABCD.")
 
-entity_info <- readRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
+entity_info <- readRDS(file.path(config[["data_prep_outputs_path"]], "entity_info.rds"))
 
 ar_company_id__country_of_domicile <-
   entity_info %>%
@@ -365,10 +367,10 @@ logger::log_info(
 readr::read_csv(masterdata_ownership_path, na = "", show_col_types = FALSE) %>%
   pacta.data.preparation::prepare_masterdata(
     ar_company_id__country_of_domicile,
-    pacta_financial_timestamp,
-    zero_emission_factor_techs
+    config[["pacta_financial_timestamp"]],
+    config[["zero_emission_factor_techs"]]
   ) %>%
-  saveRDS(file.path(data_prep_outputs_path, "masterdata_ownership_datastore.rds"))
+  saveRDS(file.path(config[["data_prep_outputs_path"]], "masterdata_ownership_datastore.rds"))
 invisible(gc())
 
 
@@ -387,8 +389,8 @@ company_id__creditor_company_id <-
 masterdata_debt %>%
   pacta.data.preparation::prepare_masterdata(
     ar_company_id__country_of_domicile,
-    pacta_financial_timestamp,
-    zero_emission_factor_techs
+    config[["pacta_financial_timestamp"]],
+    config[["zero_emission_factor_techs"]]
   ) %>%
   left_join(company_id__creditor_company_id, by = c(id = "company_id")) %>%
   left_join(ar_company_id__credit_parent_ar_company_id, by = c(id = "ar_company_id")) %>%
@@ -405,7 +407,7 @@ masterdata_debt %>%
     ald_production = sum(.data$ald_production, na.rm = TRUE),
     .groups = "drop"
   ) %>%
-  saveRDS(file.path(data_prep_outputs_path, "masterdata_debt_datastore.rds"))
+  saveRDS(file.path(config[["data_prep_outputs_path"]], "masterdata_debt_datastore.rds"))
 invisible(gc())
 
 rm(masterdata_debt)
@@ -422,9 +424,9 @@ logger::log_info("ABCD prepared.")
 # abcd_flags -------------------------------------------------------------------
 
 logger::log_info("Preparing ABCD flags.")
-financial_data <- readRDS(file.path(data_prep_outputs_path, "financial_data.rds"))
+financial_data <- readRDS(file.path(config[["data_prep_outputs_path"]], "financial_data.rds"))
 
-entity_info <- readRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
+entity_info <- readRDS(file.path(config[["data_prep_outputs_path"]], "entity_info.rds"))
 
 factset_entity_id__ar_company_id <-
   entity_info %>%
@@ -446,7 +448,7 @@ invisible(gc())
 logger::log_info("Formatting and saving file: \"abcd_flags_equity.rds\".")
 
 ar_company_id__sectors_with_assets__ownership <-
-  readRDS(file.path(data_prep_outputs_path, "masterdata_ownership_datastore.rds")) %>%
+  readRDS(file.path(config[["data_prep_outputs_path"]], "masterdata_ownership_datastore.rds")) %>%
   filter(year %in% relevant_years) %>%
   select(ar_company_id = id, ald_sector) %>%
   distinct() %>%
@@ -465,14 +467,14 @@ financial_data %>%
     has_ald_in_fin_sector,
     sectors_with_assets
   ) %>%
-  saveRDS(file.path(data_prep_outputs_path, "abcd_flags_equity.rds"))
+  saveRDS(file.path(config[["data_prep_outputs_path"]], "abcd_flags_equity.rds"))
 invisible(gc())
 
 
 logger::log_info("Formatting and saving file: \"abcd_flags_bonds.rds\".")
 
 ar_company_id__sectors_with_assets__debt <-
-  readRDS(file.path(data_prep_outputs_path, "masterdata_debt_datastore.rds")) %>%
+  readRDS(file.path(config[["data_prep_outputs_path"]], "masterdata_debt_datastore.rds")) %>%
   filter(year %in% relevant_years) %>%
   select(ar_company_id = id, ald_sector) %>%
   distinct() %>%
@@ -497,7 +499,7 @@ financial_data %>%
     sectors_with_assets = paste(sort(unique(na.omit(unlist(str_split(sectors_with_assets, pattern = " [+] "))))), collapse = " + ")
   ) %>%
   ungroup() %>%
-  saveRDS(file.path(data_prep_outputs_path, "abcd_flags_bonds.rds"))
+  saveRDS(file.path(config[["data_prep_outputs_path"]], "abcd_flags_bonds.rds"))
 invisible(gc())
 
 
@@ -537,14 +539,14 @@ fund_missing_mv <-
 
 fund_data %>%
   bind_rows(fund_missing_mv) %>%
-  saveRDS(file.path(data_prep_outputs_path, "fund_data.rds"))
+  saveRDS(file.path(config[["data_prep_outputs_path"]], "fund_data.rds"))
 
 
 logger::log_info("Saving file: \"total_fund_list.rds\".")
 fund_data %>%
   select(factset_fund_id) %>%
   distinct() %>%
-  saveRDS(file.path(data_prep_outputs_path, "total_fund_list.rds"))
+  saveRDS(file.path(config[["data_prep_outputs_path"]], "total_fund_list.rds"))
 
 
 logger::log_info("Saving file: \"isin_to_fund_table.rds\".")
@@ -572,7 +574,7 @@ isin_to_fund_table <-
   select(-n, -has_fund_data)
 
 isin_to_fund_table %>%
-  saveRDS(file.path(data_prep_outputs_path, "isin_to_fund_table.rds"))
+  saveRDS(file.path(config[["data_prep_outputs_path"]], "isin_to_fund_table.rds"))
 
 
 rm(fund_data)
@@ -632,7 +634,7 @@ iss_entity_emission_intensities <-
 
 saveRDS(
   select(iss_entity_emission_intensities, -c("ff_mkt_val", "ff_debt")),
-  file.path(data_prep_outputs_path, "iss_entity_emission_intensities.rds")
+  file.path(config[["data_prep_outputs_path"]], "iss_entity_emission_intensities.rds")
 )
 
 
@@ -659,7 +661,7 @@ iss_entity_emission_intensities %>%
     .groups = "drop"
   ) %>%
   ungroup() %>%
-  saveRDS(file.path(data_prep_outputs_path, "iss_average_sector_emission_intensities.rds"))
+  saveRDS(file.path(config[["data_prep_outputs_path"]], "iss_average_sector_emission_intensities.rds"))
 
 
 rm(iss_company_emissions)
@@ -675,7 +677,7 @@ logger::log_info("Emissions data prepared.")
 logger::log_info("Preparing combined ABCD scenario output.")
 
 masterdata_ownership_datastore <-
-  readRDS(file.path(data_prep_outputs_path, "masterdata_ownership_datastore.rds")) %>%
+  readRDS(file.path(config[["data_prep_outputs_path"]], "masterdata_ownership_datastore.rds")) %>%
   filter(year %in% relevant_years)
 
 for (scenario_source in unique(scenarios_long$scenario_source)) {
@@ -685,18 +687,18 @@ for (scenario_source in unique(scenarios_long$scenario_source)) {
   pacta.data.preparation::dataprep_abcd_scen_connection(
     abcd_data = masterdata_ownership_datastore,
     scenario_data = scenarios_long_source,
-    reference_year = market_share_target_reference_year,
+    reference_year = config[["market_share_target_reference_year"]],
     relevant_years = relevant_years,
-    tech_exclude = tech_exclude,
-    scenario_geographies_list = scenario_geographies_list,
-    sector_list = sector_list,
-    other_sector_list = other_sector_list,
-    global_aggregate_scenario_sources_list = global_aggregate_scenario_sources_list,
-    global_aggregate_sector_list = global_aggregate_sector_list,
+    tech_exclude = config[["tech_exclude"]],
+    scenario_geographies_list = config[["scenario_geographies_list"]],
+    sector_list = config[["sector_list"]],
+    other_sector_list = config[["other_sector_list"]],
+    global_aggregate_scenario_sources_list = config[["global_aggregate_scenario_sources_list"]],
+    global_aggregate_sector_list = config[["global_aggregate_sector_list"]],
     scenario_regions = scenario_regions,
     index_regions = index_regions
   ) %>%
-    saveRDS(file.path(data_prep_outputs_path, filename))
+    saveRDS(file.path(config[["data_prep_outputs_path"]], filename))
   invisible(gc())
 }
 
@@ -705,17 +707,17 @@ invisible(gc())
 
 logger::log_info("Formatting and saving file: \"equity_abcd_scenario.rds\".")
 list.files(
-  data_prep_outputs_path,
+  config[["data_prep_outputs_path"]],
   pattern = "^equity_abcd_scenario_",
   full.names = TRUE
 ) %>%
   lapply(readRDS) %>%
   bind_rows() %>%
-  saveRDS(file.path(data_prep_outputs_path, "equity_abcd_scenario.rds"))
+  saveRDS(file.path(config[["data_prep_outputs_path"]], "equity_abcd_scenario.rds"))
 
 
 masterdata_debt_datastore <-
-  readRDS(file.path(data_prep_outputs_path, "masterdata_debt_datastore.rds")) %>%
+  readRDS(file.path(config[["data_prep_outputs_path"]], "masterdata_debt_datastore.rds")) %>%
   filter(year %in% relevant_years)
 
 for (scenario_source in unique(scenarios_long$scenario_source)) {
@@ -725,18 +727,18 @@ for (scenario_source in unique(scenarios_long$scenario_source)) {
   pacta.data.preparation::dataprep_abcd_scen_connection(
     abcd_data = masterdata_debt_datastore,
     scenario_data = scenarios_long_source,
-    reference_year = market_share_target_reference_year,
+    reference_year = config[["market_share_target_reference_year"]],
     relevant_years = relevant_years,
-    tech_exclude = tech_exclude,
-    scenario_geographies_list = scenario_geographies_list,
-    sector_list = sector_list,
-    other_sector_list = other_sector_list,
-    global_aggregate_scenario_sources_list = global_aggregate_scenario_sources_list,
-    global_aggregate_sector_list = global_aggregate_sector_list,
+    tech_exclude = config[["tech_exclude"]],
+    scenario_geographies_list = config[["scenario_geographies_list"]],
+    sector_list = config[["sector_list"]],
+    other_sector_list = config[["other_sector_list"]],
+    global_aggregate_scenario_sources_list = config[["global_aggregate_scenario_sources_list"]],
+    global_aggregate_sector_list = config[["global_aggregate_sector_list"]],
     scenario_regions = scenario_regions,
     index_regions = index_regions
   ) %>%
-    saveRDS(file.path(data_prep_outputs_path, filename))
+    saveRDS(file.path(config[["data_prep_outputs_path"]], filename))
   invisible(gc())
 }
 
@@ -745,29 +747,29 @@ invisible(gc())
 
 logger::log_info("Formatting and saving file: \"bonds_abcd_scenario.rds\".")
 list.files(
-  data_prep_outputs_path,
+  config[["data_prep_outputs_path"]],
   pattern = "^bonds_abcd_scenario_",
   full.names = TRUE
 ) %>%
   lapply(readRDS) %>%
   bind_rows() %>%
-  saveRDS(file.path(data_prep_outputs_path, "bonds_abcd_scenario.rds"))
+  saveRDS(file.path(config[["data_prep_outputs_path"]], "bonds_abcd_scenario.rds"))
 
 logger::log_info("Combined ABCD scenario output prepared.")
 
 
 # export SQLite versions of relevant files -------------------------------------
 
-if (export_sqlite_files) {
+if (config[["export_sqlite_files"]]) {
   # entity_info
   logger::log_info("Formatting and saving file: \"entity_info.sqlite\".")
 
-  entity_info <- readRDS(file.path(data_prep_outputs_path, "entity_info.rds"))
+  entity_info <- readRDS(file.path(config[["data_prep_outputs_path"]], "entity_info.rds"))
 
   con <-
     DBI::dbConnect(
       drv = RSQLite::SQLite(),
-      dbname = file.path(data_prep_outputs_path, "entity_info.sqlite")
+      dbname = file.path(config[["data_prep_outputs_path"]], "entity_info.sqlite")
     )
   RSQLite::sqliteSetBusyHandler(con, 3000L)
 
@@ -789,12 +791,12 @@ if (export_sqlite_files) {
     "Formatting and saving file: \"equity_abcd_scenario.sqlite\"."
   )
 
-  equity_abcd_scenario <- readRDS(file.path(data_prep_outputs_path, "equity_abcd_scenario.rds"))
+  equity_abcd_scenario <- readRDS(file.path(config[["data_prep_outputs_path"]], "equity_abcd_scenario.rds"))
 
   con <-
     DBI::dbConnect(
       drv = RSQLite::SQLite(),
-      dbname = file.path(data_prep_outputs_path, "equity_abcd_scenario.sqlite")
+      dbname = file.path(config[["data_prep_outputs_path"]], "equity_abcd_scenario.sqlite")
     )
   RSQLite::sqliteSetBusyHandler(con, 3000L)
 
@@ -822,12 +824,12 @@ if (export_sqlite_files) {
     "Formatting and saving file: \"bonds_abcd_scenario.sqlite\"."
   )
 
-  bonds_abcd_scenario <- readRDS(file.path(data_prep_outputs_path, "bonds_abcd_scenario.rds"))
+  bonds_abcd_scenario <- readRDS(file.path(config[["data_prep_outputs_path"]], "bonds_abcd_scenario.rds"))
 
   con <-
     DBI::dbConnect(
       drv = RSQLite::SQLite(),
-      dbname = file.path(data_prep_outputs_path, "bonds_abcd_scenario.sqlite")
+      dbname = file.path(config[["data_prep_outputs_path"]], "bonds_abcd_scenario.sqlite")
     )
   RSQLite::sqliteSetBusyHandler(con, 3000L)
 
@@ -881,29 +883,29 @@ parameters <-
     config = unclass(config),
     input_filepaths = as.list(input_filepaths),
     timestamps = list(
-      imf_quarter_timestamp = imf_quarter_timestamp,
+      imf_quarter_timestamp = config[["imf_quarter_timestamp"]],
       factset_data_identifier = factset_timestamp,
-      pacta_financial_timestamp = pacta_financial_timestamp
+      pacta_financial_timestamp = config[["pacta_financial_timestamp"]]
     ),
     scenarios = list(
-      scenario_sources_list = scenario_sources_list,
-      scenario_geographies_list = scenario_geographies_list,
-      global_aggregate_scenario_sources_list = global_aggregate_scenario_sources_list
+      scenario_sources_list = config[["scenario_sources_list"]],
+      scenario_geographies_list = config[["scenario_geographies_list"]],
+      global_aggregate_scenario_sources_list = config[["global_aggregate_scenario_sources_list"]]
     ),
     sectors = list(
-      sector_list = sector_list,
-      other_sector_list = other_sector_list,
-      global_aggregate_sector_list = global_aggregate_sector_list
+      sector_list = config[["sector_list"]],
+      other_sector_list = config[["other_sector_list"]],
+      global_aggregate_sector_list = config[["global_aggregate_sector_list"]]
     ),
     years = list(
-      market_share_target_reference_year = market_share_target_reference_year,
-      time_horizon = time_horizon,
+      market_share_target_reference_year = config[["market_share_target_reference_year"]],
+      time_horizon = config[["time_horizon"]],
       relevant_years = relevant_years
     ),
     technologies = list(
-      zero_emission_factor_techs = zero_emission_factor_techs,
-      green_techs = green_techs,
-      tech_exclude = tech_exclude
+      zero_emission_factor_techs = config[["zero_emission_factor_techs"]],
+      green_techs = config[["green_techs"]],
+      tech_exclude = config[["tech_exclude"]]
     ),
     package_news = package_news
   )
@@ -911,13 +913,13 @@ parameters <-
 logger::log_trace("Getting list of output files.")
 output_files <- normalizePath(
   list.files(
-    data_prep_outputs_path,
+    config[["data_prep_outputs_path"]],
     full.names = TRUE,
     recursive = TRUE
   )
 )
 
-manifest_path <- file.path(data_prep_outputs_path, "manifest.json")
+manifest_path <- file.path(config[["data_prep_outputs_path"]], "manifest.json")
 logger::log_trace("Writing manifest file: \"{manifest_path}\".")
 pacta.data.preparation::write_manifest(
   path = manifest_path,
@@ -935,16 +937,16 @@ logger::log_info("Copying NEWS.md files from relevant PACTA packages.")
 for (pkg_name in pacta_packages) {
   file.copy(
     system.file("NEWS.md", package = pkg_name),
-    to = file.path(data_prep_outputs_path, paste0(pkg_name, "-NEWS.md"))
+    to = file.path(config[["data_prep_outputs_path"]], paste0(pkg_name, "-NEWS.md"))
   )
 }
 
 # Create archive files
-if (export_archives) {
+if (config[["export_archives"]]) {
   logger::log_info("Exporting input and output archives.")
 
   logger::log_debug("Creating inputs zip file.")
-  inputs_zip_file_path <- paste0(data_prep_outputs_path, "_inputs.zip")
+  inputs_zip_file_path <- paste0(config[["data_prep_outputs_path"]], "_inputs.zip")
   logger::log_trace("Zip file path: \"{inputs_zip_file_path}\".")
   zip(
     zipfile = inputs_zip_file_path,
@@ -958,7 +960,7 @@ if (export_archives) {
   logger::log_debug("Inputs archive created.")
 
   logger::log_debug("Creating outputs zip file.")
-  outputs_zip_file_path <- paste0(data_prep_outputs_path, ".zip")
+  outputs_zip_file_path <- paste0(config[["data_prep_outputs_path"]], ".zip")
   logger::log_trace("Zip file path: \"{outputs_zip_file_path}\".")
   zip(
     zipfile = outputs_zip_file_path,
