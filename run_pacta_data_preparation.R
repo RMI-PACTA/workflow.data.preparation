@@ -883,6 +883,7 @@ parameters <-
     timestamps = list(
       imf_quarter_timestamp = imf_quarter_timestamp,
       factset_data_identifier = factset_timestamp,
+      ent_entity_affiliates_last_update = ent_entity_affiliates_last_update,
       pacta_financial_timestamp = pacta_financial_timestamp
     ),
     scenarios = list(
