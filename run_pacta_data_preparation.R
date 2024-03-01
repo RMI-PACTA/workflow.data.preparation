@@ -204,7 +204,8 @@ if (config[["update_currencies"]]) {
     currencies_preflight_data_path = currencies_preflight_data_path
   )
   currencies <- pacta.data.scraping::get_currency_exchange_rates(
-    quarter = config[["imf_quarter_timestamp"]]
+    quarter = config[["imf_quarter_timestamp"]],
+    max_seconds = 600L
   )
   saveRDS(currencies, currencies_preflight_data_path)
 } else {
