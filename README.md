@@ -37,7 +37,6 @@ Running the workflow requires a file `.env` to exist in the root directory, that
 HOST_FACTSET_EXTRACTED_PATH=/PATH/TO/factset-extracted
 HOST_ASSET_IMPACT_PATH=/PATH/TO/asset-impact
 HOST_OUTPUTS_PATH=/PATH/TO/YYYYQQ_pacta_analysis_inputs_YYYY-MM-DD/YYYYQQ
-GITHUB_PAT=ghp_XXXXxxXxXXXxXxxX
 R_CONFIG_ACTIVE=YYYYQQ
 ```
 
@@ -57,6 +56,16 @@ R_CONFIG_ACTIVE=YYYYQQ
 - `R_CONFIG_ACTIVE` the name of the config to use.
   The [config.yml](config.yml) file contains named configurations which define the settings used during PACTA data preparation.
   See top-level yaml names of [config.yml](config.yml) for valid options.
+
+Running the workflow also requires a file `GITHUB_PAT` to exist in the root directory that contains a valid GitHub PAT that grants access to the repos:
+  - [RMI-PACTA/pacta.scenario.preparation](https://github.com/RMI-PACTA/pacta.scenario.preparation)
+  - [RMI-PACTA/pacta.data.preparation](https://github.com/RMI-PACTA/pacta.data.preparation)
+
+and it should look like...
+
+```sh
+ghp_893djh9238h9834rh9
+```
 
 Run `docker-compose up` from the root directory, and docker will build the image (if necessary), and then run the data.prep process given the specified options in the .env file.
 

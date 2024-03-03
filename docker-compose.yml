@@ -4,6 +4,8 @@ services:
   data_prep:
     build:
       context: .
+      secrets:
+        - github_pat
     environment:
       - LOG_LEVEL=TRACE
     volumes:
@@ -18,3 +20,7 @@ services:
       - type: bind
         source: ${HOST_OUTPUTS_PATH}
         target: /mnt/outputs
+
+secrets:
+  github_pat:
+    file: GITHUB_PAT

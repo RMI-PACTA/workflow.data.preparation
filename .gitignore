@@ -4,4 +4,5 @@
 .Ruserdata
 .Rbuildignore
 .env
+GITHUB_PAT
 .DS_Store
