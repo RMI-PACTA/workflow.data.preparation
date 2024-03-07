@@ -10,14 +10,11 @@ RUN Rscript -e '\
   '
 
 WORKDIR /workflow.data.preparation
-COPY .env DESCRIPTION ./
+COPY DESCRIPTION ./
 
-RUN Rscript -e '\
-  readRenviron(".env"); \
-  pak::local_install_deps(); \
-  '
+RUN Rscript -e 'pak::local_install_deps()'
 
 COPY .git/ ./.git/
-COPY config.yml run_pacta_data_preparation.R ./
+COPY .env config.yml run_pacta_data_preparation.R ./
 
 CMD Rscript run_pacta_data_preparation.R
