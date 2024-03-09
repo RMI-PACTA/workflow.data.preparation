@@ -1,15 +1,15 @@
 Package: workflow.data.preparation
 Title: export a directory of data files needed for PACTA analysis input
 Version: 0.0.0.9000
-Authors@R: 
+Authors@R:
     c(person(given = "CJ",
              family = "Yetman",
              role = c("aut", "cre", "ctr"),
              email = "cj@cjyetman.com",
              comment = c(ORCID = "0000-0001-5099-9500")),
-      person(given = "Jackson", 
+      person(given = "Jackson",
              family = "Hoffart",
-             email = "jackson.hoffart@gmail.com", 
+             email = "jackson.hoffart@gmail.com",
              role = c("aut", "ctr"),
              comment = c(ORCID = "0000-0002-8600-5042")),
       person(given = "Jacob",
@@ -24,27 +24,27 @@ Authors@R:
       person(given = "RMI",
              role = c("cph", "fnd"),
              email = "PACTA4investors@rmi.org"))
-Description: This repo exports a directory of data files needed for PACTA 
+Description: This repo exports a directory of data files needed for PACTA
     analysis input.
 Encoding: UTF-8
-Imports: 
+Imports:
     config,
     DBI,
     dbplyr,
     dplyr,
     logger,
-    pacta.data.preparation (>= 0.1.0.9003), 
-    pacta.data.scraping, 
-    pacta.scenario.preparation, 
-    readr, 
-    rlang, 
-    RSQLite, 
-    stringr, 
+    pacta.data.preparation (>= 0.1.0.9003),
+    pacta.data.scraping,
+    pacta.scenario.preparation,
+    readr,
+    rlang,
+    RSQLite,
+    stringr,
     tidyr
-Remotes: 
-    RMI-PACTA/pacta.data.preparation, 
-    RMI-PACTA/pacta.data.scraping, 
+Remotes:
+    RMI-PACTA/pacta.data.preparation,
+    RMI-PACTA/pacta.data.scraping,
     RMI-PACTA/pacta.scenario.preparation
-Depends: 
+Depends:
     R (>= 3.5.0)
 License: MIT + file LICENSE
