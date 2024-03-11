@@ -16,5 +16,9 @@ services:
         target: /mnt/asset-impact
         read_only: true
       - type: bind
+        source: ${HOST_SCENARIO_INPUTS_PATH}
+        target: /mnt/scenario-inputs
+        read_only: true
+      - type: bind
         source: ${HOST_OUTPUTS_PATH}
         target: /mnt/outputs
