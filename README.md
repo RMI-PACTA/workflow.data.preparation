@@ -40,6 +40,7 @@ Running the workflow requires a file `.env` to exist in the root directory, that
 # .env
 HOST_FACTSET_EXTRACTED_PATH=/PATH/TO/factset-extracted
 HOST_ASSET_IMPACT_PATH=/PATH/TO/asset-impact
+HOST_SCENARIO_INPUTS_PATH=/PATH/TO/scenario-inputs
 HOST_OUTPUTS_PATH=/PATH/TO/YYYYQQ_pacta_analysis_inputs_YYYY-MM-DD/YYYYQQ
 GITHUB_PAT=ghp_XXXXxxXxXXXxXxxX
 R_CONFIG_ACTIVE=YYYYQQ
@@ -50,6 +51,10 @@ R_CONFIG_ACTIVE=YYYYQQ
   The pacta.data.preparation process requires input files that must exist in this directory and they must have filenames that match those specified in the [config.yml](config.yml) for the specified config.
   See ["Required Input Files"](#required-input-files) (below) for more information.
 - `HOST_ASSET_IMPACT_PATH` the local path to where the Asset Impact input files live.
+  `docker-compose` volume mounts this directory and reads files from it, so it requires appropriate permissions on the host filesystem.
+  The pacta.data.preparation process requires input files that must exist in this directory and they must have filenames that match those specified in the [config.yml](config.yml) for the specified config.
+  See ["Required Input Files"](#required-input-files) (below) for more information.
+- `HOST_SCENARIO_INPUTS_PATH` the local path to where the scenarios input files live.
   `docker-compose` volume mounts this directory and reads files from it, so it requires appropriate permissions on the host filesystem.
   The pacta.data.preparation process requires input files that must exist in this directory and they must have filenames that match those specified in the [config.yml](config.yml) for the specified config.
   See ["Required Input Files"](#required-input-files) (below) for more information.
@@ -242,6 +247,11 @@ The required files are:
 Files exported by [`{workflow.factset}`](https://github.com/RMI-PACTA/workflow.factset) provide financial data to tie to production data.
 See the [`workflow.factset` README](https://github.com/RMI-PACTA/workflow.factset#exported-files) for more information on expected file format.
 
+### Scenarios Data
+
+Files exported by [`{workflow.scenario.preparation}`](https://github.com/RMI-PACTA/workflow.scenario.preparation) provide scenario data to be combined with the ABCD data.
+See the [`workflow.scenario.preparation` README](https://github.com/RMI-PACTA/workflow.scenario.preparation) for more information on expected file format.
+
 The required files are:
 
 - factset_entity_financing_data.rds
@@ -253,3 +263,4 @@ The required files are:
 - factset_issue_code_bridge.rds
 - factset_industry_map_bridge.rds
 - factset_manual_pacta_sector_override.rds
+- geco_2022.csv
