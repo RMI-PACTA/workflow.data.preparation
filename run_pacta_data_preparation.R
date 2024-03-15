@@ -553,34 +553,12 @@ readRDS(file.path(config[["data_prep_outputs_path"]], "fund_data.rds")) %>%
 
 logger::log_info("Saving file: \"isin_to_fund_table.rds\".")
 
-isin_to_fund_table <- readRDS(factset_isin_to_fund_table_path)
-
-# filter out fsyms that have more than 1 row and no fund data
-isin_to_fund_table <-
-  isin_to_fund_table %>%
-  mutate(has_fund_data = factset_fund_id %in% fund_data$factset_fund_id) %>%
-  group_by(fsym_id) %>%
-  mutate(n = n()) %>%
-  filter(n == 1 | (n > 1 & has_fund_data)) %>%
-  ungroup() %>%
-  select(-n, -has_fund_data)
-
-# filter out fsyms that have more than 1 row and have fund data for both rows
-isin_to_fund_table <-
-  isin_to_fund_table %>%
-  mutate(has_fund_data = factset_fund_id %in% fund_data$factset_fund_id) %>%
-  group_by(fsym_id) %>%
-  mutate(n = n()) %>%
-  filter(!(all(has_fund_data) & n > 1)) %>%
-  ungroup() %>%
-  select(-n, -has_fund_data)
-
-isin_to_fund_table %>%
+pacta.data.preparation::prepare_isin_to_fund_table(
+  isin_to_fund_table = readRDS(factset_isin_to_fund_table_path),
+  fund_data = readRDS(file.path(config[["data_prep_outputs_path"]], "fund_data.rds"))
+) %>%
   saveRDS(file.path(config[["data_prep_outputs_path"]], "isin_to_fund_table.rds"))
 
-
-rm(isin_to_fund_table)
-invisible(gc())
 
 logger::log_info("Fund data prepared.")
 
