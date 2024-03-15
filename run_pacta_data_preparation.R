@@ -314,9 +314,8 @@ invisible(gc())
 
 logger::log_info("Formatting and saving file: \"entity_info.rds\".")
 factset_entity_id__ar_company_id <-
-  pacta.data.preparation::prepare_factset_entity_id__ar_company_id(
-    readr::read_csv(ar_company_id__factset_entity_id_path, col_types = "c")
-  )
+  readr::read_csv(ar_company_id__factset_entity_id_path, col_types = "c") %>%
+  pacta.data.preparation::prepare_factset_entity_id__ar_company_id()
 
 readRDS(factset_entity_info_path) %>%
   pacta.data.preparation::prepare_entity_info(
@@ -411,9 +410,8 @@ financial_data <- readRDS(file.path(config[["data_prep_outputs_path"]], "financi
 entity_info <- readRDS(file.path(config[["data_prep_outputs_path"]], "entity_info.rds"))
 
 factset_entity_id__ar_company_id <-
-  pacta.data.preparation::prepare_factset_entity_id__ar_company_id(
-    readr::read_csv(ar_company_id__factset_entity_id_path, col_types = "c")
-  )
+  readr::read_csv(ar_company_id__factset_entity_id_path, col_types = "c") %>%
+  pacta.data.preparation::prepare_factset_entity_id__ar_company_id()
 
 factset_entity_id__security_mapped_sector <-
   pacta.data.preparation::prepare_factset_entity_id__security_mapped_sector(entity_info)
@@ -428,10 +426,8 @@ invisible(gc())
 logger::log_info("Formatting and saving file: \"abcd_flags_equity.rds\".")
 
 ar_company_id__sectors_with_assets__ownership <-
-  pacta.data.preparation::prepare_ar_company_id__sectors_with_assets__ownership(
-    readRDS(file.path(config[["data_prep_outputs_path"]], "masterdata_ownership_datastore.rds")),
-    relevant_years
-  )
+  readRDS(file.path(config[["data_prep_outputs_path"]], "masterdata_ownership_datastore.rds")) %>%
+  pacta.data.preparation::prepare_ar_company_id__sectors_with_assets__ownership(relevant_years)
 
 financial_data %>%
   left_join(factset_entity_id__ar_company_id, by = "factset_entity_id") %>%
@@ -452,10 +448,8 @@ invisible(gc())
 logger::log_info("Formatting and saving file: \"abcd_flags_bonds.rds\".")
 
 ar_company_id__sectors_with_assets__debt <-
-  pacta.data.preparation::prepare_ar_company_id__sectors_with_assets__debt(
-    readRDS(file.path(config[["data_prep_outputs_path"]], "masterdata_debt_datastore.rds")),
-    relevant_years
-  )
+  readRDS(file.path(config[["data_prep_outputs_path"]], "masterdata_debt_datastore.rds")) %>%
+  pacta.data.preparation::prepare_ar_company_id__sectors_with_assets__debt(relevant_years)
 
 financial_data %>%
   left_join(factset_entity_id__ar_company_id, by = "factset_entity_id") %>%
