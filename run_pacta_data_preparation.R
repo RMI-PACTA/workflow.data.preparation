@@ -554,9 +554,8 @@ logger::log_info("Fund data prepared.")
 # emission data output ---------------------------------------------------------
 
 iss_company_emissions <-
-  pacta.data.preparation::prepare_iss_company_emissions(
-    readRDS(factset_iss_emissions_data_path)
-  )
+  readRDS(factset_iss_emissions_data_path) %>%
+  pacta.data.preparation::prepare_iss_company_emissions()
 
 logger::log_info("Formatting and saving file: \"iss_entity_emission_intensities.rds\".")
 
