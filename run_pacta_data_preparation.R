@@ -19,9 +19,7 @@ suppressPackageStartupMessages({
 
 # config -----------------------------------------------------------------------
 
-if (Sys.getenv("R_CONFIG_ACTIVE") != "desktop") {
-  readRenviron(".env")
-}
+if (Sys.getenv("R_CONFIG_ACTIVE") != "desktop") { readRenviron(".env") }
 
 config_name <- Sys.getenv("R_CONFIG_ACTIVE")
 raw_config <-
@@ -137,9 +135,7 @@ relevant_years <- sort(
     config[["market_share_target_reference_year"]]:(config[["market_share_target_reference_year"]] + config[["time_horizon"]])
   )
 )
-logger::log_info(
-  "Full time horizon set to: {paste0(relevant_years, collapse = ', ')}."
-)
+logger::log_info("Full time horizon set to: {paste0(relevant_years, collapse = ', ')}.")
 
 scenario_raw_data_to_include <- lapply(config[["scenario_raw_data_to_include"]], get, envir = asNamespace("pacta.scenario.preparation"))
 
@@ -184,13 +180,8 @@ if (!config[["update_currencies"]]) {
 missing_input_files <- input_filepaths[!file.exists(input_filepaths)]
 
 if (length(missing_input_files) > 0L) {
-  logger::log_error(
-    "Input file cannot be found: {names(missing_input_files)} ({missing_input_files})."
-  )
-  stop(
-    "Input files are missing: ",
-    toString(missing_input_files)
-  )
+  logger::log_error("Input file cannot be found: {names(missing_input_files)} ({missing_input_files}).")
+  stop("Input files are missing: ", toString(missing_input_files))
 }
 
 # pre-flight -------------------------------------------------------------------
@@ -295,14 +286,13 @@ logger::log_info("Scenario data prepared.")
 # currency data output ---------------------------------------------------------
 
 logger::log_info("Saving file: \"currencies.rds\".")
-currencies %>%
-  saveRDS(currencies_data_path)
+saveRDS(currencies, currencies_data_path)
 
 
 # index_regions output ---------------------------------------------------------
 
 logger::log_info("Saving file: \"index_regions.rds\".")
-index_regions %>% saveRDS(index_regions_data_path)
+saveRDS(index_regions, index_regions_data_path)
 
 
 # financial data output --------------------------------------------------------
@@ -540,8 +530,7 @@ fund_missing_mv <-
   ungroup() %>%
   filter(holding_reported_mv != 0)
 
-fund_data %>%
-  bind_rows(fund_missing_mv) %>%
+bind_rows(fund_data, fund_missing_mv) %>%
   saveRDS(file.path(config[["data_prep_outputs_path"]], "fund_data.rds"))
 
 
@@ -598,9 +587,7 @@ iss_company_emissions <-
   ) %>%
   mutate(icc_total_emissions_units = "tCO2e") # units are defined in the ISS/FactSet documentation (see #144)
 
-logger::log_info(
-  "Formatting and saving file: \"iss_entity_emission_intensities.rds\"."
-)
+logger::log_info("Formatting and saving file: \"iss_entity_emission_intensities.rds\".")
 
 iss_entity_emission_intensities <-
   readRDS(factset_entity_financing_data_path) %>%
@@ -641,9 +628,7 @@ saveRDS(
 )
 
 
-logger::log_info(
-  "Formatting and saving file: \"iss_average_sector_emission_intensities.rds\"."
-)
+logger::log_info("Formatting and saving file: \"iss_average_sector_emission_intensities.rds\".")
 
 factset_entity_info <- readRDS(factset_entity_info_path)
 
@@ -790,9 +775,7 @@ if (config[["export_sqlite_files"]]) {
   invisible(gc())
 
   # equity_abcd_scenario
-  logger::log_info(
-    "Formatting and saving file: \"equity_abcd_scenario.sqlite\"."
-  )
+  logger::log_info("Formatting and saving file: \"equity_abcd_scenario.sqlite\".")
 
   equity_abcd_scenario <- readRDS(file.path(config[["data_prep_outputs_path"]], "equity_abcd_scenario.rds"))
 
@@ -823,9 +806,7 @@ if (config[["export_sqlite_files"]]) {
   invisible(gc())
 
   # bonds_abcd_scenario
-  logger::log_info(
-    "Formatting and saving file: \"bonds_abcd_scenario.sqlite\"."
-  )
+  logger::log_info("Formatting and saving file: \"bonds_abcd_scenario.sqlite\".")
 
   bonds_abcd_scenario <- readRDS(file.path(config[["data_prep_outputs_path"]], "bonds_abcd_scenario.rds"))
 
