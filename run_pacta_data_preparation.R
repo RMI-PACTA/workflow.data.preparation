@@ -486,33 +486,15 @@ logger::log_info("ABCD flags prepared.")
 
 logger::log_info("Preparing fund data.")
 
-fund_data <- readRDS(factset_fund_data_path)
-
-# remove funds above the threshold
-fund_data <-
-  fund_data %>%
-  group_by(factset_fund_id, fund_reported_mv) %>%
-  filter((fund_reported_mv[[1]] - sum(holding_reported_mv)) / fund_reported_mv[[1]] > -1e-5) %>%
-  ungroup()
-
-# build MISSINGWEIGHT for under and over
-fund_missing_mv <-
-  fund_data %>%
-  group_by(factset_fund_id, fund_reported_mv) %>%
-  summarise(
-    holding_isin = "MISSINGWEIGHT",
-    holding_reported_mv = fund_reported_mv[[1]] - sum(holding_reported_mv),
-    .groups = "drop"
-  ) %>%
-  ungroup() %>%
-  filter(holding_reported_mv != 0)
-
-bind_rows(fund_data, fund_missing_mv) %>%
+readRDS(factset_fund_data_path) %>%
+  pacta.data.preparation::prepare_fund_data(threshold = 0) %>%
   saveRDS(file.path(config[["data_prep_outputs_path"]], "fund_data.rds"))
 
 
 logger::log_info("Saving file: \"total_fund_list.rds\".")
-pacta.data.preparation::prepare_total_fund_list(fund_data) %>%
+
+readRDS(file.path(config[["data_prep_outputs_path"]], "fund_data.rds")) %>%
+  pacta.data.preparation::prepare_total_fund_list() %>%
   saveRDS(file.path(config[["data_prep_outputs_path"]], "total_fund_list.rds"))
 
 
@@ -544,7 +526,6 @@ isin_to_fund_table %>%
   saveRDS(file.path(config[["data_prep_outputs_path"]], "isin_to_fund_table.rds"))
 
 
-rm(fund_data)
 rm(isin_to_fund_table)
 invisible(gc())
 
