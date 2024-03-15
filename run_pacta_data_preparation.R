@@ -324,12 +324,10 @@ invisible(gc())
 
 logger::log_info("Formatting and saving file: \"entity_info.rds\".")
 factset_entity_id__ar_company_id <-
-  readr::read_csv(ar_company_id__factset_entity_id_path, col_types = "c") %>%
-  select(
-    factset_entity_id = "factset_id",
-    ar_company_id = "company_id"
-  ) %>%
-  distinct()
+  pacta.data.preparation::prepare_factset_entity_id__ar_company_id(
+    readr::read_csv(ar_company_id__factset_entity_id_path, col_types = "c")
+  )
+
 readRDS(factset_entity_info_path) %>%
   pacta.data.preparation::prepare_entity_info(
     factset_entity_id__ar_company_id,
@@ -349,16 +347,10 @@ logger::log_info("Preparing ABCD.")
 entity_info <- readRDS(file.path(config[["data_prep_outputs_path"]], "entity_info.rds"))
 
 ar_company_id__country_of_domicile <-
-  entity_info %>%
-  select("ar_company_id", "country_of_domicile") %>%
-  filter(!is.na(.data$ar_company_id)) %>%
-  distinct()
+  pacta.data.preparation::prepare_ar_company_id__country_of_domicile(entity_info)
 
 ar_company_id__credit_parent_ar_company_id <-
-  entity_info %>%
-  select("ar_company_id", "credit_parent_ar_company_id") %>%
-  filter(!is.na(.data$ar_company_id)) %>%
-  distinct()
+  pacta.data.preparation::prepare_ar_company_id__credit_parent_ar_company_id(entity_info)
 
 rm(entity_info)
 invisible(gc())
@@ -384,10 +376,7 @@ logger::log_info(
 masterdata_debt <- readr::read_csv(masterdata_debt_path, na = "", show_col_types = FALSE)
 
 company_id__creditor_company_id <-
-  masterdata_debt %>%
-  select("company_id", "creditor_company_id") %>%
-  distinct() %>%
-  mutate(across(.cols = dplyr::everything(), .fns = as.character))
+  pacta.data.preparation::prepare_company_id__creditor_company_id(masterdata_debt)
 
 masterdata_debt %>%
   pacta.data.preparation::prepare_masterdata(
@@ -432,17 +421,15 @@ financial_data <- readRDS(file.path(config[["data_prep_outputs_path"]], "financi
 entity_info <- readRDS(file.path(config[["data_prep_outputs_path"]], "entity_info.rds"))
 
 factset_entity_id__ar_company_id <-
-  entity_info %>%
-  select(factset_entity_id, ar_company_id) %>%
-  filter(!is.na(ar_company_id))
+  pacta.data.preparation::prepare_factset_entity_id__ar_company_id(
+    readr::read_csv(ar_company_id__factset_entity_id_path, col_types = "c")
+  )
 
 factset_entity_id__security_mapped_sector <-
-  entity_info %>%
-  select(factset_entity_id, security_mapped_sector)
+  pacta.data.preparation::prepare_factset_entity_id__security_mapped_sector(entity_info)
 
 factset_entity_id__credit_parent_id <-
-  entity_info %>%
-  select("factset_entity_id", "credit_parent_id")
+  pacta.data.preparation::prepare_factset_entity_id__credit_parent_id(entity_info)
 
 rm(entity_info)
 invisible(gc())
@@ -451,12 +438,10 @@ invisible(gc())
 logger::log_info("Formatting and saving file: \"abcd_flags_equity.rds\".")
 
 ar_company_id__sectors_with_assets__ownership <-
-  readRDS(file.path(config[["data_prep_outputs_path"]], "masterdata_ownership_datastore.rds")) %>%
-  filter(year %in% relevant_years) %>%
-  select(ar_company_id = id, ald_sector) %>%
-  distinct() %>%
-  group_by(ar_company_id) %>%
-  summarise(sectors_with_assets = paste(unique(ald_sector), collapse = " + "))
+  pacta.data.preparation::prepare_ar_company_id__sectors_with_assets__ownership(
+    readRDS(file.path(config[["data_prep_outputs_path"]], "masterdata_ownership_datastore.rds")),
+    relevant_years
+  )
 
 financial_data %>%
   left_join(factset_entity_id__ar_company_id, by = "factset_entity_id") %>%
@@ -477,12 +462,10 @@ invisible(gc())
 logger::log_info("Formatting and saving file: \"abcd_flags_bonds.rds\".")
 
 ar_company_id__sectors_with_assets__debt <-
-  readRDS(file.path(config[["data_prep_outputs_path"]], "masterdata_debt_datastore.rds")) %>%
-  filter(year %in% relevant_years) %>%
-  select(ar_company_id = id, ald_sector) %>%
-  distinct() %>%
-  group_by(ar_company_id) %>%
-  summarise(sectors_with_assets = paste(unique(ald_sector), collapse = " + "))
+  pacta.data.preparation::prepare_ar_company_id__sectors_with_assets__debt(
+    readRDS(file.path(config[["data_prep_outputs_path"]], "masterdata_debt_datastore.rds")),
+    relevant_years
+  )
 
 financial_data %>%
   left_join(factset_entity_id__ar_company_id, by = "factset_entity_id") %>%
@@ -546,9 +529,7 @@ fund_data %>%
 
 
 logger::log_info("Saving file: \"total_fund_list.rds\".")
-fund_data %>%
-  select(factset_fund_id) %>%
-  distinct() %>%
+pacta.data.preparation::prepare_total_fund_list(fund_data) %>%
   saveRDS(file.path(config[["data_prep_outputs_path"]], "total_fund_list.rds"))
 
 
@@ -590,13 +571,9 @@ logger::log_info("Fund data prepared.")
 # emission data output ---------------------------------------------------------
 
 iss_company_emissions <-
-  readRDS(factset_iss_emissions_data_path) %>%
-  group_by(factset_entity_id) %>%
-  summarise(
-    icc_total_emissions = sum(icc_total_emissions + icc_scope_3_emissions, na.rm = TRUE),
-    .groups = "drop"
-  ) %>%
-  mutate(icc_total_emissions_units = "tCO2e") # units are defined in the ISS/FactSet documentation (see #144)
+  pacta.data.preparation::prepare_iss_company_emissions(
+    readRDS(factset_iss_emissions_data_path)
+  )
 
 logger::log_info(
   "Formatting and saving file: \"iss_entity_emission_intensities.rds\"."
