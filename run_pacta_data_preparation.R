@@ -12,7 +12,6 @@ suppressPackageStartupMessages({
   library(readr)
   library(rlang)
   library(RSQLite)
-  library(stringr)
   library(tidyr)
 })
 
@@ -407,11 +406,11 @@ logger::log_info("ABCD prepared.")
 logger::log_info("Preparing ABCD flags.")
 financial_data <- readRDS(file.path(config[["data_prep_outputs_path"]], "financial_data.rds"))
 
-entity_info <- readRDS(file.path(config[["data_prep_outputs_path"]], "entity_info.rds"))
-
 factset_entity_id__ar_company_id <-
   readr::read_csv(ar_company_id__factset_entity_id_path, col_types = "c") %>%
   pacta.data.preparation::prepare_factset_entity_id__ar_company_id()
+
+entity_info <- readRDS(file.path(config[["data_prep_outputs_path"]], "entity_info.rds"))
 
 factset_entity_id__security_mapped_sector <-
   pacta.data.preparation::prepare_factset_entity_id__security_mapped_sector(entity_info)
@@ -429,19 +428,15 @@ ar_company_id__sectors_with_assets__ownership <-
   readRDS(file.path(config[["data_prep_outputs_path"]], "masterdata_ownership_datastore.rds")) %>%
   pacta.data.preparation::prepare_ar_company_id__sectors_with_assets__ownership(relevant_years)
 
-financial_data %>%
-  left_join(factset_entity_id__ar_company_id, by = "factset_entity_id") %>%
-  left_join(factset_entity_id__security_mapped_sector, by = "factset_entity_id") %>%
-  left_join(ar_company_id__sectors_with_assets__ownership, by = "ar_company_id") %>%
-  mutate(has_asset_level_data = if_else(is.na(sectors_with_assets) | sectors_with_assets == "", FALSE, TRUE)) %>%
-  mutate(has_ald_in_fin_sector = if_else(stringr::str_detect(sectors_with_assets, security_mapped_sector), TRUE, FALSE)) %>%
-  select(
-    isin,
-    has_asset_level_data,
-    has_ald_in_fin_sector,
-    sectors_with_assets
-  ) %>%
+pacta.data.preparation::prepare_abcd_flags_equity(
+  financial_data,
+  factset_entity_id__ar_company_id,
+  factset_entity_id__security_mapped_sector,
+  ar_company_id__sectors_with_assets__ownership
+) %>%
   saveRDS(file.path(config[["data_prep_outputs_path"]], "abcd_flags_equity.rds"))
+
+rm(ar_company_id__sectors_with_assets__ownership)
 invisible(gc())
 
 
@@ -451,25 +446,16 @@ ar_company_id__sectors_with_assets__debt <-
   readRDS(file.path(config[["data_prep_outputs_path"]], "masterdata_debt_datastore.rds")) %>%
   pacta.data.preparation::prepare_ar_company_id__sectors_with_assets__debt(relevant_years)
 
-financial_data %>%
-  left_join(factset_entity_id__ar_company_id, by = "factset_entity_id") %>%
-  left_join(factset_entity_id__security_mapped_sector, by = "factset_entity_id") %>%
-  left_join(ar_company_id__sectors_with_assets__debt, by = "ar_company_id") %>%
-  mutate(has_asset_level_data = if_else(is.na(sectors_with_assets) | sectors_with_assets == "", FALSE, TRUE)) %>%
-  mutate(has_ald_in_fin_sector = if_else(stringr::str_detect(sectors_with_assets, security_mapped_sector), TRUE, FALSE)) %>%
-  left_join(factset_entity_id__credit_parent_id, by = "factset_entity_id") %>%
-  mutate(
-    # If FactSet has no credit_parent, we define the company as it's own parent
-    credit_parent_id = if_else(is.na(credit_parent_id), factset_entity_id, credit_parent_id)
-  ) %>%
-  group_by(credit_parent_id) %>%
-  summarise(
-    has_asset_level_data = sum(has_asset_level_data, na.rm = TRUE) > 0,
-    has_ald_in_fin_sector = sum(has_ald_in_fin_sector, na.rm = TRUE) > 0,
-    sectors_with_assets = paste(sort(unique(na.omit(unlist(str_split(sectors_with_assets, pattern = " [+] "))))), collapse = " + ")
-  ) %>%
-  ungroup() %>%
+pacta.data.preparation::prepare_abcd_flags_bonds(
+  financial_data,
+  factset_entity_id__ar_company_id,
+  factset_entity_id__security_mapped_sector,
+  ar_company_id__sectors_with_assets__debt,
+  factset_entity_id__credit_parent_id
+) %>%
   saveRDS(file.path(config[["data_prep_outputs_path"]], "abcd_flags_bonds.rds"))
+
+rm(ar_company_id__sectors_with_assets__debt)
 invisible(gc())
 
 
