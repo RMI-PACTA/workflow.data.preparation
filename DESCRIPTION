@@ -40,7 +40,6 @@ Imports:
     readr,
     rlang,
     RSQLite,
-    stringr,
     tidyr
 Remotes:
     RMI-PACTA/pacta.data.preparation,
