@@ -295,8 +295,8 @@ logger::log_info("Scenario data prepared.")
 # currency data output ---------------------------------------------------------
 
 logger::log_info("Saving file: \"currencies.rds\".")
-pacta.data.validation::validate_currencies(currencies) %>%
-  saveRDS(currencies_data_path)
+pacta.data.validation::validate_currencies(currencies)
+saveRDS(currencies, currencies_data_path)
 
 
 # index_regions output ---------------------------------------------------------
