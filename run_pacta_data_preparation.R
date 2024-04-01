@@ -504,20 +504,24 @@ iss_company_emissions <-
 
 logger::log_info("Formatting and saving file: \"iss_entity_emission_intensities.rds\".")
 
+factset_entity_info <- readRDS(factset_entity_info_path)
+
 iss_entity_emission_intensities <-
   readRDS(factset_entity_financing_data_path) %>%
+  arrange(factset_entity_id, currency) %>%
+  left_join(select(factset_entity_info, factset_entity_id, iso_country), by = "factset_entity_id") %>%
+  filter(countrycode::countrycode(iso_country, "iso2c", "iso4217c") == currency) %>%
   left_join(currencies, by = "currency") %>%
   mutate(
-    ff_mkt_val = ff_mkt_val * exchange_rate,
-    ff_debt = ff_debt * exchange_rate,
+    ff_mkt_val = if_else(!is.na(ff_mkt_val), ff_mkt_val * exchange_rate, NA_real_),
+    ff_debt = if_else(!is.na(ff_debt), ff_debt * exchange_rate, NA_real_),
     currency = "USD"
   ) %>%
   select(-exchange_rate) %>%
-  group_by(factset_entity_id, currency) %>%
   summarise(
-    ff_mkt_val = sum(ff_mkt_val, na.rm = TRUE),
-    ff_debt = sum(ff_debt, na.rm = TRUE),
-    .groups = "drop"
+    ff_mkt_val = mean(ff_mkt_val, na.rm = TRUE),
+    ff_debt = mean(ff_debt, na.rm = TRUE),
+    .by = "factset_entity_id"
   ) %>%
   inner_join(iss_company_emissions, by = "factset_entity_id") %>%
   transmute(
@@ -535,17 +539,16 @@ iss_entity_emission_intensities <-
     ff_mkt_val,
     ff_debt,
     units = paste0(icc_total_emissions_units, " / ", "$ USD")
-  )
+  ) %>%
+  select(-c("ff_mkt_val", "ff_debt"))
 
 saveRDS(
-  select(iss_entity_emission_intensities, -c("ff_mkt_val", "ff_debt")),
+  iss_entity_emission_intensities,
   file.path(config[["data_prep_outputs_path"]], "iss_entity_emission_intensities.rds")
 )
 
 
 logger::log_info("Formatting and saving file: \"iss_average_sector_emission_intensities.rds\".")
-
-factset_entity_info <- readRDS(factset_entity_info_path)
 
 iss_entity_emission_intensities %>%
   inner_join(factset_entity_info, by = "factset_entity_id") %>%
