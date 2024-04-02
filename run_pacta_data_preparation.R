@@ -504,14 +504,22 @@ iss_company_emissions <-
 
 logger::log_info("Formatting and saving file: \"iss_entity_emission_intensities.rds\".")
 
+factset_financial_data <-
+  readRDS(factset_financial_data_path) %>%
+  select(factset_entity_id, adj_price, adj_shares_outstanding) %>%
+  filter(!is.na(factset_entity_id) & !is.na(adj_shares_outstanding))
+
 factset_entity_info <-
   readRDS(factset_entity_info_path) %>%
-  select(factset_entity_id, iso_country, sector_code, factset_sector_desc)
+  select(factset_entity_id, iso_country, sector_code, factset_sector_desc) %>%
+  left_join(factset_financial_data, by = "factset_entity_id")
+
+rm(factset_financial_data)
+invisible(gc())
 
 iss_entity_emission_intensities <-
   readRDS(factset_entity_financing_data_path) %>%
-  arrange(factset_entity_id, currency) %>%
-  left_join(select(factset_entity_info, factset_entity_id, iso_country), by = "factset_entity_id") %>%
+  left_join(factset_entity_info, by = "factset_entity_id") %>%
   filter(countrycode::countrycode(iso_country, "iso2c", "iso4217c") == currency) %>%
   left_join(currencies, by = "currency") %>%
   mutate(
