@@ -530,7 +530,6 @@ iss_entity_emission_intensities <-
     ff_debt = if_else(!is.na(ff_debt), ff_debt * exchange_rate, NA_real_),
     currency = "USD"
   ) %>%
-  select(-exchange_rate) %>%
   summarise(
     ff_mkt_val = mean(ff_mkt_val, na.rm = TRUE),
     ff_debt = mean(ff_debt, na.rm = TRUE),
