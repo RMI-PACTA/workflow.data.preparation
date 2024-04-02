@@ -266,8 +266,8 @@ scenarios_long <-
     by = c(
       scenario_source = "source",
       scenario_geography = "scenario_geography_source"
-      )
-    ) %>%
+    )
+  ) %>%
   select(-"scenario_geography") %>%
   rename(scenario_geography = "scenario_geography_pacta") %>%
   filter(
@@ -506,8 +506,11 @@ logger::log_info("Formatting and saving file: \"iss_entity_emission_intensities.
 
 factset_financial_data <-
   readRDS(factset_financial_data_path) %>%
-  select(factset_entity_id, adj_price, adj_shares_outstanding) %>%
-  filter(!is.na(factset_entity_id) & !is.na(adj_shares_outstanding))
+  select(factset_entity_id,issue_type, adj_price, adj_shares_outstanding) %>%
+  filter(!is.na(factset_entity_id) & !is.na(adj_shares_outstanding)) %>%
+  filter(issue_type %in% c("EQ", "PF", "CP")) %>%
+  group_by(factset_entity_id) %>%
+  summarize(mkt_val = sum(adj_price * adj_shares_outstanding, na.rm = TRUE))
 
 factset_entity_info <-
   readRDS(factset_entity_info_path) %>%
@@ -523,7 +526,7 @@ iss_entity_emission_intensities <-
   filter(countrycode::countrycode(iso_country, "iso2c", "iso4217c") == currency) %>%
   left_join(currencies, by = "currency") %>%
   mutate(
-    ff_mkt_val = if_else(!is.na(ff_mkt_val), ff_mkt_val * exchange_rate, NA_real_),
+    ff_mkt_val = if_else(!is.na(mkt_val), mkt_val, NA_real_),
     ff_debt = if_else(!is.na(ff_debt), ff_debt * exchange_rate, NA_real_),
     currency = "USD"
   ) %>%
