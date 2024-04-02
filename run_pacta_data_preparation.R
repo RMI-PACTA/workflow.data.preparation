@@ -509,8 +509,10 @@ factset_financial_data <-
   select(factset_entity_id,issue_type, adj_price, adj_shares_outstanding) %>%
   filter(!is.na(factset_entity_id) & !is.na(adj_shares_outstanding)) %>%
   filter(issue_type %in% c("EQ", "PF", "CP")) %>%
-  group_by(factset_entity_id) %>%
-  summarize(mkt_val = sum(adj_price * adj_shares_outstanding, na.rm = TRUE))
+  summarize(
+    mkt_val = sum(adj_price * adj_shares_outstanding, na.rm = TRUE),
+    .by =  = "factset_entity_id"
+  )
 
 factset_entity_info <-
   readRDS(factset_entity_info_path) %>%
