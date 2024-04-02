@@ -511,7 +511,7 @@ factset_financial_data <-
   filter(issue_type %in% c("EQ", "PF", "CP")) %>%
   summarize(
     mkt_val = sum(adj_price * adj_shares_outstanding, na.rm = TRUE),
-    .by =  = "factset_entity_id"
+    .by = "factset_entity_id"
   )
 
 factset_entity_info <-
