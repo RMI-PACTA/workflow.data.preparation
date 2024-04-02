@@ -504,7 +504,9 @@ iss_company_emissions <-
 
 logger::log_info("Formatting and saving file: \"iss_entity_emission_intensities.rds\".")
 
-factset_entity_info <- readRDS(factset_entity_info_path)
+factset_entity_info <-
+  readRDS(factset_entity_info_path) %>%
+  select(factset_entity_id, iso_country, sector_code, factset_sector_desc)
 
 iss_entity_emission_intensities <-
   readRDS(factset_entity_financing_data_path) %>%
@@ -539,11 +541,10 @@ iss_entity_emission_intensities <-
     ff_mkt_val,
     ff_debt,
     units = paste0(icc_total_emissions_units, " / ", "$ USD")
-  ) %>%
-  select(-c("ff_mkt_val", "ff_debt"))
+  )
 
 saveRDS(
-  iss_entity_emission_intensities,
+  select(iss_entity_emission_intensities, -c("ff_mkt_val", "ff_debt")),
   file.path(config[["data_prep_outputs_path"]], "iss_entity_emission_intensities.rds")
 )
 
@@ -552,7 +553,6 @@ logger::log_info("Formatting and saving file: \"iss_average_sector_emission_inte
 
 iss_entity_emission_intensities %>%
   inner_join(factset_entity_info, by = "factset_entity_id") %>%
-  group_by(sector_code, factset_sector_desc, units) %>%
   summarise(
     emission_intensity_per_mkt_val = weighted.mean(
       emission_intensity_per_mkt_val,
@@ -564,9 +564,8 @@ iss_entity_emission_intensities %>%
       ff_debt,
       na.rm = TRUE
     ),
-    .groups = "drop"
+    .by = c("sector_code", "factset_sector_desc", "units")
   ) %>%
-  ungroup() %>%
   saveRDS(file.path(config[["data_prep_outputs_path"]], "iss_average_sector_emission_intensities.rds"))
 
 
