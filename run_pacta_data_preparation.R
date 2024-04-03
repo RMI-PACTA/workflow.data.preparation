@@ -785,7 +785,7 @@ factset_manifest_path <-
   )
 if (file.exists(factset_manifest_path)) {
   factset_manifest <- jsonlite::fromJSON(factset_manifest_path)
-  factset_manifest <- factset_manifest[c("files", "data_timestamp", "start_time")]
+  factset_manifest <- factset_manifest[c("files", "data_timestamp", "start_time", "metadata_creation_time_date")]
 } else {
   logger::log_warn("FactSet manifest file was not found: \"{factset_manifest_path}\".")
   factset_manifest <- NULL
