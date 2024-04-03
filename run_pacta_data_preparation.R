@@ -777,6 +777,20 @@ ent_entity_affiliates_last_update <-
   pull(ent_entity_affiliates_last_update) %>%
   unique()
 
+# include FactSet inputs manifest if it is available
+factset_manifest_path <-
+  file.path(
+    config[["factset_data_path"]],
+    paste0(factset_timestamp, "-factset-export-manifest.json")
+  )
+if (file.exists(factset_manifest_path)) {
+  factset_manifest <- jsonlite::fromJSON(factset_manifest_path)
+  factset_manifest <- factset_manifest[c("files", "data_timestamp", "start_time", "metadata_creation_time_date")]
+} else {
+  logger::log_warn("FactSet manifest file was not found: \"{factset_manifest_path}\".")
+  factset_manifest <- NULL
+}
+
 # include PACTA packages NEWS.md test in the parameters to export
 pacta_packages <- c("pacta.data.preparation", "pacta.scenario.preparation")
 package_news <-
@@ -815,6 +829,7 @@ parameters <-
     raw_config = unclass(raw_config),
     config = unclass(config),
     input_filepaths = as.list(input_filepaths),
+    factset_manifest = factset_manifest,
     timestamps = list(
       imf_quarter_timestamp = config[["imf_quarter_timestamp"]],
       factset_data_identifier = factset_timestamp,
