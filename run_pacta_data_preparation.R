@@ -504,20 +504,38 @@ iss_company_emissions <-
 
 logger::log_info("Formatting and saving file: \"iss_entity_emission_intensities.rds\".")
 
+factset_financial_data <-
+  readRDS(factset_financial_data_path) %>%
+  select(factset_entity_id, issue_type, adj_price, adj_shares_outstanding) %>%
+  filter(!is.na(factset_entity_id) & !is.na(adj_shares_outstanding)) %>%
+  filter(issue_type %in% c("EQ", "PF", "CP")) %>%
+  summarize(
+    mkt_val = sum(adj_price * adj_shares_outstanding, na.rm = TRUE),
+    .by = "factset_entity_id"
+  )
+
+factset_entity_info <-
+  readRDS(factset_entity_info_path) %>%
+  select(factset_entity_id, iso_country, sector_code, factset_sector_desc) %>%
+  left_join(factset_financial_data, by = "factset_entity_id")
+
+rm(factset_financial_data)
+invisible(gc())
+
 iss_entity_emission_intensities <-
   readRDS(factset_entity_financing_data_path) %>%
+  left_join(factset_entity_info, by = "factset_entity_id") %>%
+  filter(countrycode::countrycode(iso_country, "iso2c", "iso4217c") == currency) %>%
   left_join(currencies, by = "currency") %>%
   mutate(
-    ff_mkt_val = ff_mkt_val * exchange_rate,
-    ff_debt = ff_debt * exchange_rate,
+    ff_mkt_val = if_else(!is.na(mkt_val), mkt_val, NA_real_),
+    ff_debt = if_else(!is.na(ff_debt), ff_debt * exchange_rate, NA_real_),
     currency = "USD"
   ) %>%
-  select(-exchange_rate) %>%
-  group_by(factset_entity_id, currency) %>%
   summarise(
-    ff_mkt_val = sum(ff_mkt_val, na.rm = TRUE),
-    ff_debt = sum(ff_debt, na.rm = TRUE),
-    .groups = "drop"
+    ff_mkt_val = mean(ff_mkt_val, na.rm = TRUE),
+    ff_debt = mean(ff_debt, na.rm = TRUE),
+    .by = "factset_entity_id"
   ) %>%
   inner_join(iss_company_emissions, by = "factset_entity_id") %>%
   transmute(
@@ -545,11 +563,8 @@ saveRDS(
 
 logger::log_info("Formatting and saving file: \"iss_average_sector_emission_intensities.rds\".")
 
-factset_entity_info <- readRDS(factset_entity_info_path)
-
 iss_entity_emission_intensities %>%
   inner_join(factset_entity_info, by = "factset_entity_id") %>%
-  group_by(sector_code, factset_sector_desc, units) %>%
   summarise(
     emission_intensity_per_mkt_val = weighted.mean(
       emission_intensity_per_mkt_val,
@@ -561,9 +576,8 @@ iss_entity_emission_intensities %>%
       ff_debt,
       na.rm = TRUE
     ),
-    .groups = "drop"
+    .by = c("sector_code", "factset_sector_desc", "units")
   ) %>%
-  ungroup() %>%
   saveRDS(file.path(config[["data_prep_outputs_path"]], "iss_average_sector_emission_intensities.rds"))
 
 
