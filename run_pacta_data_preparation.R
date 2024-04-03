@@ -506,7 +506,7 @@ logger::log_info("Formatting and saving file: \"iss_entity_emission_intensities.
 
 factset_financial_data <-
   readRDS(factset_financial_data_path) %>%
-  select(factset_entity_id,issue_type, adj_price, adj_shares_outstanding) %>%
+  select(factset_entity_id, issue_type, adj_price, adj_shares_outstanding) %>%
   filter(!is.na(factset_entity_id) & !is.na(adj_shares_outstanding)) %>%
   filter(issue_type %in% c("EQ", "PF", "CP")) %>%
   summarize(
