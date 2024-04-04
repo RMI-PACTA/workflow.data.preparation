@@ -219,16 +219,7 @@ logger::log_info("Fetching pre-flight data done.")
 
 factset_issue_code_bridge <-
   readRDS(factset_issue_code_bridge_path) %>%
-  select(issue_type_code, asset_type) %>%
-  mutate(
-    asset_type = case_when(
-      .data$asset_type == "Listed Equity" ~ "Equity",
-      .data$asset_type == "Corporate Bond" ~ "Bonds",
-      .data$asset_type == "Fund" ~ "Funds",
-      .data$asset_type == "Other" ~ "Others",
-      TRUE ~ "Others"
-    )
-  )
+  pacta.data.preparation::standardize_asset_type_names()
 
 factset_industry_map_bridge <-
   readRDS(factset_industry_map_bridge_path)
