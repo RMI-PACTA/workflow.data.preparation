@@ -240,43 +240,16 @@ logger::log_info("Preparing scenario data.")
 
 scenario_regions <- pacta.scenario.preparation::scenario_regions
 
-# scenario values will be linearly interpolated for each group below
-interpolation_groups <- c(
-  "source",
-  "scenario",
-  "sector",
-  "technology",
-  "scenario_geography",
-  "indicator",
-  "units"
-)
-
-scenario_raw <-
-  bind_rows(scenario_raw_data_to_include) %>%
-  pacta.scenario.preparation::interpolate_yearly(!!!rlang::syms(interpolation_groups)) %>%
-  filter(.data$year >= .env$config[["market_share_target_reference_year"]]) %>%
-  pacta.scenario.preparation::add_market_share_columns(reference_year = config[["market_share_target_reference_year"]]) %>%
-  pacta.scenario.preparation::format_p4i(config[["green_techs"]])
-
-# filter for relevant scenario data
 scenarios_long <-
-  scenario_raw %>%
-  inner_join(
-    pacta.scenario.preparation::scenario_source_pacta_geography_bridge,
-    by = c(
-      scenario_source = "source",
-      scenario_geography = "scenario_geography_source"
-      )
-    ) %>%
-  select(-"scenario_geography") %>%
-  rename(scenario_geography = "scenario_geography_pacta") %>%
-  filter(
-    .data$scenario_source %in% .env$config[["scenario_sources_list"]],
-    .data$ald_sector %in% c(.env$config[["sector_list"]], .env$config[["other_sector_list"]]),
-    .data$scenario_geography %in% unique(.env$scenario_regions$scenario_geography),
-    .data$year %in% unique(
-      c(.env$relevant_years, .env$config[["market_share_target_reference_year"]] + 10)
-    )
+  pacta.data.preparation::prepare_scenarios_long(
+    scenario_raw_data_to_include = scenario_raw_data_to_include,
+    scenario_regions = scenario_regions,
+    relevant_years = relevant_years,
+    market_share_target_reference_year = market_share_target_reference_year,
+    green_techs = green_techs,
+    scenario_sources_list = scenario_sources_list,
+    sector_list = sector_list,
+    other_sector_list = other_sector_list
   )
 
 logger::log_info("Scenario data prepared.")
