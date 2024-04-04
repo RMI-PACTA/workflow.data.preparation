@@ -804,7 +804,8 @@ package_news <-
     USE.NAMES = TRUE
   )
 
-# report sector-technology and source-scenario pairs present in output data
+# report relevant values for setting config parameters in workflow.pacta and
+# workflow.transition.monitor
 equity_abcd_scenario <-
   readRDS(file.path(config[["data_prep_outputs_path"]], "equity_abcd_scenario.rds"))
 bonds_abcd_scenario <-
