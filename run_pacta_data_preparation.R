@@ -828,6 +828,24 @@ source_scenario_pairs <-
   dplyr::distinct() %>%
   dplyr::arrange(.data[["scenario_source"]], .data[["scenario"]])
 
+scenario_geographies <-
+  dplyr::bind_rows(
+    equity_abcd_scenario,
+    bonds_abcd_scenario
+  ) %>%
+  dplyr::select("scenario_geography") %>%
+  dplyr::distinct() %>%
+  dplyr::arrange(.data[["scenario_geography"]])
+
+equity_markets <-
+  dplyr::bind_rows(
+    equity_abcd_scenario,
+    bonds_abcd_scenario
+  ) %>%
+  dplyr::select("equity_market") %>%
+  dplyr::distinct() %>%
+  dplyr::arrange(.data[["equity_market"]])
+
 rm(equity_abcd_scenario)
 rm(bonds_abcd_scenario)
 invisible(gc())
@@ -869,7 +887,9 @@ parameters <-
     package_news = package_news,
     output_stats = list(
       sector_tech_pairs = sector_tech_pairs,
-      source_scenario_pairs = source_scenario_pairs
+      source_scenario_pairs = source_scenario_pairs,
+      scenario_geographies = scenario_geographies,
+      equity_markets = equity_markets
     )
   )
 
