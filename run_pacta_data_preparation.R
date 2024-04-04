@@ -804,7 +804,7 @@ package_news <-
     USE.NAMES = TRUE
   )
 
-# report sector-technology pairs present in output data
+# report sector-technology and source-scenario pairs present in output data
 equity_abcd_scenario <-
   readRDS(file.path(config[["data_prep_outputs_path"]], "equity_abcd_scenario.rds"))
 bonds_abcd_scenario <-
@@ -819,10 +819,20 @@ sector_tech_pairs <-
   dplyr::distinct() %>%
   dplyr::arrange(.data[["ald_sector"]], .data[["technology"]])
 
+source_scenario_pairs <-
+  dplyr::bind_rows(
+    equity_abcd_scenario,
+    bonds_abcd_scenario
+  ) %>%
+  dplyr::select("scenario_source", "scenario") %>%
+  dplyr::distinct() %>%
+  dplyr::arrange(.data[["scenario_source"]], .data[["scenario"]])
+
 rm(equity_abcd_scenario)
 rm(bonds_abcd_scenario)
 invisible(gc())
 
+# build parameters output object
 parameters <-
   list(
     config_name = config_name,
@@ -858,7 +868,8 @@ parameters <-
     ),
     package_news = package_news,
     output_stats = list(
-      sector_tech_pairs = sector_tech_pairs
+      sector_tech_pairs = sector_tech_pairs,
+      source_scenario_pairs = source_scenario_pairs
     )
   )
 
