@@ -130,7 +130,7 @@ index_regions_preflight_data_path <- file.path(config[["preflight_data_path"]], 
 # computed options -------------------------------------------------------------
 
 relevant_years <-
-  determine_relevant_years(
+  pacta.data.preparation::determine_relevant_years(
     config[["market_share_target_reference_year"]],
     config[["time_horizon"]]
   )
