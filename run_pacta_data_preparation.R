@@ -810,44 +810,41 @@ equity_abcd_scenario <-
 bonds_abcd_scenario <-
   readRDS(file.path(config[["data_prep_outputs_path"]], "bonds_abcd_scenario.rds"))
 
-sector_tech_pairs <-
+abcd_scenario <-
   dplyr::bind_rows(
     equity_abcd_scenario,
     bonds_abcd_scenario
-  ) %>%
+  )
+
+rm(equity_abcd_scenario)
+rm(bonds_abcd_scenario)
+invisible(gc())
+
+sector_tech_pairs <-
+  abcd_scenario %>%
   dplyr::select("ald_sector", "technology") %>%
   dplyr::distinct() %>%
   dplyr::arrange(.data[["ald_sector"]], .data[["technology"]])
 
 source_scenario_pairs <-
-  dplyr::bind_rows(
-    equity_abcd_scenario,
-    bonds_abcd_scenario
-  ) %>%
+  abcd_scenario %>%
   dplyr::select("scenario_source", "scenario") %>%
   dplyr::distinct() %>%
   dplyr::arrange(.data[["scenario_source"]], .data[["scenario"]])
 
 scenario_geographies <-
-  dplyr::bind_rows(
-    equity_abcd_scenario,
-    bonds_abcd_scenario
-  ) %>%
+  abcd_scenario %>%
   dplyr::select("scenario_geography") %>%
   dplyr::distinct() %>%
   dplyr::arrange(.data[["scenario_geography"]])
 
 equity_markets <-
-  dplyr::bind_rows(
-    equity_abcd_scenario,
-    bonds_abcd_scenario
-  ) %>%
+  abcd_scenario %>%
   dplyr::select("equity_market") %>%
   dplyr::distinct() %>%
   dplyr::arrange(.data[["equity_market"]])
 
-rm(equity_abcd_scenario)
-rm(bonds_abcd_scenario)
+rm(abcd_scenario)
 invisible(gc())
 
 # build parameters output object
