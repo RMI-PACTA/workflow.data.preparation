@@ -1,6 +1,7 @@
 logger::log_threshold(Sys.getenv("LOG_LEVEL", ifelse(interactive(), "FATAL", "INFO")))
 logger::log_formatter(logger::formatter_glue)
 
+
 # necessary packages -----------------------------------------------------------
 
 suppressPackageStartupMessages({
@@ -86,6 +87,7 @@ if (dir.exists(config[["data_prep_outputs_path"]])) {
   dir.create(config[["data_prep_outputs_path"]], recursive = TRUE)
 }
 
+
 # input filepaths --------------------------------------------------------------
 
 masterdata_ownership_path <-
@@ -126,6 +128,7 @@ currencies_data_path <- file.path(config[["data_prep_outputs_path"]], "currencie
 index_regions_data_path <- file.path(config[["data_prep_outputs_path"]], "index_regions.rds")
 
 index_regions_preflight_data_path <- file.path(config[["preflight_data_path"]], "index_regions.rds")
+
 
 # computed options -------------------------------------------------------------
 
@@ -182,6 +185,7 @@ if (length(missing_input_files) > 0L) {
   logger::log_error("Input file cannot be found: {names(missing_input_files)} ({missing_input_files}).")
   stop("Input files are missing: ", toString(missing_input_files))
 }
+
 
 # pre-flight -------------------------------------------------------------------
 
@@ -910,6 +914,7 @@ pacta.data.preparation::write_manifest(
 )
 output_files <- c(output_files, manifest_path = manifest_path)
 
+
 # copy in NEWs.md files from relevant PACTA packages ---------------------------
 
 logger::log_info("Copying NEWS.md files from relevant PACTA packages.")
@@ -954,6 +959,7 @@ if (config[["export_archives"]]) {
   )
   logger::log_debug("Outputs archive created.")
 }
+
 
 # ------------------------------------------------------------------------------
 
