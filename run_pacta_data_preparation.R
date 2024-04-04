@@ -856,25 +856,51 @@ package_news <-
     USE.NAMES = TRUE
   )
 
-# report sector-technology pairs present in output data
+# report relevant values for setting config parameters in workflow.pacta and
+# workflow.transition.monitor
 equity_abcd_scenario <-
   readRDS(file.path(config[["data_prep_outputs_path"]], "equity_abcd_scenario.rds"))
 bonds_abcd_scenario <-
   readRDS(file.path(config[["data_prep_outputs_path"]], "bonds_abcd_scenario.rds"))
 
-sector_tech_pairs <-
+abcd_scenario <-
   dplyr::bind_rows(
     equity_abcd_scenario,
     bonds_abcd_scenario
-  ) %>%
-  dplyr::select("ald_sector", "technology") %>%
-  dplyr::distinct() %>%
-  dplyr::arrange(.data[["ald_sector"]], .data[["technology"]])
+  )
 
 rm(equity_abcd_scenario)
 rm(bonds_abcd_scenario)
 invisible(gc())
 
+sector_tech_pairs <-
+  abcd_scenario %>%
+  dplyr::select("ald_sector", "technology") %>%
+  dplyr::distinct() %>%
+  dplyr::arrange(.data[["ald_sector"]], .data[["technology"]])
+
+source_scenario_pairs <-
+  abcd_scenario %>%
+  dplyr::select("scenario_source", "scenario") %>%
+  dplyr::distinct() %>%
+  dplyr::arrange(.data[["scenario_source"]], .data[["scenario"]])
+
+scenario_geographies <-
+  abcd_scenario %>%
+  dplyr::select("scenario_geography") %>%
+  dplyr::distinct() %>%
+  dplyr::arrange(.data[["scenario_geography"]])
+
+equity_markets <-
+  abcd_scenario %>%
+  dplyr::select("equity_market") %>%
+  dplyr::distinct() %>%
+  dplyr::arrange(.data[["equity_market"]])
+
+rm(abcd_scenario)
+invisible(gc())
+
+# build parameters output object
 parameters <-
   list(
     config_name = config_name,
@@ -910,7 +936,10 @@ parameters <-
     ),
     package_news = package_news,
     output_stats = list(
-      sector_tech_pairs = sector_tech_pairs
+      sector_tech_pairs = sector_tech_pairs,
+      source_scenario_pairs = source_scenario_pairs,
+      scenario_geographies = scenario_geographies,
+      equity_markets = equity_markets
     )
   )
 
