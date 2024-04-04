@@ -361,6 +361,7 @@ logger::log_info("Formatting and saving file: \"masterdata_debt_datastore.rds\".
 
 pacta.data.preparation::prepare_masterdata_debt(
   masterdata_debt_raw = readr::read_csv(masterdata_debt_path, na = "", show_col_types = FALSE),
+  ar_company_id__country_of_domicile = ar_company_id__country_of_domicile,
   ar_company_id__credit_parent_ar_company_id = ar_company_id__credit_parent_ar_company_id,
   pacta_financial_timestamp = config[["pacta_financial_timestamp"]],
   zero_emission_factor_techs = config[["zero_emission_factor_techs"]]
