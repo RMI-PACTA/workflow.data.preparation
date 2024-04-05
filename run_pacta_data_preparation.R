@@ -129,11 +129,11 @@ index_regions_preflight_data_path <- file.path(config[["preflight_data_path"]], 
 
 # computed options -------------------------------------------------------------
 
-relevant_years <- sort(
-  unique(
-    config[["market_share_target_reference_year"]]:(config[["market_share_target_reference_year"]] + config[["time_horizon"]])
+relevant_years <-
+  pacta.data.preparation::determine_relevant_years(
+    config[["market_share_target_reference_year"]],
+    config[["time_horizon"]]
   )
-)
 logger::log_info("Full time horizon set to: {paste0(relevant_years, collapse = ', ')}.")
 
 scenario_raw_data_to_include <- lapply(config[["scenario_raw_data_to_include"]], get, envir = asNamespace("pacta.scenario.preparation"))
