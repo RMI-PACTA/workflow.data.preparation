@@ -132,11 +132,11 @@ index_regions_preflight_data_path <- file.path(config[["preflight_data_path"]], 
 
 # computed options -------------------------------------------------------------
 
-relevant_years <- sort(
-  unique(
-    config[["market_share_target_reference_year"]]:(config[["market_share_target_reference_year"]] + config[["time_horizon"]])
+relevant_years <-
+  pacta.data.preparation::determine_relevant_years(
+    config[["market_share_target_reference_year"]],
+    config[["time_horizon"]]
   )
-)
 logger::log_info("Full time horizon set to: {paste0(relevant_years, collapse = ', ')}.")
 
 scenario_raw_data_to_include <- lapply(config[["scenario_raw_data_to_include"]], get, envir = asNamespace("pacta.scenario.preparation"))
@@ -223,16 +223,7 @@ logger::log_info("Fetching pre-flight data done.")
 
 factset_issue_code_bridge <-
   readRDS(factset_issue_code_bridge_path) %>%
-  select(issue_type_code, asset_type) %>%
-  mutate(
-    asset_type = case_when(
-      .data$asset_type == "Listed Equity" ~ "Equity",
-      .data$asset_type == "Corporate Bond" ~ "Bonds",
-      .data$asset_type == "Fund" ~ "Funds",
-      .data$asset_type == "Other" ~ "Others",
-      TRUE ~ "Others"
-    )
-  )
+  pacta.data.preparation::standardize_asset_type_names()
 
 factset_industry_map_bridge <-
   readRDS(factset_industry_map_bridge_path)
@@ -361,41 +352,17 @@ readr::read_csv(masterdata_ownership_path, na = "", show_col_types = FALSE) %>%
 invisible(gc())
 
 
-logger::log_info(
-  "Formatting and saving file: \"masterdata_debt_datastore.rds\"."
-)
+logger::log_info("Formatting and saving file: \"masterdata_debt_datastore.rds\".")
 
-masterdata_debt <- readr::read_csv(masterdata_debt_path, na = "", show_col_types = FALSE)
-
-company_id__creditor_company_id <-
-  pacta.data.preparation::prepare_company_id__creditor_company_id(masterdata_debt)
-
-masterdata_debt %>%
-  pacta.data.preparation::prepare_masterdata(
-    ar_company_id__country_of_domicile,
-    config[["pacta_financial_timestamp"]],
-    config[["zero_emission_factor_techs"]]
-  ) %>%
-  left_join(company_id__creditor_company_id, by = c(id = "company_id")) %>%
-  left_join(ar_company_id__credit_parent_ar_company_id, by = c(id = "ar_company_id")) %>%
-  mutate(id = if_else(!is.na(.data$credit_parent_ar_company_id), .data$credit_parent_ar_company_id, .data$id)) %>%
-  mutate(id = if_else(!is.na(.data$creditor_company_id), .data$creditor_company_id, .data$id)) %>%
-  mutate(id_name = "credit_parent_ar_company_id") %>%
-  group_by(
-    .data$id, .data$id_name, .data$ald_sector, .data$ald_location,
-    .data$technology, .data$year, .data$country_of_domicile,
-    .data$ald_production_unit, .data$ald_emissions_factor_unit,
-  ) %>%
-  summarise(
-    ald_emissions_factor = stats::weighted.mean(.data$ald_emissions_factor, .data$ald_production, na.rm = TRUE),
-    ald_production = sum(.data$ald_production, na.rm = TRUE),
-    .groups = "drop"
-  ) %>%
+pacta.data.preparation::prepare_masterdata_debt(
+  masterdata_debt_raw = readr::read_csv(masterdata_debt_path, na = "", show_col_types = FALSE),
+  ar_company_id__country_of_domicile = ar_company_id__country_of_domicile,
+  ar_company_id__credit_parent_ar_company_id = ar_company_id__credit_parent_ar_company_id,
+  pacta_financial_timestamp = config[["pacta_financial_timestamp"]],
+  zero_emission_factor_techs = config[["zero_emission_factor_techs"]]
+) %>%
   saveRDS(file.path(config[["data_prep_outputs_path"]], "masterdata_debt_datastore.rds"))
-invisible(gc())
 
-rm(masterdata_debt)
-rm(company_id__creditor_company_id)
 invisible(gc())
 
 rm(ar_company_id__country_of_domicile)
