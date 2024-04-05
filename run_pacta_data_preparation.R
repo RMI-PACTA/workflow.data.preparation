@@ -518,7 +518,7 @@ pacta.data.preparation::prepare_iss_entity_emission_intensities(
 
 logger::log_info("Formatting and saving file: \"iss_average_sector_emission_intensities.rds\".")
 
-pacta.data.preparation::iss_average_sector_emission_intensities(
+pacta.data.preparation::prepare_iss_average_sector_emission_intensities(
   iss_company_emissions = iss_company_emissions,
   factset_financial_data = factset_financial_data,
   factset_entity_info = factset_entity_info,
