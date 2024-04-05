@@ -501,89 +501,36 @@ logger::log_info("Fund data prepared.")
 iss_company_emissions <-
   readRDS(factset_iss_emissions_data_path) %>%
   pacta.data.preparation::prepare_iss_company_emissions()
+factset_financial_data <- readRDS(factset_financial_data_path)
+factset_entity_info <- readRDS(factset_entity_info_path)
+factset_entity_financing_data <- readRDS(factset_entity_financing_data_path)
 
 logger::log_info("Formatting and saving file: \"iss_entity_emission_intensities.rds\".")
 
-factset_financial_data <-
-  readRDS(factset_financial_data_path) %>%
-  select(factset_entity_id, issue_type, adj_price, adj_shares_outstanding) %>%
-  filter(!is.na(factset_entity_id) & !is.na(adj_shares_outstanding)) %>%
-  filter(issue_type %in% c("EQ", "PF", "CP")) %>%
-  summarize(
-    mkt_val = sum(adj_price * adj_shares_outstanding, na.rm = TRUE),
-    .by = "factset_entity_id"
-  )
-
-factset_entity_info <-
-  readRDS(factset_entity_info_path) %>%
-  select(factset_entity_id, iso_country, sector_code, factset_sector_desc) %>%
-  left_join(factset_financial_data, by = "factset_entity_id")
-
-rm(factset_financial_data)
-invisible(gc())
-
-iss_entity_emission_intensities <-
-  readRDS(factset_entity_financing_data_path) %>%
-  left_join(factset_entity_info, by = "factset_entity_id") %>%
-  filter(countrycode::countrycode(iso_country, "iso2c", "iso4217c") == currency) %>%
-  left_join(currencies, by = "currency") %>%
-  mutate(
-    ff_mkt_val = if_else(!is.na(mkt_val), mkt_val, NA_real_),
-    ff_debt = if_else(!is.na(ff_debt), ff_debt * exchange_rate, NA_real_),
-    currency = "USD"
-  ) %>%
-  summarise(
-    ff_mkt_val = mean(ff_mkt_val, na.rm = TRUE),
-    ff_debt = mean(ff_debt, na.rm = TRUE),
-    .by = "factset_entity_id"
-  ) %>%
-  inner_join(iss_company_emissions, by = "factset_entity_id") %>%
-  transmute(
-    factset_entity_id = factset_entity_id,
-    emission_intensity_per_mkt_val = if_else(
-      ff_mkt_val == 0,
-      NA_real_,
-      icc_total_emissions / ff_mkt_val
-    ),
-    emission_intensity_per_debt = if_else(
-      ff_debt == 0,
-      NA_real_,
-      icc_total_emissions / ff_debt
-    ),
-    ff_mkt_val,
-    ff_debt,
-    units = paste0(icc_total_emissions_units, " / ", "$ USD")
-  )
-
-saveRDS(
-  select(iss_entity_emission_intensities, -c("ff_mkt_val", "ff_debt")),
-  file.path(config[["data_prep_outputs_path"]], "iss_entity_emission_intensities.rds")
-)
-
+pacta.data.preparation::prepare_iss_entity_emission_intensities(
+  iss_company_emissions = iss_company_emissions,
+  factset_financial_data = factset_financial_data,
+  factset_entity_info = factset_entity_info,
+  factset_entity_financing_data = factset_entity_financing_data,
+  currencies = currencies
+) %>%
+  saveRDS(file.path(config[["data_prep_outputs_path"]], "iss_entity_emission_intensities.rds"))
 
 logger::log_info("Formatting and saving file: \"iss_average_sector_emission_intensities.rds\".")
 
-iss_entity_emission_intensities %>%
-  inner_join(factset_entity_info, by = "factset_entity_id") %>%
-  summarise(
-    emission_intensity_per_mkt_val = weighted.mean(
-      emission_intensity_per_mkt_val,
-      ff_mkt_val,
-      na.rm = TRUE
-    ),
-    emission_intensity_per_debt = weighted.mean(
-      emission_intensity_per_debt,
-      ff_debt,
-      na.rm = TRUE
-    ),
-    .by = c("sector_code", "factset_sector_desc", "units")
-  ) %>%
+pacta.data.preparation::iss_average_sector_emission_intensities(
+  iss_company_emissions = iss_company_emissions,
+  factset_financial_data = factset_financial_data,
+  factset_entity_info = factset_entity_info,
+  factset_entity_financing_data = factset_entity_financing_data,
+  currencies = currencies
+) %>%
   saveRDS(file.path(config[["data_prep_outputs_path"]], "iss_average_sector_emission_intensities.rds"))
 
-
 rm(iss_company_emissions)
-rm(iss_entity_emission_intensities)
+rm(factset_financial_data)
 rm(factset_entity_info)
+rm(factset_entity_financing_data)
 invisible(gc())
 
 logger::log_info("Emissions data prepared.")
