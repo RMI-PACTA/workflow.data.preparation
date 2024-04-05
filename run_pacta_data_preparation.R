@@ -1,6 +1,7 @@
 logger::log_threshold(Sys.getenv("LOG_LEVEL", ifelse(interactive(), "FATAL", "INFO")))
 logger::log_formatter(logger::formatter_glue)
 
+
 # necessary packages -----------------------------------------------------------
 
 suppressPackageStartupMessages({
@@ -87,6 +88,7 @@ if (dir.exists(config[["data_prep_outputs_path"]])) {
   dir.create(config[["data_prep_outputs_path"]], recursive = TRUE)
 }
 
+
 # input filepaths --------------------------------------------------------------
 
 masterdata_ownership_path <-
@@ -128,13 +130,14 @@ index_regions_data_path <- file.path(config[["data_prep_outputs_path"]], "index_
 
 index_regions_preflight_data_path <- file.path(config[["preflight_data_path"]], "index_regions.rds")
 
+
 # computed options -------------------------------------------------------------
 
-relevant_years <- sort(
-  unique(
-    config[["market_share_target_reference_year"]]:(config[["market_share_target_reference_year"]] + config[["time_horizon"]])
+relevant_years <-
+  pacta.data.preparation::determine_relevant_years(
+    config[["market_share_target_reference_year"]],
+    config[["time_horizon"]]
   )
-)
 logger::log_info("Full time horizon set to: {paste0(relevant_years, collapse = ', ')}.")
 
 scenario_raw_data_to_include <-
@@ -192,6 +195,7 @@ if (length(missing_input_files) > 0L) {
   stop("Input files are missing: ", toString(missing_input_files))
 }
 
+
 # pre-flight -------------------------------------------------------------------
 
 logger::log_info("Fetching pre-flight data.")
@@ -228,16 +232,7 @@ logger::log_info("Fetching pre-flight data done.")
 
 factset_issue_code_bridge <-
   readRDS(factset_issue_code_bridge_path) %>%
-  select(issue_type_code, asset_type) %>%
-  mutate(
-    asset_type = case_when(
-      .data$asset_type == "Listed Equity" ~ "Equity",
-      .data$asset_type == "Corporate Bond" ~ "Bonds",
-      .data$asset_type == "Fund" ~ "Funds",
-      .data$asset_type == "Other" ~ "Others",
-      TRUE ~ "Others"
-    )
-  )
+  pacta.data.preparation::standardize_asset_type_names()
 
 factset_industry_map_bridge <-
   readRDS(factset_industry_map_bridge_path)
@@ -386,36 +381,15 @@ rm(masterdata_ownership_datastore)
 invisible(gc())
 
 
-logger::log_info(
-  "Formatting and saving file: \"masterdata_debt_datastore.rds\"."
-)
-
-masterdata_debt <- readr::read_csv(masterdata_debt_path, na = "", show_col_types = FALSE)
-
-company_id__creditor_company_id <-
-  pacta.data.preparation::prepare_company_id__creditor_company_id(masterdata_debt)
+logger::log_info("Formatting and saving file: \"masterdata_debt_datastore.rds\".")
 
 masterdata_debt_datastore <-
-  masterdata_debt %>%
-  pacta.data.preparation::prepare_masterdata(
-    ar_company_id__country_of_domicile,
-    config[["pacta_financial_timestamp"]],
-    config[["zero_emission_factor_techs"]]
-  ) %>%
-  left_join(company_id__creditor_company_id, by = c(id = "company_id")) %>%
-  left_join(ar_company_id__credit_parent_ar_company_id, by = c(id = "ar_company_id")) %>%
-  mutate(id = if_else(!is.na(.data$credit_parent_ar_company_id), .data$credit_parent_ar_company_id, .data$id)) %>%
-  mutate(id = if_else(!is.na(.data$creditor_company_id), .data$creditor_company_id, .data$id)) %>%
-  mutate(id_name = "credit_parent_ar_company_id") %>%
-  group_by(
-    .data$id, .data$id_name, .data$ald_sector, .data$ald_location,
-    .data$technology, .data$year, .data$country_of_domicile,
-    .data$ald_production_unit, .data$ald_emissions_factor_unit,
-  ) %>%
-  summarise(
-    ald_emissions_factor = stats::weighted.mean(.data$ald_emissions_factor, .data$ald_production, na.rm = TRUE),
-    ald_production = sum(.data$ald_production, na.rm = TRUE),
-    .groups = "drop"
+  pacta.data.preparation::prepare_masterdata_debt(
+    masterdata_debt_raw = readr::read_csv(masterdata_debt_path, na = "", show_col_types = FALSE),
+    ar_company_id__country_of_domicile = ar_company_id__country_of_domicile,
+    ar_company_id__credit_parent_ar_company_id = ar_company_id__credit_parent_ar_company_id,
+    pacta_financial_timestamp = config[["pacta_financial_timestamp"]],
+    zero_emission_factor_techs = config[["zero_emission_factor_techs"]]
   )
 
 pacta.data.validation::validate_masterdata_debt_datastore(masterdata_debt_datastore)
@@ -425,10 +399,6 @@ saveRDS(
   file = file.path(config[["data_prep_outputs_path"]], "masterdata_debt_datastore.rds")
 )
 rm(masterdata_debt_datastore)
-invisible(gc())
-
-rm(masterdata_debt)
-rm(company_id__creditor_company_id)
 invisible(gc())
 
 rm(ar_company_id__country_of_domicile)
@@ -553,89 +523,36 @@ logger::log_info("Fund data prepared.")
 iss_company_emissions <-
   readRDS(factset_iss_emissions_data_path) %>%
   pacta.data.preparation::prepare_iss_company_emissions()
+factset_financial_data <- readRDS(factset_financial_data_path)
+factset_entity_info <- readRDS(factset_entity_info_path)
+factset_entity_financing_data <- readRDS(factset_entity_financing_data_path)
 
 logger::log_info("Formatting and saving file: \"iss_entity_emission_intensities.rds\".")
 
-factset_financial_data <-
-  readRDS(factset_financial_data_path) %>%
-  select(factset_entity_id, issue_type, adj_price, adj_shares_outstanding) %>%
-  filter(!is.na(factset_entity_id) & !is.na(adj_shares_outstanding)) %>%
-  filter(issue_type %in% c("EQ", "PF", "CP")) %>%
-  summarize(
-    mkt_val = sum(adj_price * adj_shares_outstanding, na.rm = TRUE),
-    .by = "factset_entity_id"
-  )
-
-factset_entity_info <-
-  readRDS(factset_entity_info_path) %>%
-  select(factset_entity_id, iso_country, sector_code, factset_sector_desc) %>%
-  left_join(factset_financial_data, by = "factset_entity_id")
-
-rm(factset_financial_data)
-invisible(gc())
-
-iss_entity_emission_intensities <-
-  readRDS(factset_entity_financing_data_path) %>%
-  left_join(factset_entity_info, by = "factset_entity_id") %>%
-  filter(countrycode::countrycode(iso_country, "iso2c", "iso4217c") == currency) %>%
-  left_join(currencies, by = "currency") %>%
-  mutate(
-    ff_mkt_val = if_else(!is.na(mkt_val), mkt_val, NA_real_),
-    ff_debt = if_else(!is.na(ff_debt), ff_debt * exchange_rate, NA_real_),
-    currency = "USD"
-  ) %>%
-  summarise(
-    ff_mkt_val = mean(ff_mkt_val, na.rm = TRUE),
-    ff_debt = mean(ff_debt, na.rm = TRUE),
-    .by = "factset_entity_id"
-  ) %>%
-  inner_join(iss_company_emissions, by = "factset_entity_id") %>%
-  transmute(
-    factset_entity_id = factset_entity_id,
-    emission_intensity_per_mkt_val = if_else(
-      ff_mkt_val == 0,
-      NA_real_,
-      icc_total_emissions / ff_mkt_val
-    ),
-    emission_intensity_per_debt = if_else(
-      ff_debt == 0,
-      NA_real_,
-      icc_total_emissions / ff_debt
-    ),
-    ff_mkt_val,
-    ff_debt,
-    units = paste0(icc_total_emissions_units, " / ", "$ USD")
-  )
-
-saveRDS(
-  select(iss_entity_emission_intensities, -c("ff_mkt_val", "ff_debt")),
-  file.path(config[["data_prep_outputs_path"]], "iss_entity_emission_intensities.rds")
-)
-
+pacta.data.preparation::prepare_iss_entity_emission_intensities(
+  iss_company_emissions = iss_company_emissions,
+  factset_financial_data = factset_financial_data,
+  factset_entity_info = factset_entity_info,
+  factset_entity_financing_data = factset_entity_financing_data,
+  currencies = currencies
+) %>%
+  saveRDS(file.path(config[["data_prep_outputs_path"]], "iss_entity_emission_intensities.rds"))
 
 logger::log_info("Formatting and saving file: \"iss_average_sector_emission_intensities.rds\".")
 
-iss_entity_emission_intensities %>%
-  inner_join(factset_entity_info, by = "factset_entity_id") %>%
-  summarise(
-    emission_intensity_per_mkt_val = weighted.mean(
-      emission_intensity_per_mkt_val,
-      ff_mkt_val,
-      na.rm = TRUE
-    ),
-    emission_intensity_per_debt = weighted.mean(
-      emission_intensity_per_debt,
-      ff_debt,
-      na.rm = TRUE
-    ),
-    .by = c("sector_code", "factset_sector_desc", "units")
-  ) %>%
+pacta.data.preparation::prepare_iss_average_sector_emission_intensities(
+  iss_company_emissions = iss_company_emissions,
+  factset_financial_data = factset_financial_data,
+  factset_entity_info = factset_entity_info,
+  factset_entity_financing_data = factset_entity_financing_data,
+  currencies = currencies
+) %>%
   saveRDS(file.path(config[["data_prep_outputs_path"]], "iss_average_sector_emission_intensities.rds"))
 
-
 rm(iss_company_emissions)
-rm(iss_entity_emission_intensities)
+rm(factset_financial_data)
 rm(factset_entity_info)
+rm(factset_entity_financing_data)
 invisible(gc())
 
 logger::log_info("Emissions data prepared.")
@@ -962,6 +879,7 @@ pacta.data.preparation::write_manifest(
 )
 output_files <- c(output_files, manifest_path = manifest_path)
 
+
 # copy in NEWs.md files from relevant PACTA packages ---------------------------
 
 logger::log_info("Copying NEWS.md files from relevant PACTA packages.")
@@ -1006,6 +924,7 @@ if (config[["export_archives"]]) {
   )
   logger::log_debug("Outputs archive created.")
 }
+
 
 # ------------------------------------------------------------------------------
 
