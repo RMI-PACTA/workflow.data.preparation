@@ -520,14 +520,15 @@ logger::log_info("Fund data prepared.")
 
 # emission data output ---------------------------------------------------------
 
+logger::log_info("Formatting and saving file: \"iss_entity_emission_intensities.rds\".")
+
 iss_company_emissions <-
   readRDS(factset_iss_emissions_data_path) %>%
   pacta.data.preparation::prepare_iss_company_emissions()
+
 factset_financial_data <- readRDS(factset_financial_data_path)
 factset_entity_info <- readRDS(factset_entity_info_path)
 factset_entity_financing_data <- readRDS(factset_entity_financing_data_path)
-
-logger::log_info("Formatting and saving file: \"iss_entity_emission_intensities.rds\".")
 
 pacta.data.preparation::prepare_iss_entity_emission_intensities(
   iss_company_emissions = iss_company_emissions,
