@@ -39,13 +39,13 @@ desktop:
   data_prep_outputs_path: "./outputs"
   asset_impact_data_path: "./ai_inputs"
   factset_data_path: "./factset_inputs"
-  scenarios_data_path: "./scenario_inputs"
+  scenarios_data_path: "./scenario-sources"
 
 docker:
   data_prep_outputs_path: "/mnt/outputs"
   asset_impact_data_path: "/mnt/asset-impact"
   factset_data_path: "/mnt/factset-extracted"
-  scenarios_data_path: "mnt/scenario-inputs"
+  scenarios_data_path: "mnt/scenario-sources"
 
 
 2021Q4:
@@ -143,6 +143,7 @@ docker:
   data_prep_outputs_path: "/mnt/outputs"
   asset_impact_data_path: "/mnt/asset-impact"
   factset_data_path: "/mnt/factset-extracted/factset-pacta_timestamp-20221231T000000Z_pulled-20240217T134528Z"
+  scenarios_data_path: "/mnt/workflow-scenario-preparation-outputs/"
   # Asset impact files are stored in separate subdirectories on Azure File Share.
   masterdata_ownership_filename: "2023-06-18/2023-06-18_AI_RMI Bespoke_Company Data Products_masterdata_ownership_2022Q4.csv"
   masterdata_debt_filename: "2023-06-18/2023-06-18_AI_RMI Bespoke_Company Data Products_masterdata_debt_2022Q4.csv"

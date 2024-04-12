@@ -40,7 +40,7 @@ Running the workflow requires a file `.env` to exist in the root directory, that
 # .env
 HOST_FACTSET_EXTRACTED_PATH=/PATH/TO/factset-extracted
 HOST_ASSET_IMPACT_PATH=/PATH/TO/asset-impact
-HOST_SCENARIO_INPUTS_PATH=/PATH/TO/scenario-inputs
+HOST_SCENARIO_INPUTS_PATH=/PATH/TO/scenario-sources
 HOST_OUTPUTS_PATH=/PATH/TO/YYYYQQ_pacta_analysis_inputs_YYYY-MM-DD/YYYYQQ
 GITHUB_PAT=ghp_XXXXxxXxXXXxXxxX
 R_CONFIG_ACTIVE=YYYYQQ
