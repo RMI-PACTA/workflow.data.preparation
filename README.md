@@ -24,6 +24,8 @@ You will need to set `asset_impact_data_path` to the locally accessible director
 
 You will need to set `factset_data_path` to the locally accessible directory where the necessary financial data files are located (absolute, or relative to the working directory of the R session you will be running data.prep in).
 
+You will need to set `scenarios_data_path` to the locally accessible directory where the necessary scenario data files are located (absolute, or relative to the working directory of the R session you will be running data.prep in).
+
 ### Setting the active config set
 
 Before you begin, you must set the active config in an open R session with `Sys.setenv(R_CONFIG_ACTIVE = "desktop")`.
