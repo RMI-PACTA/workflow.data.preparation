@@ -261,7 +261,7 @@ The required files are:
 ### Scenarios Data
 
 Files exported by [`{workflow.scenario.preparation}`](https://github.com/RMI-PACTA/workflow.scenario.preparation) provide scenario data to be combined with the ABCD data.
-See the [`workflow.scenario.preparation` README](https://github.com/RMI-PACTA/workflow.scenario.preparation) for more information on expected file format. All required files must under `$HOST_SCENARIO_INPUTS_PATH`, in a single directory (no subdirectories).
+See the [`workflow.scenario.preparation` README](https://github.com/RMI-PACTA/workflow.scenario.preparation) for more information on expected file format. All required files must exist at `$HOST_SCENARIO_INPUTS_PATH`, in a single directory (no subdirectories).
 
 The required files are:
 
