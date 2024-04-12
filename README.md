@@ -231,11 +231,10 @@ Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
 
 ## Required Input Files
 
-All required files must exist at `$HOST_INPUTS_PATH`, in a single directory (no subdirectories).
-
 ### Asset Impact Data
 
-Files from Asset Impact provide production forecasts.
+Files from Asset Impact provide production forecasts. All required files must exist at `$HOST_ASSET_IMPACT_PATH`, in a single directory (no subdirectories).
+
 The required files are:
 
 - masterdata_ownership e.g. "2022-08-15_rmi_masterdata_ownership_2021q4.csv"
@@ -245,7 +244,7 @@ The required files are:
 ### FactSet Data
 
 Files exported by [`{workflow.factset}`](https://github.com/RMI-PACTA/workflow.factset) provide financial data to tie to production data.
-See the [`workflow.factset` README](https://github.com/RMI-PACTA/workflow.factset#exported-files) for more information on expected file format.
+See the [`workflow.factset` README](https://github.com/RMI-PACTA/workflow.factset#exported-files) for more information on expected file format.  All required files must exist at `$HOST_FACTSET_EXTRACTED_PATH`, in a single directory (no subdirectories).
 
 The required files are:
 
@@ -262,7 +261,7 @@ The required files are:
 ### Scenarios Data
 
 Files exported by [`{workflow.scenario.preparation}`](https://github.com/RMI-PACTA/workflow.scenario.preparation) provide scenario data to be combined with the ABCD data.
-See the [`workflow.scenario.preparation` README](https://github.com/RMI-PACTA/workflow.scenario.preparation) for more information on expected file format.
+See the [`workflow.scenario.preparation` README](https://github.com/RMI-PACTA/workflow.scenario.preparation) for more information on expected file format. All required files must under `$HOST_SCENARIO_INPUTS_PATH`, in a single directory (no subdirectories).
 
 The required files are:
 
