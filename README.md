@@ -247,11 +247,6 @@ The required files are:
 Files exported by [`{workflow.factset}`](https://github.com/RMI-PACTA/workflow.factset) provide financial data to tie to production data.
 See the [`workflow.factset` README](https://github.com/RMI-PACTA/workflow.factset#exported-files) for more information on expected file format.
 
-### Scenarios Data
-
-Files exported by [`{workflow.scenario.preparation}`](https://github.com/RMI-PACTA/workflow.scenario.preparation) provide scenario data to be combined with the ABCD data.
-See the [`workflow.scenario.preparation` README](https://github.com/RMI-PACTA/workflow.scenario.preparation) for more information on expected file format.
-
 The required files are:
 
 - factset_entity_financing_data.rds
@@ -263,4 +258,12 @@ The required files are:
 - factset_issue_code_bridge.rds
 - factset_industry_map_bridge.rds
 - factset_manual_pacta_sector_override.rds
-- geco_2022.csv
+
+### Scenarios Data
+
+Files exported by [`{workflow.scenario.preparation}`](https://github.com/RMI-PACTA/workflow.scenario.preparation) provide scenario data to be combined with the ABCD data.
+See the [`workflow.scenario.preparation` README](https://github.com/RMI-PACTA/workflow.scenario.preparation) for more information on expected file format.
+
+The required files are:
+
+- dependent on what sceanrios are meant to be included
