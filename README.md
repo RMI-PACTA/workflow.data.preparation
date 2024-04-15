@@ -63,7 +63,6 @@ R_CONFIG_ACTIVE=YYYYQQ
 - `HOST_OUTPUTS_PATH` the local path to save the output files.
   `docker-compose` volume mounts this directory and writes files to it, so it requires appropriate permissions on the host filesystem.
 - `GITHUB_PAT` valid GitHub PAT that grants access to the repos:
-  - [RMI-PACTA/pacta.scenario.preparation](https://github.com/RMI-PACTA/pacta.scenario.preparation)
   - [RMI-PACTA/pacta.data.preparation](https://github.com/RMI-PACTA/pacta.data.preparation)
 - `R_CONFIG_ACTIVE` the name of the config to use.
   The [config.yml](config.yml) file contains named configurations which define the settings used during PACTA data preparation.
