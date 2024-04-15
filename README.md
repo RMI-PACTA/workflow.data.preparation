@@ -44,7 +44,6 @@ HOST_FACTSET_EXTRACTED_PATH=/PATH/TO/factset-extracted
 HOST_ASSET_IMPACT_PATH=/PATH/TO/asset-impact
 HOST_SCENARIO_INPUTS_PATH=/PATH/TO/scenario-sources
 HOST_OUTPUTS_PATH=/PATH/TO/YYYYQQ_pacta_analysis_inputs_YYYY-MM-DD/YYYYQQ
-GITHUB_PAT=ghp_XXXXxxXxXXXxXxxX
 R_CONFIG_ACTIVE=YYYYQQ
 ```
 
@@ -62,8 +61,6 @@ R_CONFIG_ACTIVE=YYYYQQ
   See ["Required Input Files"](#required-input-files) (below) for more information.
 - `HOST_OUTPUTS_PATH` the local path to save the output files.
   `docker-compose` volume mounts this directory and writes files to it, so it requires appropriate permissions on the host filesystem.
-- `GITHUB_PAT` valid GitHub PAT that grants access to the repos:
-  - [RMI-PACTA/pacta.data.preparation](https://github.com/RMI-PACTA/pacta.data.preparation)
 - `R_CONFIG_ACTIVE` the name of the config to use.
   The [config.yml](config.yml) file contains named configurations which define the settings used during PACTA data preparation.
   See top-level yaml names of [config.yml](config.yml) for valid options.
