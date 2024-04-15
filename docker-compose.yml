@@ -1,11 +1,16 @@
-version: "3.2"
+version: "3.8"
 
 services:
   data_prep:
     build:
       context: .
     environment:
-      - LOG_LEVEL=TRACE
+      LOG_LEVEL: TRACE
+      HOST_FACTSET_EXTRACTED_PATH: /mnt/factset-extracted
+      HOST_ASSET_IMPACT_PATH: /mnt/asset-impact
+      HOST_SCENARIO_INPUTS_PATH: /mnt/scenario-sources
+      HOST_OUTPUTS_PATH: /mnt/outputs
+      R_CONFIG_ACTIVE: ${R_CONFIG_ACTIVE:-2023Q4}
     volumes:
       - type: bind
         source: ${HOST_FACTSET_EXTRACTED_PATH}
@@ -14,6 +19,10 @@ services:
       - type: bind
         source: ${HOST_ASSET_IMPACT_PATH}
         target: /mnt/asset-impact
+        read_only: true
+      - type: bind
+        source: ${HOST_SCENARIO_INPUTS_PATH}
+        target: /mnt/scenario-sources
         read_only: true
       - type: bind
         source: ${HOST_OUTPUTS_PATH}
