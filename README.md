@@ -24,6 +24,8 @@ You will need to set `asset_impact_data_path` to the locally accessible director
 
 You will need to set `factset_data_path` to the locally accessible directory where the necessary financial data files are located (absolute, or relative to the working directory of the R session you will be running data.prep in).
 
+You will need to set `scenarios_data_path` to the locally accessible directory where the necessary scenario data files are located (absolute, or relative to the working directory of the R session you will be running data.prep in).
+
 ### Setting the active config set
 
 Before you begin, you must set the active config in an open R session with `Sys.setenv(R_CONFIG_ACTIVE = "desktop")`.
@@ -40,8 +42,8 @@ Running the workflow requires a file `.env` to exist in the root directory, that
 # .env
 HOST_FACTSET_EXTRACTED_PATH=/PATH/TO/factset-extracted
 HOST_ASSET_IMPACT_PATH=/PATH/TO/asset-impact
+HOST_SCENARIO_INPUTS_PATH=/PATH/TO/scenario-sources
 HOST_OUTPUTS_PATH=/PATH/TO/YYYYQQ_pacta_analysis_inputs_YYYY-MM-DD/YYYYQQ
-GITHUB_PAT=ghp_XXXXxxXxXXXxXxxX
 R_CONFIG_ACTIVE=YYYYQQ
 ```
 
@@ -53,11 +55,12 @@ R_CONFIG_ACTIVE=YYYYQQ
   `docker-compose` volume mounts this directory and reads files from it, so it requires appropriate permissions on the host filesystem.
   The pacta.data.preparation process requires input files that must exist in this directory and they must have filenames that match those specified in the [config.yml](config.yml) for the specified config.
   See ["Required Input Files"](#required-input-files) (below) for more information.
+- `HOST_SCENARIO_INPUTS_PATH` the local path to where the scenarios input files live.
+  `docker-compose` volume mounts this directory and reads files from it, so it requires appropriate permissions on the host filesystem.
+  The pacta.data.preparation process requires input files that must exist in this directory and they must have filenames that match those specified in the [config.yml](config.yml) for the specified config.
+  See ["Required Input Files"](#required-input-files) (below) for more information.
 - `HOST_OUTPUTS_PATH` the local path to save the output files.
   `docker-compose` volume mounts this directory and writes files to it, so it requires appropriate permissions on the host filesystem.
-- `GITHUB_PAT` valid GitHub PAT that grants access to the repos:
-  - [RMI-PACTA/pacta.scenario.preparation](https://github.com/RMI-PACTA/pacta.scenario.preparation)
-  - [RMI-PACTA/pacta.data.preparation](https://github.com/RMI-PACTA/pacta.data.preparation)
 - `R_CONFIG_ACTIVE` the name of the config to use.
   The [config.yml](config.yml) file contains named configurations which define the settings used during PACTA data preparation.
   See top-level yaml names of [config.yml](config.yml) for valid options.
@@ -103,7 +106,7 @@ Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
     VNET_RESOURCE_GROUP="RMI-PROD-EU-VNET-RG"
     VNET_NAME="RMI-PROD-EU-VNET"
     SUBNET_NAME="RMI-SP-PACTA-DEV-VNET"
-    SUBNET_ID=$(az network vnet subnet show --resource-group $VNET_RESOURCE_GROUP --name $SUBNET_NAME --vnet-name $VNET_NAME --query id -o tsv)
+    SUBNET_ID="/subscriptions/feef729b-4584-44af-a0f9-4827075512f9/resourceGroups/RMI-PROD-EU-VNET-RG/providers/Microsoft.Network/virtualNetworks/RMI-PROD-EU-VNET/subnets/RMI-SP-PACTA-DEV-VNET"
 
     # Use the identity previously setup (see Prerequisites)
     MACHINEIDENTITY="/subscriptions/feef729b-4584-44af-a0f9-4827075512f9/resourceGroups/RMI-SP-PACTA-PROD/providers/Microsoft.ManagedIdentity/userAssignedIdentities/workflow-data-preparation"
@@ -172,6 +175,7 @@ Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
     # Use script from this repo to connect to file shares
     ~/workflow.data.preparation/scripts/mount_afs.sh -r "RMI-SP-PACTA-PROD" -a "pactarawdata" -f "factset-extracted" -m "/mnt/factset-extracted"
     ~/workflow.data.preparation/scripts/mount_afs.sh -r "RMI-SP-PACTA-PROD" -a "pactarawdata" -f "asset-impact" -m "/mnt/asset-impact"
+    ~/workflow.data.preparation/scripts/mount_afs.sh -r "RMI-SP-PACTA-DEV" -a "pactadatadev" -f "workflow-scenario-preparation-outputs" -m "/mnt/workflow-scenario-preparation-outputs"
 
     # Note the outputs directory has the -w flag, meaning write permissions are enabled.
     ~/workflow.data.preparation/scripts/mount_afs.sh -r "RMI-SP-PACTA-DEV" -a "pactadatadev" -f "workflow-data-preparation-outputs" -m "/mnt/workflow-data-preparation-outputs" -w
@@ -226,11 +230,10 @@ Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
 
 ## Required Input Files
 
-All required files must exist at `$HOST_INPUTS_PATH`, in a single directory (no subdirectories).
-
 ### Asset Impact Data
 
-Files from Asset Impact provide production forecasts.
+Files from Asset Impact provide production forecasts. All required files must exist at `$HOST_ASSET_IMPACT_PATH`, in a single directory (no subdirectories).
+
 The required files are:
 
 - masterdata_ownership e.g. "2022-08-15_rmi_masterdata_ownership_2021q4.csv"
@@ -240,7 +243,7 @@ The required files are:
 ### FactSet Data
 
 Files exported by [`{workflow.factset}`](https://github.com/RMI-PACTA/workflow.factset) provide financial data to tie to production data.
-See the [`workflow.factset` README](https://github.com/RMI-PACTA/workflow.factset#exported-files) for more information on expected file format.
+See the [`workflow.factset` README](https://github.com/RMI-PACTA/workflow.factset#exported-files) for more information on expected file format.  All required files must exist at `$HOST_FACTSET_EXTRACTED_PATH`, in a single directory (no subdirectories).
 
 The required files are:
 
@@ -253,3 +256,12 @@ The required files are:
 - factset_issue_code_bridge.rds
 - factset_industry_map_bridge.rds
 - factset_manual_pacta_sector_override.rds
+
+### Scenarios Data
+
+Files exported by [`{workflow.scenario.preparation}`](https://github.com/RMI-PACTA/workflow.scenario.preparation) provide scenario data to be combined with the ABCD data.
+See the [`workflow.scenario.preparation` README](https://github.com/RMI-PACTA/workflow.scenario.preparation) for more information on expected file format. All required files must exist at `$HOST_SCENARIO_INPUTS_PATH`, in a single directory (no subdirectories).
+
+The required files are:
+
+- dependent on what sceanrios are meant to be included

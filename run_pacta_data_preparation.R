@@ -8,7 +8,7 @@ suppressPackageStartupMessages({
   library(pacta.data.preparation)
   library(pacta.data.scraping)
   library(pacta.data.validation)
-  library(pacta.scenario.preparation)
+  library(pacta.scenario.data.preparation)
   library(DBI)
   library(dplyr)
   library(readr)
@@ -35,6 +35,7 @@ config <- raw_config
 expected_keys <- c(
   "asset_impact_data_path",
   "factset_data_path",
+  "scenarios_data_path",
   "data_prep_outputs_path",
   "preflight_data_path",
   "masterdata_ownership_filename",
@@ -143,12 +144,13 @@ logger::log_info("Full time horizon set to: {paste0(relevant_years, collapse = '
 scenario_raw_data_to_include <-
   lapply(
     X = config[["scenario_raw_data_to_include"]],
-    FUN = get,
-    envir = asNamespace("pacta.scenario.preparation")
+    FUN = function(x) {
+      readr::read_csv(
+        file = file.path(config[["scenarios_data_path"]], paste0(x, ".csv")),
+        show_col_types = FALSE
+      )
+    }
   )
-for (i in seq_along(scenario_raw_data_to_include)) {
-  pacta.data.validation::validate_intermediate_scenario_output(scenario_raw_data_to_include[[i]])
-}
 
 factset_timestamp <-
   unique(sub("_factset_.*[.]rds$", "", c(
@@ -242,7 +244,7 @@ factset_manual_pacta_sector_override <-
 
 logger::log_info("Preparing scenario data.")
 
-scenario_regions <- pacta.scenario.preparation::scenario_regions
+scenario_regions <- pacta.scenario.data.preparation::scenario_regions
 
 # scenario values will be linearly interpolated for each group below
 interpolation_groups <- c(
@@ -257,16 +259,16 @@ interpolation_groups <- c(
 
 scenario_raw <-
   bind_rows(scenario_raw_data_to_include) %>%
-  pacta.scenario.preparation::interpolate_yearly(!!!rlang::syms(interpolation_groups)) %>%
+  pacta.scenario.data.preparation::interpolate_yearly(!!!rlang::syms(interpolation_groups)) %>%
   filter(.data$year >= .env$config[["market_share_target_reference_year"]]) %>%
-  pacta.scenario.preparation::add_market_share_columns(reference_year = config[["market_share_target_reference_year"]]) %>%
-  pacta.scenario.preparation::format_p4i(config[["green_techs"]])
+  pacta.scenario.data.preparation::add_market_share_columns(reference_year = config[["market_share_target_reference_year"]]) %>%
+  pacta.scenario.data.preparation::format_p4i(config[["green_techs"]])
 
 # filter for relevant scenario data
 scenarios_long <-
   scenario_raw %>%
   inner_join(
-    pacta.scenario.preparation::scenario_source_pacta_geography_bridge,
+    pacta.scenario.data.preparation::scenario_source_pacta_geography_bridge,
     by = c(
       scenario_source = "source",
       scenario_geography = "scenario_geography_source"
@@ -762,7 +764,7 @@ if (file.exists(factset_manifest_path)) {
 }
 
 # include PACTA packages NEWS.md test in the parameters to export
-pacta_packages <- c("pacta.data.preparation", "pacta.scenario.preparation")
+pacta_packages <- c("pacta.data.preparation", "pacta.scenario.data.preparation")
 package_news <-
   vapply(
     X = pacta_packages,
