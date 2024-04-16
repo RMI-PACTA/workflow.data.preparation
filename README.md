@@ -106,7 +106,7 @@ Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
     VNET_RESOURCE_GROUP="RMI-PROD-EU-VNET-RG"
     VNET_NAME="RMI-PROD-EU-VNET"
     SUBNET_NAME="RMI-SP-PACTA-DEV-VNET"
-    SUBNET_ID=$(az network vnet subnet show --resource-group $VNET_RESOURCE_GROUP --name $SUBNET_NAME --vnet-name $VNET_NAME --query id -o tsv)
+    SUBNET_ID="/subscriptions/feef729b-4584-44af-a0f9-4827075512f9/resourceGroups/RMI-PROD-EU-VNET-RG/providers/Microsoft.Network/virtualNetworks/RMI-PROD-EU-VNET/subnets/RMI-SP-PACTA-DEV-VNET"
 
     # Use the identity previously setup (see Prerequisites)
     MACHINEIDENTITY="/subscriptions/feef729b-4584-44af-a0f9-4827075512f9/resourceGroups/RMI-SP-PACTA-PROD/providers/Microsoft.ManagedIdentity/userAssignedIdentities/workflow-data-preparation"
