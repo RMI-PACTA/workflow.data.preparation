@@ -106,7 +106,7 @@ Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
     VNET_RESOURCE_GROUP="RMI-PROD-EU-VNET-RG"
     VNET_NAME="RMI-PROD-EU-VNET"
     SUBNET_NAME="RMI-SP-PACTA-DEV-VNET"
-    SUBNET_ID=$(az network vnet subnet show --resource-group $VNET_RESOURCE_GROUP --name $SUBNET_NAME --vnet-name $VNET_NAME --query id -o tsv)
+    SUBNET_ID="/subscriptions/feef729b-4584-44af-a0f9-4827075512f9/resourceGroups/RMI-PROD-EU-VNET-RG/providers/Microsoft.Network/virtualNetworks/RMI-PROD-EU-VNET/subnets/RMI-SP-PACTA-DEV-VNET"
 
     # Use the identity previously setup (see Prerequisites)
     MACHINEIDENTITY="/subscriptions/feef729b-4584-44af-a0f9-4827075512f9/resourceGroups/RMI-SP-PACTA-PROD/providers/Microsoft.ManagedIdentity/userAssignedIdentities/workflow-data-preparation"
@@ -175,6 +175,7 @@ Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
     # Use script from this repo to connect to file shares
     ~/workflow.data.preparation/scripts/mount_afs.sh -r "RMI-SP-PACTA-PROD" -a "pactarawdata" -f "factset-extracted" -m "/mnt/factset-extracted"
     ~/workflow.data.preparation/scripts/mount_afs.sh -r "RMI-SP-PACTA-PROD" -a "pactarawdata" -f "asset-impact" -m "/mnt/asset-impact"
+    ~/workflow.data.preparation/scripts/mount_afs.sh -r "RMI-SP-PACTA-DEV" -a "pactadatadev" -f "workflow-scenario-preparation-outputs" -m "/mnt/workflow-scenario-preparation-outputs"
 
     # Note the outputs directory has the -w flag, meaning write permissions are enabled.
     ~/workflow.data.preparation/scripts/mount_afs.sh -r "RMI-SP-PACTA-DEV" -a "pactadatadev" -f "workflow-data-preparation-outputs" -m "/mnt/workflow-data-preparation-outputs" -w
