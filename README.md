@@ -175,6 +175,7 @@ Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
     # Use script from this repo to connect to file shares
     ~/workflow.data.preparation/scripts/mount_afs.sh -r "RMI-SP-PACTA-PROD" -a "pactarawdata" -f "factset-extracted" -m "/mnt/factset-extracted"
     ~/workflow.data.preparation/scripts/mount_afs.sh -r "RMI-SP-PACTA-PROD" -a "pactarawdata" -f "asset-impact" -m "/mnt/asset-impact"
+    ~/workflow.data.preparation/scripts/mount_afs.sh -r "RMI-SP-PACTA-DEV" -a "pactadatadev" -f "workflow-scenario-preparation-outputs" -m "/mnt/workflow-scenario-preparation-outputs"
 
     # Note the outputs directory has the -w flag, meaning write permissions are enabled.
     ~/workflow.data.preparation/scripts/mount_afs.sh -r "RMI-SP-PACTA-DEV" -a "pactadatadev" -f "workflow-data-preparation-outputs" -m "/mnt/workflow-data-preparation-outputs" -w
