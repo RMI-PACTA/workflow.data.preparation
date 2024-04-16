@@ -22,7 +22,7 @@ services:
         read_only: true
       - type: bind
         source: ${HOST_SCENARIO_INPUTS_PATH}
-        target: /mnt/scenario-sources
+        target: /mnt/workflow-scenario-preparation-outputs
         read_only: true
       - type: bind
         source: ${HOST_OUTPUTS_PATH}
