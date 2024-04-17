@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 rocker/tidyverse:4.3.3
+FROM rocker/tidyverse:4.3.3
 
 ARG CRAN_REPO=""
 RUN echo "options(repos = c(CRAN = 'https://packagemanager.posit.co/cran/__linux__/jammy/2024-04-01'))" \
