@@ -20,4 +20,4 @@ RUN Rscript -e 'pak::local_install_deps()'
 COPY .git/ ./.git/
 COPY config.yml run_pacta_data_preparation.R ./
 
-CMD Rscript run_pacta_data_preparation.R
+CMD ["Rscript", "run_pacta_data_preparation.R"]
