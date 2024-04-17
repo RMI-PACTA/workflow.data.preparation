@@ -1,5 +1,11 @@
 FROM rocker/tidyverse:4.3.3
 
+# install system dependencies
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    cmake=3.22.* \
+  && rm -rf /var/lib/apt/lists/*
+
 ARG CRAN_REPO=""
 RUN echo "options(repos = c(CRAN = 'https://packagemanager.posit.co/cran/__linux__/jammy/2024-04-01'))" \
       >> "${R_HOME}/etc/Rprofile.site" \
