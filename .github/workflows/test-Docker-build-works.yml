@@ -7,8 +7,6 @@ jobs:
   docker-compose-build:
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    env:
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Checkout workflow.data.preparation
@@ -24,7 +22,7 @@ jobs:
           cat <<EOF > .env
           HOST_INPUTS_PATH=/inputs
           HOST_OUTPUTS_PATH=/outputs
-          R_CONFIG_ACTIVE=2022Q4
+          R_CONFIG_ACTIVE=2023Q4
           EOF
 
       - name: Build Docker image
