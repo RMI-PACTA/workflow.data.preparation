@@ -19,4 +19,4 @@ name: docker
 jobs:
   docker:
     name: Docker actions
-    uses: RMI-PACTA/actions/.github/workflows/docker.yml@main
+    uses: RMI-PACTA/actions/.github/workflows/docker.yml@feat/58-specify-platform-for-docker-build
