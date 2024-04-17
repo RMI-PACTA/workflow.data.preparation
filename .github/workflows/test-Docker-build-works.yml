@@ -1,0 +1,29 @@
+on:
+  push:
+      branches: [main]
+  pull_request:
+
+jobs:
+  docker-compose-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout workflow.data.preparation
+        uses: actions/checkout@v4
+
+      - name: create fake directories
+        run: |
+          mkdir inputs
+          mkdir outputs
+
+      - name: create .env file
+        run: |
+          cat <<EOF > .env
+          HOST_INPUTS_PATH=/inputs
+          HOST_OUTPUTS_PATH=/outputs
+          R_CONFIG_ACTIVE=2023Q4
+          EOF
+
+      - name: Build Docker image
+        run: docker-compose build --no-cache
