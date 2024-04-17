@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 rocker/tidyverse
+FROM --platform=linux/amd64 rocker/tidyverse:4.3.3
 
 ARG CRAN_REPO="https://packagemanager.posit.co/cran/__linux__/jammy/2024-04-01"
 RUN echo "options(repos = c(CRAN = '$CRAN_REPO'))" >> "${R_HOME}/etc/Rprofile.site"
