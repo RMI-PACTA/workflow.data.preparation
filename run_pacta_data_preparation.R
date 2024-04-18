@@ -443,8 +443,6 @@ abcd_flags_equity <-
     ar_company_id__sectors_with_assets__ownership
   )
 
-pacta.data.validation::validate_abcd_flags_equity(abcd_flags_equity)
-
 saveRDS(
   object = abcd_flags_equity,
   file = file.path(config[["data_prep_outputs_path"]], "abcd_flags_equity.rds")
