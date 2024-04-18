@@ -7,6 +7,7 @@ logger::log_formatter(logger::formatter_glue)
 suppressPackageStartupMessages({
   library(pacta.data.preparation)
   library(pacta.data.scraping)
+  library(pacta.data.validation)
   library(pacta.scenario.data.preparation)
   library(DBI)
   library(dplyr)
@@ -290,6 +291,7 @@ logger::log_info("Scenario data prepared.")
 # currency data output ---------------------------------------------------------
 
 logger::log_info("Saving file: \"currencies.rds\".")
+pacta.data.validation::validate_currencies(currencies)
 saveRDS(currencies, currencies_data_path)
 
 
@@ -306,10 +308,18 @@ logger::log_info("Preparing financial data.")
 # read raw FactSet financial data, filter to unique rows, merge AR company_id,
 # merge PACTA sectors from AR data
 logger::log_info("Formatting and saving file: \"financial_data.rds\".")
-readRDS(factset_financial_data_path) %>%
-  pacta.data.preparation::prepare_financial_data(factset_issue_code_bridge) %>%
-  saveRDS(file.path(config[["data_prep_outputs_path"]], "financial_data.rds"))
+
+financial_data <-
+  readRDS(factset_financial_data_path) %>%
+  pacta.data.preparation::prepare_financial_data(factset_issue_code_bridge)
+
+saveRDS(
+  object = financial_data,
+  file = file.path(config[["data_prep_outputs_path"]], "financial_data.rds")
+)
+rm(financial_data)
 invisible(gc())
+
 
 logger::log_info("Formatting and saving file: \"entity_financing.rds\".")
 readRDS(factset_entity_financing_data_path) %>%
@@ -352,27 +362,43 @@ invisible(gc())
 logger::log_info(
   "Formatting and saving file: \"masterdata_ownership_datastore.rds\"."
 )
-readr::read_csv(masterdata_ownership_path, na = "", show_col_types = FALSE) %>%
+
+masterdata_ownership_datastore <-
+  readr::read_csv(masterdata_ownership_path, na = "", show_col_types = FALSE) %>%
   pacta.data.preparation::prepare_masterdata(
     ar_company_id__country_of_domicile,
     config[["pacta_financial_timestamp"]],
     config[["zero_emission_factor_techs"]]
-  ) %>%
-  saveRDS(file.path(config[["data_prep_outputs_path"]], "masterdata_ownership_datastore.rds"))
+  )
+
+pacta.data.validation::validate_masterdata_ownership_datastore(masterdata_ownership_datastore)
+
+saveRDS(
+  object = masterdata_ownership_datastore,
+  file = file.path(config[["data_prep_outputs_path"]], "masterdata_ownership_datastore.rds")
+)
+rm(masterdata_ownership_datastore)
 invisible(gc())
 
 
 logger::log_info("Formatting and saving file: \"masterdata_debt_datastore.rds\".")
 
-pacta.data.preparation::prepare_masterdata_debt(
-  masterdata_debt_raw = readr::read_csv(masterdata_debt_path, na = "", show_col_types = FALSE),
-  ar_company_id__country_of_domicile = ar_company_id__country_of_domicile,
-  ar_company_id__credit_parent_ar_company_id = ar_company_id__credit_parent_ar_company_id,
-  pacta_financial_timestamp = config[["pacta_financial_timestamp"]],
-  zero_emission_factor_techs = config[["zero_emission_factor_techs"]]
-) %>%
-  saveRDS(file.path(config[["data_prep_outputs_path"]], "masterdata_debt_datastore.rds"))
+masterdata_debt_datastore <-
+  pacta.data.preparation::prepare_masterdata_debt(
+    masterdata_debt_raw = readr::read_csv(masterdata_debt_path, na = "", show_col_types = FALSE),
+    ar_company_id__country_of_domicile = ar_company_id__country_of_domicile,
+    ar_company_id__credit_parent_ar_company_id = ar_company_id__credit_parent_ar_company_id,
+    pacta_financial_timestamp = config[["pacta_financial_timestamp"]],
+    zero_emission_factor_techs = config[["zero_emission_factor_techs"]]
+  )
 
+pacta.data.validation::validate_masterdata_debt_datastore(masterdata_debt_datastore)
+
+saveRDS(
+  object = masterdata_debt_datastore,
+  file = file.path(config[["data_prep_outputs_path"]], "masterdata_debt_datastore.rds")
+)
+rm(masterdata_debt_datastore)
 invisible(gc())
 
 rm(ar_company_id__country_of_domicile)
@@ -409,14 +435,20 @@ ar_company_id__sectors_with_assets__ownership <-
   readRDS(file.path(config[["data_prep_outputs_path"]], "masterdata_ownership_datastore.rds")) %>%
   pacta.data.preparation::prepare_ar_company_id__sectors_with_assets__ownership(relevant_years)
 
-pacta.data.preparation::prepare_abcd_flags_equity(
-  financial_data,
-  factset_entity_id__ar_company_id,
-  factset_entity_id__security_mapped_sector,
-  ar_company_id__sectors_with_assets__ownership
-) %>%
-  saveRDS(file.path(config[["data_prep_outputs_path"]], "abcd_flags_equity.rds"))
+abcd_flags_equity <-
+  pacta.data.preparation::prepare_abcd_flags_equity(
+    financial_data,
+    factset_entity_id__ar_company_id,
+    factset_entity_id__security_mapped_sector,
+    ar_company_id__sectors_with_assets__ownership
+  )
 
+saveRDS(
+  object = abcd_flags_equity,
+  file = file.path(config[["data_prep_outputs_path"]], "abcd_flags_equity.rds")
+)
+
+rm(abcd_flags_equity)
 rm(ar_company_id__sectors_with_assets__ownership)
 invisible(gc())
 
@@ -427,15 +459,22 @@ ar_company_id__sectors_with_assets__debt <-
   readRDS(file.path(config[["data_prep_outputs_path"]], "masterdata_debt_datastore.rds")) %>%
   pacta.data.preparation::prepare_ar_company_id__sectors_with_assets__debt(relevant_years)
 
-pacta.data.preparation::prepare_abcd_flags_bonds(
-  financial_data,
-  factset_entity_id__ar_company_id,
-  factset_entity_id__security_mapped_sector,
-  ar_company_id__sectors_with_assets__debt,
-  factset_entity_id__credit_parent_id
-) %>%
-  saveRDS(file.path(config[["data_prep_outputs_path"]], "abcd_flags_bonds.rds"))
+abcd_flags_bonds <-
+  pacta.data.preparation::prepare_abcd_flags_bonds(
+    financial_data,
+    factset_entity_id__ar_company_id,
+    factset_entity_id__security_mapped_sector,
+    ar_company_id__sectors_with_assets__debt,
+    factset_entity_id__credit_parent_id
+  )
 
+pacta.data.validation::validate_abcd_flags_bonds(abcd_flags_bonds)
+
+saveRDS(
+  object = abcd_flags_bonds,
+  file = file.path(config[["data_prep_outputs_path"]], "abcd_flags_bonds.rds")
+)
+rm(abcd_flags_bonds)
 rm(ar_company_id__sectors_with_assets__debt)
 invisible(gc())
 

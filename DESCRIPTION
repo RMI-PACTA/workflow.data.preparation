@@ -35,6 +35,7 @@ Imports:
     logger,
     pacta.data.preparation (>= 0.1.0.9003),
     pacta.data.scraping,
+    pacta.data.validation,
     pacta.scenario.data.preparation,
     readr,
     rlang,
@@ -43,6 +44,7 @@ Imports:
 Remotes:
     RMI-PACTA/pacta.data.preparation,
     RMI-PACTA/pacta.data.scraping,
+    RMI-PACTA/pacta.data.validation,
     RMI-PACTA/pacta.scenario.data.preparation
 Depends:
     R (>= 3.5.0)
