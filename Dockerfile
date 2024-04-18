@@ -1,4 +1,5 @@
-FROM rocker/tidyverse:4.3.3
+# hadolint ignore=DL3029
+FROM --platform=linux/amd64 rocker/tidyverse:4.3.3
 
 # install system dependencies
 RUN apt-get update \
