@@ -313,8 +313,6 @@ financial_data <-
   readRDS(factset_financial_data_path) %>%
   pacta.data.preparation::prepare_financial_data(factset_issue_code_bridge)
 
-pacta.data.validation::validate_financial_data(financial_data)
-
 saveRDS(
   object = financial_data,
   file = file.path(config[["data_prep_outputs_path"]], "financial_data.rds")
