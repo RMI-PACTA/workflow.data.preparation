@@ -81,15 +81,6 @@ config[["data_prep_outputs_path"]] <- file.path(
   paste(config[["pacta_financial_timestamp"]], system_timestamp, sep = "_")
 )
 
-if (dir.exists(config[["data_prep_outputs_path"]])) {
-  logger::log_warn("POTENTIAL DATA LOSS: Output directory already exists, and files may be overwritten ({config[[\"data_prep_outputs_path\"]]}).")
-  warning("Output directory exists. Files may be overwritten.")
-} else {
-  logger::log_trace("Creating output directory: \"{config[[\"data_prep_outputs_path\"]]}\"")
-  dir.create(config[["data_prep_outputs_path"]], recursive = TRUE)
-}
-
-
 # input filepaths --------------------------------------------------------------
 
 masterdata_ownership_path <-
@@ -299,6 +290,16 @@ saveRDS(currencies, currencies_data_path)
 
 logger::log_info("Saving file: \"index_regions.rds\".")
 saveRDS(index_regions, index_regions_data_path)
+
+# Create output directory ---------------------------------------------------------
+
+if (dir.exists(config[["data_prep_outputs_path"]])) {
+  logger::log_warn("POTENTIAL DATA LOSS: Output directory already exists, and files may be overwritten ({config[[\"data_prep_outputs_path\"]]}).")
+  warning("Output directory exists. Files may be overwritten.")
+} else {
+  logger::log_trace("Creating output directory: \"{config[[\"data_prep_outputs_path\"]]}\"")
+  dir.create(config[["data_prep_outputs_path"]], recursive = TRUE)
+}
 
 
 # financial data output --------------------------------------------------------
