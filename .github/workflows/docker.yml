@@ -21,6 +21,9 @@ jobs:
     name: Docker actions
     uses: RMI-PACTA/actions/.github/workflows/docker.yml@main
     with:
-      build-platform: ["linux/amd64"]
+      build-platform: |
+        [
+          "linux/amd64"
+        ]
       do-lint: false
       do-check-r-sysdeps: false
