@@ -35,10 +35,11 @@ default:
   global_aggregate_sector_list: []  # an array of strings specifying the sectors to be included in the global aggregates, e.g. ["Power"]
 
 desktop:
-  inherits: 2022Q4
-  data_prep_outputs_path: "./outputs"
-  asset_impact_data_path: "./ai_inputs"
-  factset_data_path: "./factset_inputs"
+  inherits: 2023Q4
+  data_prep_outputs_path: "~/data/pactadatadev/workflow-data-preparation-outputs"
+  asset_impact_data_path: "~/data/pactarawdata/asset-impact/2024-02-15_AI_RMI_2023Q4"
+  factset_data_path: "~/data/pactarawdata/factset-extracted/factset-pacta_timestamp-20231231T000000Z_pulled-20240422T133705Z"
+  scenarios_data_path: "~/data/pactadatadev/workflow-scenario-preparation-outputs/2023Q4_20240416_T140550Z"
 
 docker:
   data_prep_outputs_path: "/mnt/outputs"
