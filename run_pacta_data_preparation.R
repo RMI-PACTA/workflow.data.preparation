@@ -20,8 +20,6 @@ suppressPackageStartupMessages({
 
 # config -----------------------------------------------------------------------
 
-if (Sys.getenv("R_CONFIG_ACTIVE") != "desktop") { readRenviron(".env") }
-
 config_name <- Sys.getenv("R_CONFIG_ACTIVE")
 raw_config <-
   config::get(
