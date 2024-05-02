@@ -141,16 +141,12 @@ relevant_years <-
   )
 logger::log_info("Full time horizon set to: {paste0(relevant_years, collapse = ', ')}.")
 
-scenario_raw_data_to_include <-
-  lapply(
-    X = config[["scenario_raw_data_to_include"]],
-    FUN = function(x) {
-      readr::read_csv(
-        file = file.path(config[["scenarios_data_path"]], paste0(x, ".csv")),
-        show_col_types = FALSE
-      )
-    }
+scenario_data_file_paths <-
+  file.path(
+    config[["scenarios_data_path"]],
+    paste0(config[["scenario_raw_data_to_include"]], ".csv")
   )
+names(scenario_data_file_paths) <- basename(scenario_data_file_paths)
 
 factset_timestamp <-
   unique(sub("_factset_.*[.]rds$", "", c(
@@ -180,7 +176,8 @@ input_filepaths <- c(
   factset_iss_emissions_data_path = factset_iss_emissions_data_path,
   factset_issue_code_bridge_path = factset_issue_code_bridge_path,
   factset_industry_map_bridge_path = factset_industry_map_bridge_path,
-  factset_manual_pacta_sector_override_path = factset_manual_pacta_sector_override_path
+  factset_manual_pacta_sector_override_path = factset_manual_pacta_sector_override_path,
+  scenario_data_file_paths
 )
 
 if (!config[["update_currencies"]]) {
@@ -201,6 +198,18 @@ if (length(missing_input_files) > 0L) {
 # pre-flight -------------------------------------------------------------------
 
 logger::log_info("Fetching pre-flight data.")
+
+logger::log_info("Importing raw scenrio data.")
+scenario_raw_data_to_include <-
+  lapply(
+    X = config[["scenario_raw_data_to_include"]],
+    FUN = function(x) {
+      readr::read_csv(
+        file = file.path(config[["scenarios_data_path"]], paste0(x, ".csv")),
+        show_col_types = FALSE
+      )
+    }
+  )
 
 if (config[["update_currencies"]]) {
   logger::log_info("Fetching currency data.")
