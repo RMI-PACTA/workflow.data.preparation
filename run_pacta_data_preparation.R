@@ -834,7 +834,7 @@ callr::r(
         ),
         FUN = readRDS)
       ),
-      file = file.path(config[["data_prep_outputs_path"]], "equity_abcd_scenario.rds")
+      file = file.path(config[["data_prep_outputs_path"]], "bonds_abcd_scenario.rds")
     )
   },
   args = list(config)
