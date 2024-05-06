@@ -28,6 +28,7 @@ Description: This repo exports a directory of data files needed for PACTA
     analysis input.
 Encoding: UTF-8
 Imports:
+    callr,
     config,
     DBI,
     dbplyr,
