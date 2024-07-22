@@ -25,3 +25,7 @@ services:
       - type: bind
         source: ${HOST_OUTPUTS_PATH}
         target: /mnt/outputs
+    deploy:
+      resources:
+        reservations:
+          memory: 14gb
