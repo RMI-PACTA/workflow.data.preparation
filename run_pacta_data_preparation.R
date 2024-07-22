@@ -316,7 +316,7 @@ logger::log_info("Preparing financial data.")
 # read raw FactSet financial data, filter to unique rows, merge AR company_id,
 # merge PACTA sectors from AR data
 logger::log_info("Formatting and saving file: \"financial_data.rds\".")
-callr::r(
+invisible(callr::r(
   func = function(factset_financial_data_path, factset_issue_code_bridge, config) {
     financial_data <-
       pacta.data.preparation::prepare_financial_data(
@@ -328,28 +328,25 @@ callr::r(
       object = financial_data,
       file = file.path(config[["data_prep_outputs_path"]], "financial_data.rds")
     )
-
-    invisible()
   },
   args = list(factset_financial_data_path, factset_issue_code_bridge, config)
-)
+))
 
 
 logger::log_info("Formatting and saving file: \"entity_financing.rds\".")
-callr::r(
+invisible(callr::r(
   func = function(factset_entity_financing_data_path, config) {
     saveRDS(
       object = readRDS(factset_entity_financing_data_path),
       file = file.path(config[["data_prep_outputs_path"]], "entity_financing.rds")
     )
-    invisible()
   },
   args = list(factset_entity_financing_data_path, config)
-)
+))
 
 
 logger::log_info("Formatting and saving file: \"entity_info.rds\".")
-callr::r(
+invisible(callr::r(
   func = function(ar_company_id__factset_entity_id_path, factset_entity_info_path, config, factset_industry_map_bridge, factset_manual_pacta_sector_override) {
     factset_entity_id__ar_company_id <-
       pacta.data.preparation::prepare_factset_entity_id__ar_company_id(
@@ -368,11 +365,9 @@ callr::r(
       ),
       file = file.path(config[["data_prep_outputs_path"]], "entity_info.rds")
     )
-
-    invisible()
   },
   args = list(ar_company_id__factset_entity_id_path, factset_entity_info_path, config, factset_industry_map_bridge, factset_manual_pacta_sector_override)
-)
+))
 
 
 logger::log_info("Financial data prepared.")
@@ -384,7 +379,7 @@ logger::log_info("Preparing ABCD.")
 
 
 logger::log_info("Formatting and saving file: \"masterdata_ownership_datastore.rds\".")
-callr::r(
+invisible(callr::r(
   func = function(config, masterdata_ownership_path) {
     entity_info <- readRDS(file.path(config[["data_prep_outputs_path"]], "entity_info.rds"))
 
@@ -410,15 +405,13 @@ callr::r(
       object = masterdata_ownership_datastore,
       file = file.path(config[["data_prep_outputs_path"]], "masterdata_ownership_datastore.rds")
     )
-
-    invisible()
   },
   args = list(config, masterdata_ownership_path)
-)
+))
 
 
 logger::log_info("Formatting and saving file: \"masterdata_debt_datastore.rds\".")
-callr::r(
+invisible(callr::r(
   func = function(config, masterdata_debt_path) {
     entity_info <- readRDS(file.path(config[["data_prep_outputs_path"]], "entity_info.rds"))
 
@@ -445,11 +438,9 @@ callr::r(
       object = masterdata_debt_datastore,
       file = file.path(config[["data_prep_outputs_path"]], "masterdata_debt_datastore.rds")
     )
-
-    invisible()
   },
   args = list(config, masterdata_debt_path)
-)
+))
 
 
 logger::log_info("ABCD prepared.")
@@ -461,7 +452,7 @@ logger::log_info("Preparing ABCD flags.")
 
 
 logger::log_info("Formatting and saving file: \"abcd_flags_equity.rds\".")
-callr::r(
+invisible(callr::r(
   func = function(config, ar_company_id__factset_entity_id_path, relevant_years) {
     entity_info <- readRDS(file.path(config[["data_prep_outputs_path"]], "entity_info.rds"))
 
@@ -503,11 +494,11 @@ callr::r(
     )
   },
   args = list(config, ar_company_id__factset_entity_id_path, relevant_years)
-)
+))
 
 
 logger::log_info("Formatting and saving file: \"abcd_flags_bonds.rds\".")
-callr::r(
+invisible(callr::r(
   func = function(config, ar_company_id__factset_entity_id_path, relevant_years) {
     entity_info <- readRDS(file.path(config[["data_prep_outputs_path"]], "entity_info.rds"))
 
@@ -552,7 +543,7 @@ callr::r(
     )
   },
   args = list(config, ar_company_id__factset_entity_id_path, relevant_years)
-)
+))
 
 
 logger::log_info("ABCD flags prepared.")
@@ -564,7 +555,7 @@ logger::log_info("Preparing fund data.")
 
 
 logger::log_info("Saving file: \"fund_data.rds\".")
-callr::r(
+invisible(callr::r(
   func = function(config, factset_fund_data_path) {
     saveRDS(
       object = pacta.data.preparation::prepare_fund_data(
@@ -575,11 +566,11 @@ callr::r(
     )
   },
   args = list(config, factset_fund_data_path)
-)
+))
 
 
 logger::log_info("Saving file: \"total_fund_list.rds\".")
-callr::r(
+invisible(callr::r(
   func = function(config) {
     saveRDS(
       object = pacta.data.preparation::prepare_total_fund_list(
@@ -589,11 +580,11 @@ callr::r(
     )
   },
   args = list(config)
-)
+))
 
 
 logger::log_info("Saving file: \"isin_to_fund_table.rds\".")
-callr::r(
+invisible(callr::r(
   func = function(config, factset_isin_to_fund_table_path) {
     saveRDS(
       object = pacta.data.preparation::prepare_isin_to_fund_table(
@@ -604,7 +595,7 @@ callr::r(
     )
   },
   args = list(config, factset_isin_to_fund_table_path)
-)
+))
 
 
 logger::log_info("Fund data prepared.")
@@ -613,7 +604,7 @@ logger::log_info("Fund data prepared.")
 # emission data output ---------------------------------------------------------
 
 logger::log_info("Formatting and saving file: \"iss_entity_emission_intensities.rds\".")
-callr::r(
+invisible(callr::r(
   func = function(factset_iss_emissions_data_path, factset_financial_data_path, factset_entity_info_path, factset_entity_financing_data_path, currencies, config) {
     iss_company_emissions <-
       pacta.data.preparation::prepare_iss_company_emissions(
@@ -636,11 +627,11 @@ callr::r(
     )
   },
   args = list(factset_iss_emissions_data_path, factset_financial_data_path, factset_entity_info_path, factset_entity_financing_data_path, currencies, config)
-)
+))
 
 
 logger::log_info("Formatting and saving file: \"iss_average_sector_emission_intensities.rds\".")
-callr::r(
+invisible(callr::r(
   func = function(factset_iss_emissions_data_path, factset_financial_data_path, factset_entity_info_path, factset_entity_financing_data_path, currencies, config) {
     iss_company_emissions <-
       pacta.data.preparation::prepare_iss_company_emissions(
@@ -663,7 +654,7 @@ callr::r(
     )
   },
   args = list(factset_iss_emissions_data_path, factset_financial_data_path, factset_entity_info_path, factset_entity_financing_data_path, currencies, config)
-)
+))
 
 
 logger::log_info("Emissions data prepared.")
@@ -682,7 +673,7 @@ for (scenario_source in unique(scenarios_long$scenario_source)) {
 
   filename <- paste0("equity_abcd_scenario_", scenario_source, ".rds")
   logger::log_info("Formatting and saving file: \"{filename}\".")
-  callr::r(
+  invisible(callr::r(
     func = function(config, masterdata_ownership_datastore, scenarios_long_source, relevant_years, scenario_regions, index_regions, filename) {
       saveRDS(
         object = pacta.data.preparation:::dataprep_connect_abcd_with_scenario(
@@ -704,12 +695,12 @@ for (scenario_source in unique(scenarios_long$scenario_source)) {
       )
     },
     args = list(config, masterdata_ownership_datastore, scenarios_long_source, relevant_years, scenario_regions, index_regions, filename)
-  )
+  ))
 
   if (any(unique(scenarios_long_source$scenario_source) %in% config[["global_aggregate_scenario_sources_list"]])) {
     filename <- paste0("equity_abcd_scenario_", scenario_source, "_global_aggregate.rds")
     logger::log_info("Formatting and saving file: \"{filename}\".")
-    callr::r(
+    invisible(callr::r(
       func = function(config, masterdata_ownership_datastore, scenarios_long_source, relevant_years, scenario_regions, index_regions, filename) {
         saveRDS(
           object = pacta.data.preparation:::dataprep_connect_abcd_with_scenario(
@@ -731,7 +722,7 @@ for (scenario_source in unique(scenarios_long$scenario_source)) {
         )
       },
       args = list(config, masterdata_ownership_datastore, scenarios_long_source, relevant_years, scenario_regions, index_regions, filename)
-    )
+    ))
   }
 }
 
@@ -739,7 +730,7 @@ rm(masterdata_ownership_datastore)
 invisible(gc())
 
 logger::log_info("Formatting and saving file: \"equity_abcd_scenario.rds\".")
-callr::r(
+invisible(callr::r(
   func = function(config) {
     saveRDS(
       object = dplyr::bind_rows(lapply(
@@ -754,7 +745,7 @@ callr::r(
     )
   },
   args = list(config)
-)
+))
 
 
 masterdata_debt_datastore <-
@@ -766,7 +757,7 @@ for (scenario_source in unique(scenarios_long$scenario_source)) {
 
   filename <- paste0("bonds_abcd_scenario_", scenario_source, ".rds")
   logger::log_info("Formatting and saving file: \"{filename}\".")
-  callr::r(
+  invisible(callr::r(
     func = function(config, masterdata_debt_datastore, scenarios_long_source, relevant_years, scenario_regions, index_regions, filename) {
       saveRDS(
         object = pacta.data.preparation:::dataprep_connect_abcd_with_scenario(
@@ -788,12 +779,12 @@ for (scenario_source in unique(scenarios_long$scenario_source)) {
       )
     },
     args = list(config, masterdata_debt_datastore, scenarios_long_source, relevant_years, scenario_regions, index_regions, filename)
-  )
+  ))
 
   if (any(unique(scenarios_long_source$scenario_source) %in% config[["global_aggregate_scenario_sources_list"]])) {
     filename <- paste0("bonds_abcd_scenario_", scenario_source, "_global_aggregate.rds")
     logger::log_info("Formatting and saving file: \"{filename}\".")
-    callr::r(
+    invisible(callr::r(
       func = function(config, masterdata_debt_datastore, scenarios_long_source, relevant_years, scenario_regions, index_regions, filename) {
         saveRDS(
           object = pacta.data.preparation:::dataprep_connect_abcd_with_scenario(
@@ -815,7 +806,7 @@ for (scenario_source in unique(scenarios_long$scenario_source)) {
         )
       },
       args = list(config, masterdata_debt_datastore, scenarios_long_source, relevant_years, scenario_regions, index_regions, filename)
-    )
+    ))
   }
 }
 
@@ -823,7 +814,7 @@ rm(masterdata_debt_datastore)
 invisible(gc())
 
 logger::log_info("Formatting and saving file: \"bonds_abcd_scenario.rds\".")
-callr::r(
+invisible(callr::r(
   func = function(config) {
     saveRDS(
       object = dplyr::bind_rows(lapply(
@@ -838,7 +829,7 @@ callr::r(
     )
   },
   args = list(config)
-)
+))
 
 
 logger::log_info("Combined ABCD scenario output prepared.")
