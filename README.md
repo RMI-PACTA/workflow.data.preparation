@@ -35,7 +35,7 @@ Before you begin, you must set the active config in an open R session with `Sys.
 
 Once the above steps have been completed, you should be able to [run run_pacta_data_preparation.R](https://github.com/RMI-PACTA/workflow.data.preparation/blob/main/run_pacta_data_preparation.R), either by sourcing it, e.g. `source("run_pacta_data_preparation.R")`, or by running it line-by-line (or select lines of it) interactively.
 
-## Running locally with `docker-compose`
+## Running locally with `docker compose`
 
 Running the workflow requires a file `.env` to exist in the root directory, that looks like...
 
@@ -66,9 +66,9 @@ R_CONFIG_ACTIVE=YYYYQQ
   The [config.yml](config.yml) file contains named configurations which define the settings used during PACTA data preparation.
   See top-level yaml names of [config.yml](config.yml) for valid options.
 
-Run `docker-compose up` from the root directory, and docker will build the image (if necessary), and then run the data.prep process given the specified options in the .env file.
+Run `docker compose up` from the root directory, and docker will build the image (if necessary), and then run the data.prep process given the specified options in the .env file.
 
-Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
+Use `docker compose build --no-cache` to force a rebuild of the Docker image.
 
 ## Running Data Preparation interactively on Azure VM
 
@@ -223,9 +223,9 @@ Use `docker-compose build --no-cache` to force a rebuild of the Docker image.
 
     tmux
 
-    docker-compose build
+    docker compose build
 
-    docker-compose up
+    docker compose up
 
     ```
 
