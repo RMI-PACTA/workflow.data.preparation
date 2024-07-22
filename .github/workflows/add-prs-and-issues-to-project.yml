@@ -11,15 +11,6 @@ on:
       - opened
 
 jobs:
-  add-to-tm-project:
-    name: Add issue/PR to Transition Monitor project
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/add-to-project@v1.0.2
-        with:
-          project-url: https://github.com/orgs/RMI-PACTA/projects/8
-          github-token: ${{ secrets.PAT_ADD_ISSUES_TO_PROJECT }}
-  
   add-to-maintainer-project:
     name: Add issue/PR to @cjyetman's maintainer project
     runs-on: ubuntu-latest
