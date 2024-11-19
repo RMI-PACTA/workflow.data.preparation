@@ -266,3 +266,67 @@ See the [`workflow.scenario.preparation` README](https://github.com/RMI-PACTA/wo
 The required files are:
 
 - dependent on what sceanrios are meant to be included
+
+## Promotion of Datasets to PROD
+
+### `workflow.transiton.monitor`
+
+Data sets to prepare images from [`workflow.transition.monitor`](https://github.com/RMI-PACTA/workflow.transition.monitor/) are stored in the `pactadatadev` Storage Account (`RMI-SP-PACTA-DEV` Resource Group), in the file share `workflow-data-preparation-outputs`.
+The dataset used is defined by the directory name in the build config for each image (`build/config/rmi_pacta_YYYYqX_ZZZZ.json`), in the `data_share_path` key.
+
+### `workflow.pacta.webapp` and `workflow.pacta.dashboard`
+
+For the [workflow.pacta.webapp](https://github.com/RMI-PACTA/workflow.pacta.webapp/) and [workflow.pacta.dashboard](https://github.com/RMI-PACTA/workflow.pacta.dashboard/) images, the PACTA data is expected as a bind mount to the docker image (rather than "baked in", as with `workflow.transition.monitor`).
+For Azure Container Instances running on our tenant, the expected file share to mount is `pacta_data`, in the `rmipactawebappdata` Storage Account (in the `RMI-SP-PACTA-WEU-PAT-DEV` Resource Group).
+The top level directories in that File Share correspond to the directories in the `pactadatadev/workflow-data-preparation-outputs` file share, and should be passed as environment variables to the docker image (see workflow repos for more detail).
+
+### Transferring from `pactadatadev` to `rmipactawebappdata`
+
+Prepared datasets can be copied from `pactadatadev` to `rmipactawebappdata` with the following commands:
+
+```sh
+
+DIRNAME="2023Q4_20240718T150252Z" # Change as needed.
+TOKEN_START=$(date -u -j '+%Y-%m-%dT%H:%MZ')
+TOKEN_EXPIRY=$(date -u -j -v "+20M" '+%Y-%m-%dT%H:%MZ')
+
+DESTINATION_ACCOUNT_NAME="rmipactawebappdata"
+DESTINATION_SHARE="pacta-data"
+DESTINATION_SAS="$(
+    az storage share generate-sas \
+        --account-name $DESTINATION_ACCOUNT_NAME \
+        --expiry $TOKEN_EXPIRY \
+        --permissions rcw \
+        --name $DESTINATION_SHARE \
+        --start $TOKEN_START \
+        --output tsv
+)"
+
+# note permissions are different. rcl allows listing contents, rcw above is to write
+SOURCE_ACCOUNT_NAME="pactadatadev"
+SOURCE_SHARE="workflow-data-preparation-outputs"
+SOURCE_SAS="$(
+    az storage share generate-sas \
+        --account-name $SOURCE_ACCOUNT_NAME \
+        --expiry $TOKEN_EXPIRY \
+        --permissions rcl \
+        --name $SOURCE_SHARE \
+        --start $TOKEN_START \
+        --output tsv
+)"
+
+COPY_SOURCE="https://$SOURCE_ACCOUNT_NAME.file.core.windows.net/$SOURCE_SHARE/$DIRNAME"?$SOURCE_SAS
+COPY_DESTINATION="https://$DESTINATION_ACCOUNT_NAME.file.core.windows.net/$DESTINATION_SHARE/$DIRNAME?$DESTINATION_SAS" 
+echo "$COPY_SOURCE"
+echo "$COPY_DESTINATION"
+
+azcopy copy \
+    "$COPY_SOURCE" \
+    "$COPY_DESTINATION" \
+    --as-subdir=false \
+    --recursive
+
+
+```
+
+
